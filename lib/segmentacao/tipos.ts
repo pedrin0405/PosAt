@@ -305,3 +305,178 @@ export interface HandoffItem {
   cliente?: ClienteCompleto;
 }
 
+// ---- WhatsApp (Espelhamento de Conversas) ----
+
+export type OrigemMensagemItem = "recebida" | "enviada";
+
+export type StatusConexaoWhatsAppItem =
+  | "conectado"
+  | "conectando"
+  | "desconectado"
+  | "qr_expirado";
+
+export interface ConexaoWhatsAppItem {
+  id: string;
+  corretor: string;
+  numero: string;
+  sessao_id: string;
+  status: StatusConexaoWhatsAppItem;
+  qr_code: string | null;
+  qr_expira_em: string | null;
+  ultimo_ping_em: string | null;
+  criado_em: string;
+  atualizado_em: string;
+}
+
+export interface MensagemWhatsAppItem {
+  id: string;
+  conversa_id: string;
+  origem: OrigemMensagemItem;
+  tipo: string;
+  conteudo: string;
+  anexo_url: string | null;
+  lida: boolean;
+  enviado_em: string;
+  criado_em: string;
+}
+
+export interface ConversaWhatsAppItem {
+  id: string;
+  conexao_id: string;
+  corretor: string | null;
+  numero_cliente: string;
+  nome_cliente: string | null;
+  cliente_id: string | null;
+  empreendimento: string | null;
+  etapa: string | null;
+  espelhando: boolean;
+  privada_motivo: string | null;
+  consentimento_lgpd: string | null;
+  primeiro_mensagem_em: string;
+  ultima_mensagem_em: string;
+  criado_em: string;
+  atualizado_em: string;
+  mensagens: MensagemWhatsAppItem[];
+  cliente?: {
+    id: string;
+    nome: string | null;
+    telefone: string | null;
+    finalidade_principal: FinalidadeCliente;
+    status: StatusRelacionamento;
+  } | null;
+}
+
+// ---- Pós-atendimento / Inteligência / LGPD (camadas 5.2–5.6) ----
+
+export type SentimentoWhatsAppItem = "satisfeito" | "neutro" | "irritado";
+
+export interface AnaliseConversaWhatsAppItem {
+  conversaId: string;
+  sentimento: SentimentoWhatsAppItem;
+  resumo: string;
+  proximaAcao: string | null;
+}
+
+export interface GatilhoFollowUpItem {
+  id: string;
+  nome: string;
+  etapa: string;
+  prazoDias: number;
+  tituloTarefa: string;
+  descricaoTarefa: string;
+  responsavelPadrao: string | null;
+  disparaNps: boolean;
+  ativo: boolean;
+}
+
+export interface TarefaFollowUpCriadaItem {
+  gatilhoId: string;
+  gatilhoNome: string;
+  clienteId: string;
+  clienteNome: string | null;
+  conversaId: string;
+  tarefaId: string;
+  titulo: string;
+  prazoEm: string;
+}
+
+export interface PesquisaNpsItem {
+  id: string;
+  conversa_id: string;
+  cliente_id: string | null;
+  cliente_nome: string | null;
+  etapa: string;
+  status: "pendente" | "respondida";
+  nota: number | null;
+  comentario: string | null;
+  enviada_em: string;
+  respondida_em: string | null;
+}
+
+export interface RegistroAcessoWhatsAppItem {
+  id: string;
+  conversa_id: string;
+  cliente: string;
+  usuario: string;
+  acao: string;
+  em: string;
+}
+
+export interface DuplicidadeWhatsAppItem {
+  numero: string;
+  mesmosCorretores: boolean;
+  conversas: {
+    id: string;
+    corretor: string | null;
+    nomeCliente: string | null;
+    clienteId: string | null;
+    ultimaMensagemEm: string;
+  }[];
+}
+
+export interface RelatorioGestorWhatsAppItem {
+  geradoEm: string;
+  totalConversas: number;
+  totalMensagens: number;
+  espelhadas: number;
+  semMatch: number;
+  semResposta: {
+    conversaId: string;
+    nomeCliente: string | null;
+    numero: string;
+    corretor: string | null;
+    etapa: string | null;
+    ultimaMensagem: string | null;
+    vencidoAposHoras: number;
+  }[];
+  escalonadas: {
+    conversaId: string;
+    nomeCliente: string | null;
+    corretor: string | null;
+    numero: string;
+    ultimaMensagem: string;
+    motivo: string;
+  }[];
+  porCorretor: {
+    corretor: string;
+    conversas: number;
+    mensagens: number;
+    recebidas: number;
+    enviadas: number;
+    semResposta: number;
+    tempoMedioRespostaMin: number | null;
+    npsPendentes: number;
+  }[];
+  porEtapa: { etapa: string; conversas: number }[];
+  porEmpreendimento: { empreendimento: string | null; conversas: number }[];
+  horariosPico: { hora: string; total: number }[];
+  sentimento: Record<SentimentoWhatsAppItem, number>;
+  duplicidades: DuplicidadeWhatsAppItem[];
+  nps: {
+    media: number | null;
+    total: number;
+    respondidas: number;
+    pendentes: number;
+  };
+}
+

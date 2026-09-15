@@ -13,6 +13,12 @@ import {
   Oportunidade,
   DashboardStats,
   FiltrosCliente,
+  ConexaoWhatsApp,
+  ConversaWhatsApp,
+  MensagemWhatsApp,
+  WhatsAppMetrics,
+  PesquisaNps,
+  RegistroAcessoWhatsApp,
 } from "../../domain/entities/types";
 
 // --- Pessoa Repository ---
@@ -67,4 +73,43 @@ export interface IOportunidadeRepository {
   findById(id: string): Promise<Oportunidade | null>;
   create(data: Partial<Oportunidade>): Promise<Oportunidade>;
   update(id: string, data: Partial<Oportunidade>): Promise<Oportunidade | null>;
+}
+
+// --- WhatsApp Repository ---
+
+export interface IWhatsAppRepository {
+  listarConexoes(): Promise<ConexaoWhatsApp[]>;
+  criarConexao(dados: Partial<ConexaoWhatsApp>): Promise<ConexaoWhatsApp>;
+  atualizarConexao(
+    id: string,
+    data: Partial<ConexaoWhatsApp>
+  ): Promise<ConexaoWhatsApp | null>;
+  listarConversas(): Promise<ConversaWhatsApp[]>;
+  buscarConversaPorId(id: string): Promise<ConversaWhatsApp | null>;
+  buscarConversaPorNumero(
+    conexaoId: string,
+    numero: string
+  ): Promise<ConversaWhatsApp | null>;
+  criarConversa(data: Partial<ConversaWhatsApp>): Promise<ConversaWhatsApp>;
+  atualizarConversa(
+    id: string,
+    data: Partial<ConversaWhatsApp>
+  ): Promise<ConversaWhatsApp | null>;
+  adicionarMensagem(
+    conversaId: string,
+    data: Partial<MensagemWhatsApp>
+  ): Promise<MensagemWhatsApp | null>;
+  buscarClientePorTelefone(numero: string): Promise<Cliente | null>;
+  obterMetricas(): Promise<WhatsAppMetrics>;
+  // NPS / follow-up / LGPD (camadas 5.3–5.6)
+  listarNps(): Promise<PesquisaNps[]>;
+  criarNps(dados: Partial<PesquisaNps>): Promise<PesquisaNps>;
+  responderNps(
+    id: string,
+    nota: number,
+    comentario?: string | null
+  ): Promise<PesquisaNps | null>;
+  registrarAcesso(dados: Partial<RegistroAcessoWhatsApp>): Promise<RegistroAcessoWhatsApp>;
+  listarAcessos(): Promise<RegistroAcessoWhatsApp[]>;
+  deletarConversa(id: string): Promise<boolean>;
 }

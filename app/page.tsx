@@ -14,6 +14,8 @@ import {
   Target,
   PhoneCall,
   ListChecks,
+  MessageSquare,
+  ShieldCheck,
 } from "lucide-react";
 
 interface DashboardData {
@@ -37,6 +39,14 @@ interface DashboardData {
     pipelineValor: number;
   };
   composicaoStatus?: Record<string, number>;
+  whatsapp?: {
+    totalConversas: number;
+    espelhadas: number;
+    semMatch: number;
+    privadas: number;
+    semResposta: number;
+    volumeHoje?: { data: string; total: number; recebidas: number; enviadas: number } | null;
+  };
 }
 
 const formatoMoeda = (v: number) =>
@@ -172,6 +182,13 @@ export default function HomePage() {
       href: "/handoffs",
       tag: "Continuidade",
     },
+    {
+      icon: MessageSquare,
+      label: "Conversas WhatsApp",
+      desc: "Espelhamento automático do WhatsApp dos corretores para o CRM.",
+      href: "/mensagens",
+      tag: "Integração",
+    },
   ];
 
   return (
@@ -291,6 +308,85 @@ export default function HomePage() {
           </div>
         </div>
       </section>
+
+      {/* ── Espelhamento WhatsApp ── */}
+      {stats.whatsapp && (
+        <section
+          className="rounded-2xl p-6"
+          style={{ background: "var(--white)", border: "1px solid var(--border)" }}
+        >
+          <div className="flex flex-wrap items-center justify-between gap-4 mb-5">
+            <div className="flex items-center gap-3">
+              <div
+                className="flex h-10 w-10 items-center justify-center rounded-xl text-white"
+                style={{ background: "#16a34a" }}
+              >
+                <MessageSquare className="h-5 w-5" />
+              </div>
+              <div>
+                <p className="text-sm font-bold" style={{ color: "var(--text-primary)" }}>
+                  WhatsApp espelhado no CRM
+                </p>
+                <p className="text-xs" style={{ color: "var(--text-secondary)" }}>
+                  Conversas dos corretores viram histórico estruturado automaticamente
+                </p>
+              </div>
+            </div>
+            <Link
+              href="/mensagens"
+              className="flex items-center gap-1.5 rounded-xl px-3.5 py-2 text-xs font-semibold transition-colors"
+              style={{ background: "var(--surface)", color: "var(--text-primary)" }}
+            >
+              Abrir painel de conversas
+              <ArrowRight className="h-3.5 w-3.5" />
+            </Link>
+          </div>
+
+          <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
+            <div>
+              <p className="text-2xl font-extrabold" style={{ color: "var(--text-primary)" }}>
+                {stats.whatsapp.espelhadas}
+                <span className="text-sm font-semibold text-slate-400">/{stats.whatsapp.totalConversas}</span>
+              </p>
+              <p className="flex items-center gap-1 text-xs mt-0.5" style={{ color: "var(--text-secondary)" }}>
+                <ShieldCheck className="h-3.5 w-3.5" style={{ color: "#16a34a" }} />
+                conversas espelhadas
+              </p>
+            </div>
+            <div>
+              <p
+                className="text-2xl font-extrabold"
+                style={{ color: stats.whatsapp.semResposta > 0 ? "var(--danger)" : "var(--success)" }}
+              >
+                {stats.whatsapp.semResposta}
+              </p>
+              <p className="flex items-center gap-1 text-xs mt-0.5" style={{ color: "var(--text-secondary)" }}>
+                <PhoneCall className="h-3.5 w-3.5" />
+                sem resposta há 8h+
+              </p>
+            </div>
+            <div>
+              <p
+                className="text-2xl font-extrabold"
+                style={{ color: stats.whatsapp.semMatch > 0 ? "var(--warning)" : "var(--text-primary)" }}
+              >
+                {stats.whatsapp.semMatch}
+              </p>
+              <p className="text-xs mt-0.5" style={{ color: "var(--text-secondary)" }}>
+                aguardando vínculo manual
+              </p>
+            </div>
+            <div>
+              <p className="text-2xl font-extrabold" style={{ color: "var(--text-primary)" }}>
+                {stats.whatsapp.volumeHoje?.total ?? 0}
+              </p>
+              <p className="text-xs mt-0.5" style={{ color: "var(--text-secondary)" }}>
+                mensagens espelhadas hoje
+              </p>
+            </div>
+          </div>
+        </section>
+      )}
 
       {/* ── Alertas Acionáveis ── */}
       <section>

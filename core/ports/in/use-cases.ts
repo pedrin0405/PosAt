@@ -14,6 +14,14 @@ import {
   DashboardStats,
   FiltrosCliente,
   ResultadoClassificacao,
+  ConexaoWhatsApp,
+  ConversaWhatsApp,
+  MensagemWhatsApp,
+  WhatsAppMetrics,
+  RelatorioGestorWhatsApp,
+  TarefaFollowUpCriada,
+  PesquisaNps,
+  RegistroAcessoWhatsApp,
 } from "../../domain/entities/types";
 
 // --- Listagens e consultas ---
@@ -181,4 +189,179 @@ export interface IAtualizarOportunidadeUseCase {
 
 export interface IClassificarClienteUseCase {
   execute(clienteId: string): Promise<ResultadoClassificacao>;
+}
+
+// --- WhatsApp (Espelhamento) ---
+
+export interface IListarConversasWhatsAppUseCase {
+  execute(): Promise<ConversaWhatsApp[]>;
+}
+
+export interface IListarConexoesWhatsAppUseCase {
+  execute(): Promise<ConexaoWhatsApp[]>;
+}
+
+export interface ICriarConexaoWhatsAppInput {
+  corretor: string;
+  numero: string;
+}
+
+export interface ICriarConexaoWhatsAppUseCase {
+  execute(input: ICriarConexaoWhatsAppInput): Promise<ConexaoWhatsApp>;
+}
+
+export interface IConectarConexaoWhatsAppUseCase {
+  execute(id: string): Promise<ConexaoWhatsApp | null>;
+}
+
+export interface IConfirmarConexaoWhatsAppUseCase {
+  execute(id: string): Promise<ConexaoWhatsApp | null>;
+}
+
+export interface IDesconectarConexaoWhatsAppUseCase {
+  execute(id: string): Promise<ConexaoWhatsApp | null>;
+}
+
+export interface IAtualizarConexaoWhatsAppInput {
+  id: string;
+  status?: string | null;
+  qr_code?: string | null;
+  qr_expira_em?: string | null;
+}
+
+export interface IAtualizarConexaoWhatsAppUseCase {
+  execute(input: IAtualizarConexaoWhatsAppInput): Promise<ConexaoWhatsApp | null>;
+}
+
+export interface IVincularConversaWhatsAppInput {
+  conversaId: string;
+  clienteId: string;
+}
+
+export interface IVincularConversaWhatsAppUseCase {
+  execute(input: IVincularConversaWhatsAppInput): Promise<ConversaWhatsApp | null>;
+}
+
+export interface IAtualizarEspelhamentoWhatsAppInput {
+  conversaId: string;
+  espelhando: boolean;
+  privadaMotivo?: string | null;
+}
+
+export interface IAtualizarEspelhamentoWhatsAppUseCase {
+  execute(input: IAtualizarEspelhamentoWhatsAppInput): Promise<ConversaWhatsApp | null>;
+}
+
+export interface IReceberMensagemWhatsAppInput {
+  sessaoId: string;
+  numero: string;
+  origem: string;
+  conteudo: string;
+  nomeContato?: string | null;
+  tipo?: string | null;
+  enviadoEm?: string | null;
+}
+
+export interface IReceberMensagemWhatsAppResult {
+  conversa: ConversaWhatsApp;
+  mensagem: MensagemWhatsApp;
+  matchCliente: boolean;
+  registradoNoCrm: boolean;
+  escalonadoParaGestor: { motivo: string } | null;
+  npsRespondido?: { nota: number } | null;
+}
+
+export interface IReceberMensagemWhatsAppUseCase {
+  execute(input: IReceberMensagemWhatsAppInput): Promise<IReceberMensagemWhatsAppResult>;
+}
+
+export interface IResponderMensagemWhatsAppInput {
+  conversaId: string;
+  conteudo: string;
+}
+
+export interface IResponderMensagemWhatsAppResult {
+  conversa: ConversaWhatsApp;
+  mensagem: MensagemWhatsApp;
+  enviadoViaEvolution: boolean;
+  registradoNoCrm: boolean;
+}
+
+export interface IResponderMensagemWhatsAppUseCase {
+  execute(input: IResponderMensagemWhatsAppInput): Promise<IResponderMensagemWhatsAppResult>;
+}
+
+export interface IObterMetricasWhatsAppUseCase {
+  execute(): Promise<WhatsAppMetrics>;
+}
+
+// --- Relatório do gestor (5.3) ---
+
+export interface IObterRelatorioGestorWhatsAppUseCase {
+  execute(): Promise<RelatorioGestorWhatsApp>;
+}
+
+// --- Follow-up automático (5.4) ---
+
+export interface IAplicarFollowUpsWhatsAppInput {
+  etapa?: string | null;
+}
+
+export interface IAplicarFollowUpsWhatsAppResult {
+  gatilhosAplicados: number;
+  tarefasCriadas: TarefaFollowUpCriada[];
+  npsDisparadas: number;
+}
+
+export interface IAplicarFollowUpsWhatsAppUseCase {
+  execute(input?: IAplicarFollowUpsWhatsAppInput): Promise<IAplicarFollowUpsWhatsAppResult>;
+}
+
+// --- NPS (5.4) ---
+
+export interface IDispararNpsWhatsAppInput {
+  conversaId: string;
+}
+
+export interface IDispararNpsWhatsAppUseCase {
+  execute(input: IDispararNpsWhatsAppInput): Promise<PesquisaNps | null>;
+}
+
+export interface IListarNpsWhatsAppUseCase {
+  execute(): Promise<PesquisaNps[]>;
+}
+
+export interface IResponderNpsWhatsAppInput {
+  id: string;
+  nota: number;
+  comentario?: string | null;
+}
+
+export interface IResponderNpsWhatsAppUseCase {
+  execute(input: IResponderNpsWhatsAppInput): Promise<PesquisaNps | null>;
+}
+
+// --- Exportação e auditoria LGPD (5.6) ---
+
+export interface IExportarHistoricoWhatsAppInput {
+  conversaId?: string | null;
+  formato?: string | null;
+}
+
+export interface IExportarHistoricoWhatsAppResult {
+  formato: "json" | "csv";
+  nomeArquivo: string;
+  conteudo: string;
+}
+
+export interface IExportarHistoricoWhatsAppUseCase {
+  execute(input?: IExportarHistoricoWhatsAppInput): Promise<IExportarHistoricoWhatsAppResult>;
+}
+
+export interface IObterLogAcessosWhatsAppUseCase {
+  execute(): Promise<RegistroAcessoWhatsApp[]>;
+}
+
+export interface IExcluirConversaWhatsAppUseCase {
+  execute(conversaId: string): Promise<boolean>;
 }

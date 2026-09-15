@@ -5,7 +5,13 @@ import {
   TarefaItem,
   HandoffItem,
   OportunidadeItem,
+  ConexaoWhatsAppItem,
+  ConversaWhatsAppItem,
+  MensagemWhatsAppItem,
+  PesquisaNpsItem,
+  RegistroAcessoWhatsAppItem,
 } from "./segmentacao/tipos";
+import { estaSemResposta, normalizarTelefone } from "./whatsapp";
 
 // Initial seed data with high context Brazilian real estate examples
 const INITIAL_PESSOAS: PessoaCompleta[] = [
@@ -455,6 +461,302 @@ const INITIAL_OPORTUNIDADES: OportunidadeItem[] = [
   },
 ];
 
+const H = 3600000;
+const DIA = 24 * H;
+
+const INITIAL_CONEXOES: ConexaoWhatsAppItem[] = [
+  {
+    id: "conn-001",
+    corretor: "Consultor André",
+    numero: "5511970000001",
+    sessao_id: "sessao-andre",
+    status: "conectado",
+    qr_code: null,
+    qr_expira_em: null,
+    ultimo_ping_em: new Date(Date.now() - 5 * 60000).toISOString(),
+    criado_em: new Date(Date.now() - 20 * DIA).toISOString(),
+    atualizado_em: new Date(Date.now() - 5 * 60000).toISOString(),
+  },
+  {
+    id: "conn-002",
+    corretor: "Gestora Fernanda",
+    numero: "5511970000002",
+    sessao_id: "sessao-fernanda",
+    status: "conectado",
+    qr_code: null,
+    qr_expira_em: null,
+    ultimo_ping_em: new Date(Date.now() - 12 * 60000).toISOString(),
+    criado_em: new Date(Date.now() - 20 * DIA).toISOString(),
+    atualizado_em: new Date(Date.now() - 12 * 60000).toISOString(),
+  },
+  {
+    id: "conn-003",
+    corretor: "Gerente Patrícia",
+    numero: "5511970000003",
+    sessao_id: "sessao-patricia",
+    status: "qr_expirado",
+    qr_code: null,
+    qr_expira_em: new Date(Date.now() - 2 * H).toISOString(),
+    ultimo_ping_em: new Date(Date.now() - 6 * H).toISOString(),
+    criado_em: new Date(Date.now() - 20 * DIA).toISOString(),
+    atualizado_em: new Date(Date.now() - 2 * H).toISOString(),
+  },
+];
+
+const INITIAL_CONVERSAS: ConversaWhatsAppItem[] = [
+  {
+    id: "conv-001",
+    conexao_id: "conn-001",
+    corretor: "Consultor André",
+    numero_cliente: "5511987654321",
+    nome_cliente: "Carlos Eduardo Silveira",
+    cliente_id: "c-001",
+    empreendimento: "Vista Jardins",
+    etapa: "proposta",
+    espelhando: true,
+    privada_motivo: null,
+    consentimento_lgpd: new Date(Date.now() - 2 * DIA).toISOString(),
+    primeiro_mensagem_em: new Date(Date.now() - 2 * DIA).toISOString(),
+    ultima_mensagem_em: new Date(Date.now() - 1 * H).toISOString(),
+    criado_em: new Date(Date.now() - 2 * DIA).toISOString(),
+    atualizado_em: new Date(Date.now() - 1 * H).toISOString(),
+    mensagens: [
+      {
+        id: "msg-101",
+        conversa_id: "conv-001",
+        origem: "recebida",
+        tipo: "texto",
+        conteudo: "André, quero confirmar meu interesse em 2 unidades no Vista Jardins para locação via Airbnb.",
+        anexo_url: null,
+        lida: true,
+        enviado_em: new Date(Date.now() - 2 * DIA).toISOString(),
+        criado_em: new Date(Date.now() - 2 * DIA).toISOString(),
+      },
+      {
+        id: "msg-102",
+        conversa_id: "conv-001",
+        origem: "enviada",
+        tipo: "texto",
+        conteudo: "Perfeito! Vou preparar a simulação de fluxo com 30% durante as obras e envio ainda hoje.",
+        anexo_url: null,
+        lida: true,
+        enviado_em: new Date(Date.now() - 26 * H).toISOString(),
+        criado_em: new Date(Date.now() - 26 * H).toISOString(),
+      },
+      {
+        id: "msg-103",
+        conversa_id: "conv-001",
+        origem: "recebida",
+        tipo: "texto",
+        conteudo: "Recebi a lâmina. Achei ótima a rentabilidade, pode me enviar também o comparativo com Moema?",
+        anexo_url: null,
+        lida: true,
+        enviado_em: new Date(Date.now() - 1 * H).toISOString(),
+        criado_em: new Date(Date.now() - 1 * H).toISOString(),
+      },
+    ],
+  },
+  {
+    id: "conv-002",
+    conexao_id: "conn-002",
+    corretor: "Gestora Fernanda",
+    numero_cliente: "5521998882233",
+    nome_cliente: "Dr. Roberto Albuquerque",
+    cliente_id: "c-003",
+    empreendimento: "Pinheiros Urban",
+    etapa: "pos_venda",
+    espelhando: true,
+    privada_motivo: null,
+    consentimento_lgpd: new Date(Date.now() - 5 * DIA).toISOString(),
+    primeiro_mensagem_em: new Date(Date.now() - 5 * DIA).toISOString(),
+    ultima_mensagem_em: new Date(Date.now() - 20 * 60000).toISOString(),
+    criado_em: new Date(Date.now() - 5 * DIA).toISOString(),
+    atualizado_em: new Date(Date.now() - 20 * 60000).toISOString(),
+    mensagens: [
+      {
+        id: "msg-201",
+        conversa_id: "conv-002",
+        origem: "recebida",
+        tipo: "texto",
+        conteudo: "Fernanda, o relatório trimestral da valorização está excelente. Quero reservar 2 studios no lançamento de Pinheiros.",
+        anexo_url: null,
+        lida: true,
+        enviado_em: new Date(Date.now() - 5 * DIA).toISOString(),
+        criado_em: new Date(Date.now() - 5 * DIA).toISOString(),
+      },
+      {
+        id: "msg-202",
+        conversa_id: "conv-002",
+        origem: "enviada",
+        tipo: "texto",
+        conteudo: "Que ótima notícia! Vou te enviar a maquete e a prévia de preços do Pinheiros Urban em primeira mão.",
+        anexo_url: null,
+        lida: true,
+        enviado_em: new Date(Date.now() - 4 * DIA).toISOString(),
+        criado_em: new Date(Date.now() - 4 * DIA).toISOString(),
+      },
+      {
+        id: "msg-203",
+        conversa_id: "conv-002",
+        origem: "recebida",
+        tipo: "texto",
+        conteudo: "A maquete ficou incrível. Avise o gerente que quero o mesmo pricing do nosso primeiro negócio.",
+        anexo_url: null,
+        lida: true,
+        enviado_em: new Date(Date.now() - 30 * 60000).toISOString(),
+        criado_em: new Date(Date.now() - 30 * 60000).toISOString(),
+      },
+      {
+        id: "msg-204",
+        conversa_id: "conv-002",
+        origem: "enviada",
+        tipo: "texto",
+        conteudo: "Registrado com o time comercial. Te retorno com o pricing reservado até amanhã.",
+        anexo_url: null,
+        lida: true,
+        enviado_em: new Date(Date.now() - 20 * 60000).toISOString(),
+        criado_em: new Date(Date.now() - 20 * 60000).toISOString(),
+      },
+    ],
+  },
+  {
+    id: "conv-003",
+    conexao_id: "conn-001",
+    corretor: "Consultor André",
+    numero_cliente: "5511932147788",
+    nome_cliente: "Juliana Mendes",
+    cliente_id: "c-006",
+    empreendimento: null,
+    etapa: "qualificacao",
+    espelhando: true,
+    privada_motivo: null,
+    consentimento_lgpd: new Date(Date.now() - 26 * H).toISOString(),
+    primeiro_mensagem_em: new Date(Date.now() - 26 * H).toISOString(),
+    ultima_mensagem_em: new Date(Date.now() - 22 * H).toISOString(),
+    criado_em: new Date(Date.now() - 26 * H).toISOString(),
+    atualizado_em: new Date(Date.now() - 22 * H).toISOString(),
+    mensagens: [
+      {
+        id: "msg-301",
+        conversa_id: "conv-003",
+        origem: "recebida",
+        tipo: "texto",
+        conteudo: "Oi, preenchi o formulário no site. Queria entender as opções para sair do aluguel.",
+        anexo_url: null,
+        lida: true,
+        enviado_em: new Date(Date.now() - 22 * H).toISOString(),
+        criado_em: new Date(Date.now() - 22 * H).toISOString(),
+      },
+    ],
+  },
+  {
+    id: "conv-004",
+    conexao_id: "conn-001",
+    corretor: "Consultor André",
+    numero_cliente: "5511988776655",
+    nome_cliente: "Número desconhecido",
+    cliente_id: null,
+    empreendimento: null,
+    etapa: null,
+    espelhando: true,
+    privada_motivo: null,
+    consentimento_lgpd: null,
+    primeiro_mensagem_em: new Date(Date.now() - 3 * H).toISOString(),
+    ultima_mensagem_em: new Date(Date.now() - 3 * H).toISOString(),
+    criado_em: new Date(Date.now() - 3 * H).toISOString(),
+    atualizado_em: new Date(Date.now() - 3 * H).toISOString(),
+    mensagens: [
+      {
+        id: "msg-401",
+        conversa_id: "conv-004",
+        origem: "recebida",
+        tipo: "texto",
+        conteudo: "Boa tarde! Vocês trabalham com imóveis na região da Vila Mariana?",
+        anexo_url: null,
+        lida: true,
+        enviado_em: new Date(Date.now() - 3 * H).toISOString(),
+        criado_em: new Date(Date.now() - 3 * H).toISOString(),
+      },
+    ],
+  },
+  {
+    id: "conv-005",
+    conexao_id: "conn-001",
+    corretor: "Consultor André",
+    numero_cliente: "5511999114411",
+    nome_cliente: "Mãe do André",
+    cliente_id: null,
+    empreendimento: null,
+    etapa: null,
+    espelhando: false,
+    privada_motivo: "Conversa pessoal — fora do espelhamento por privacidade (LGPD)",
+    consentimento_lgpd: null,
+    primeiro_mensagem_em: new Date(Date.now() - 12 * H).toISOString(),
+    ultima_mensagem_em: new Date(Date.now() - 2 * H).toISOString(),
+    criado_em: new Date(Date.now() - 12 * H).toISOString(),
+    atualizado_em: new Date(Date.now() - 2 * H).toISOString(),
+    mensagens: [
+      {
+        id: "msg-501",
+        conversa_id: "conv-005",
+        origem: "recebida",
+        tipo: "texto",
+        conteudo: "Filho, você almoça aqui no domingo?",
+        anexo_url: null,
+        lida: true,
+        enviado_em: new Date(Date.now() - 2 * H).toISOString(),
+        criado_em: new Date(Date.now() - 2 * H).toISOString(),
+      },
+    ],
+  },
+];
+
+const INITIAL_NPS: PesquisaNpsItem[] = [
+  {
+    id: "nps-001",
+    conversa_id: "conv-002",
+    cliente_id: "c-003",
+    cliente_nome: "Dr. Roberto Albuquerque",
+    etapa: "entrega_chaves",
+    status: "respondida",
+    nota: 9,
+    comentario: "Cuidado impecável desde a escolha até a entrega das chaves.",
+    enviada_em: new Date(Date.now() - 6 * DIA).toISOString(),
+    respondida_em: new Date(Date.now() - 5 * DIA).toISOString(),
+  },
+  {
+    id: "nps-002",
+    conversa_id: "conv-001",
+    cliente_id: "c-001",
+    cliente_nome: "Carlos Eduardo Silveira",
+    etapa: "assinatura",
+    status: "pendente",
+    nota: null,
+    comentario: null,
+    enviada_em: new Date(Date.now() - 30 * 60000).toISOString(),
+    respondida_em: null,
+  },
+];
+
+const INITIAL_ACESSOS_WHATSAPP: RegistroAcessoWhatsAppItem[] = [
+  {
+    id: "acs-001",
+    conversa_id: "conv-002",
+    cliente: "Dr. Roberto Albuquerque",
+    usuario: "gestor@quadra",
+    acao: "leitura_relatorio",
+    em: new Date(Date.now() - 40 * 60000).toISOString(),
+  },
+  {
+    id: "acs-002",
+    conversa_id: "conv-005",
+    cliente: "Mãe do André",
+    usuario: "andre@quadra",
+    acao: "acesso_restrito",
+    em: new Date(Date.now() - 20 * 60000).toISOString(),
+  },
+];
+
 // In-memory persistent state during process lifetime
 class StorageMemoryFallback {
   private pessoas: PessoaCompleta[] = [...INITIAL_PESSOAS];
@@ -463,6 +765,10 @@ class StorageMemoryFallback {
   private tarefas: TarefaItem[] = [...INITIAL_TAREFAS];
   private handoffs: HandoffItem[] = [...INITIAL_HANDOFFS];
   private oportunidades: OportunidadeItem[] = [...INITIAL_OPORTUNIDADES];
+  private conexoesWhatsApp: ConexaoWhatsAppItem[] = [...INITIAL_CONEXOES];
+  private conversasWhatsApp: ConversaWhatsAppItem[] = [...INITIAL_CONVERSAS];
+  private npsWhatsApp: PesquisaNpsItem[] = [...INITIAL_NPS];
+  private acessosWhatsApp: RegistroAcessoWhatsAppItem[] = [...INITIAL_ACESSOS_WHATSAPP];
 
   getPessoas() {
     return this.pessoas;
@@ -786,6 +1092,378 @@ class StorageMemoryFallback {
     }
     this.oportunidades[index] = updated;
     return updated;
+  }
+
+  // ---- WhatsApp (Espelhamento) ----
+
+  private enriquecerConversa(conversa: ConversaWhatsAppItem): ConversaWhatsAppItem {
+    const cliente = conversa.cliente_id
+      ? this.clientes.find((c) => c.id === conversa.cliente_id)
+      : null;
+    const pessoa = cliente ? this.pessoas.find((p) => p.id === cliente.pessoa_id) : null;
+    return {
+      ...conversa,
+      cliente: cliente
+        ? {
+            id: cliente.id,
+            nome: pessoa?.nome || null,
+            telefone: pessoa?.telefone || null,
+            finalidade_principal: cliente.finalidade_principal,
+            status: cliente.status,
+          }
+        : null,
+    };
+  }
+
+  getConexoesWhatsApp(): ConexaoWhatsAppItem[] {
+    return this.conexoesWhatsApp.map((c) => ({ ...c }));
+  }
+
+  addConexaoWhatsApp(conexao: Partial<Omit<ConexaoWhatsAppItem, "id">> & { id?: string }): ConexaoWhatsAppItem {
+    const agora = new Date().toISOString();
+    const nova: ConexaoWhatsAppItem = {
+      id: conexao.id || `conn-${Date.now()}-${Math.random().toString(36).substr(2, 4)}`,
+      corretor: conexao.corretor || "Corretor",
+      numero: conexao.numero || "",
+      sessao_id: conexao.sessao_id || `sessao-${Date.now()}`,
+      status: conexao.status || "desconectado",
+      qr_code: conexao.qr_code ?? null,
+      qr_expira_em: conexao.qr_expira_em ?? null,
+      ultimo_ping_em: conexao.ultimo_ping_em ?? null,
+      criado_em: agora,
+      atualizado_em: agora,
+    };
+    this.conexoesWhatsApp.unshift(nova);
+    return { ...nova };
+  }
+
+  updateConexaoWhatsApp(
+    id: string,
+    updates: Partial<Omit<ConexaoWhatsAppItem, "id">>
+  ): ConexaoWhatsAppItem | null {
+    const index = this.conexoesWhatsApp.findIndex((c) => c.id === id);
+    if (index === -1) return null;
+    this.conexoesWhatsApp[index] = {
+      ...this.conexoesWhatsApp[index],
+      ...updates,
+      atualizado_em: new Date().toISOString(),
+    };
+    return this.conexoesWhatsApp[index];
+  }
+
+  getConversasWhatsApp(): ConversaWhatsAppItem[] {
+    return this.conversasWhatsApp
+      .map((c) => this.enriquecerConversa(c))
+      .sort(
+        (a, b) =>
+          new Date(b.ultima_mensagem_em).getTime() -
+          new Date(a.ultima_mensagem_em).getTime()
+      );
+  }
+
+  getConversaWhatsAppById(id: string): ConversaWhatsAppItem | null {
+    const conversa = this.conversasWhatsApp.find((c) => c.id === id);
+    return conversa ? this.enriquecerConversa(conversa) : null;
+  }
+
+  getConversaWhatsAppByNumero(conexaoId: string, numero: string): ConversaWhatsAppItem | null {
+    const conversa = this.conversasWhatsApp.find(
+      (c) => c.conexao_id === conexaoId && c.numero_cliente === numero
+    );
+    return conversa ? this.enriquecerConversa(conversa) : null;
+  }
+
+  addConversaWhatsApp(conversa: Partial<ConversaWhatsAppItem>): ConversaWhatsAppItem {
+    const nova: ConversaWhatsAppItem = {
+      id: conversa.id || `conv-${Date.now()}-${Math.random().toString(36).substr(2, 4)}`,
+      conexao_id: conversa.conexao_id!,
+      corretor: conversa.corretor || null,
+      numero_cliente: conversa.numero_cliente!,
+      nome_cliente: conversa.nome_cliente || null,
+      cliente_id: conversa.cliente_id || null,
+      empreendimento: conversa.empreendimento || null,
+      etapa: conversa.etapa || null,
+      espelhando: conversa.espelhando ?? true,
+      privada_motivo: conversa.privada_motivo || null,
+      consentimento_lgpd: conversa.consentimento_lgpd || null,
+      primeiro_mensagem_em: conversa.primeiro_mensagem_em || new Date().toISOString(),
+      ultima_mensagem_em: conversa.ultima_mensagem_em || new Date().toISOString(),
+      criado_em: new Date().toISOString(),
+      atualizado_em: new Date().toISOString(),
+      mensagens: [],
+    };
+    this.conversasWhatsApp.unshift(nova);
+    return this.enriquecerConversa(nova);
+  }
+
+  updateConversaWhatsApp(
+    id: string,
+    updates: Partial<Omit<ConversaWhatsAppItem, "id" | "mensagens">>
+  ): ConversaWhatsAppItem | null {
+    const index = this.conversasWhatsApp.findIndex((c) => c.id === id);
+    if (index === -1) return null;
+    this.conversasWhatsApp[index] = {
+      ...this.conversasWhatsApp[index],
+      ...updates,
+      atualizado_em: new Date().toISOString(),
+    };
+    return this.enriquecerConversa(this.conversasWhatsApp[index]);
+  }
+
+  addMensagemWhatsApp(
+    conversaId: string,
+    mensagem: Partial<MensagemWhatsAppItem>
+  ): MensagemWhatsAppItem | null {
+    const index = this.conversasWhatsApp.findIndex((c) => c.id === conversaId);
+    if (index === -1) return null;
+    const nova: MensagemWhatsAppItem = {
+      id: mensagem.id || `msg-${Date.now()}-${Math.random().toString(36).substr(2, 4)}`,
+      conversa_id: conversaId,
+      origem: mensagem.origem || "recebida",
+      tipo: mensagem.tipo || "texto",
+      conteudo: mensagem.conteudo || "",
+      anexo_url: mensagem.anexo_url || null,
+      lida: mensagem.lida ?? false,
+      enviado_em: mensagem.enviado_em || new Date().toISOString(),
+      criado_em: new Date().toISOString(),
+    };
+    this.conversasWhatsApp[index].mensagens.push(nova);
+    this.conversasWhatsApp[index].mensagens.sort(
+      (a, b) => new Date(b.enviado_em).getTime() - new Date(a.enviado_em).getTime()
+    );
+    this.conversasWhatsApp[index] = {
+      ...this.conversasWhatsApp[index],
+      ultima_mensagem_em:
+        nova.enviado_em > this.conversasWhatsApp[index].ultima_mensagem_em
+          ? nova.enviado_em
+          : this.conversasWhatsApp[index].ultima_mensagem_em,
+      atualizado_em: new Date().toISOString(),
+    };
+    return nova;
+  }
+
+  getConversaPorCliente(clienteId: string): ConversaWhatsAppItem | null {
+    const conversa = this.conversasWhatsApp.find((c) => c.cliente_id === clienteId);
+    return conversa ? this.enriquecerConversa(conversa) : null;
+  }
+
+  getWhatsAppMetrics(): {
+    totalConversas: number;
+    espelhadas: number;
+    semMatch: number;
+    privadas: number;
+    semResposta: {
+      conversaId: string;
+      nomeCliente: string | null;
+      numero: string;
+      corretor: string | null;
+      etapa: string | null;
+      ultimaMensagem: string | null;
+      vencidoAposHoras: number;
+    }[];
+    porCorretor: {
+      corretor: string;
+      conversas: number;
+      mensagens: number;
+      semResposta: number;
+      hoje: number;
+    }[];
+    volumePorDia: {
+      data: string;
+      total: number;
+      recebidas: number;
+      enviadas: number;
+    }[];
+  } {
+    const conversas = this.conversasWhatsApp;
+    const totalConversas = conversas.length;
+    const espelhadas = conversas.filter(
+      (c) => c.espelhando && c.cliente_id && c.numero_cliente.length > 0
+    ).length;
+    const semMatch = conversas.filter((c) => !c.cliente_id).length;
+    const privadas = conversas.filter((c) => !c.espelhando).length;
+
+    const semResposta = conversas
+      .filter((c) => estaSemResposta(c.mensagens).semResposta)
+      .map((c) => {
+        const estado = estaSemResposta(c.mensagens);
+        return {
+          conversaId: c.id,
+          nomeCliente: c.nome_cliente,
+          numero: c.numero_cliente,
+          corretor: c.corretor,
+          etapa: c.etapa,
+          ultimaMensagem: estado.ultimaMensagem,
+          vencidoAposHoras: estado.vencidoAposHoras,
+        };
+      });
+
+    const porCorretor = new Map<
+      string,
+      { corretor: string; conversas: number; mensagens: number; semResposta: number; hoje: number }
+    >();
+    const hojeInicio = new Date();
+    hojeInicio.setHours(0, 0, 0, 0);
+    for (const c of conversas) {
+      const corretor = c.corretor || "Sem responsável";
+      const entry = porCorretor.get(corretor) || {
+        corretor,
+        conversas: 0,
+        mensagens: 0,
+        semResposta: 0,
+        hoje: 0,
+      };
+      entry.conversas += 1;
+      entry.mensagens += c.mensagens.length;
+      entry.hoje += c.mensagens.filter(
+        (m) => new Date(m.enviado_em).getTime() >= hojeInicio.getTime()
+      ).length;
+      if (estaSemResposta(c.mensagens).semResposta) entry.semResposta += 1;
+      porCorretor.set(corretor, entry);
+    }
+
+    const volumePorDia: {
+      data: string;
+      total: number;
+      recebidas: number;
+      enviadas: number;
+    }[] = [];
+    for (let i = 6; i >= 0; i--) {
+      const dia = new Date(Date.now() - i * DIA);
+      const chave = dia.toISOString().slice(0, 10);
+      const doDia = conversas.flatMap((c) => c.mensagens).filter(
+        (m) => m.enviado_em.slice(0, 10) === chave
+      );
+      volumePorDia.push({
+        data: chave,
+        total: doDia.length,
+        recebidas: doDia.filter((m) => m.origem === "recebida").length,
+        enviadas: doDia.filter((m) => m.origem === "enviada").length,
+      });
+    }
+
+    return {
+      totalConversas,
+      espelhadas,
+      semMatch,
+      privadas,
+      semResposta,
+      porCorretor: Array.from(porCorretor.values()).sort((a, b) => b.conversas - a.conversas),
+      volumePorDia,
+    };
+  }
+
+  // Busca um cliente ativo pelo telefone normalizado (padrão BR internacional).
+  matchClientePorTelefone(numero: string): ClienteCompleto | null {
+    const alvo = normalizarTelefone(numero);
+    if (!alvo) return null;
+    for (const c of this.clientes) {
+      const pessoa = this.pessoas.find((p) => p.id === c.pessoa_id);
+      const pessoaTel = normalizarTelefone(pessoa?.telefone);
+      if (pessoaTel && pessoaTel === alvo) return c;
+    }
+    return null;
+  }
+
+  // ---- NPS (pesquisa de satisfação) ----
+
+  getNpsWhatsApp(): PesquisaNpsItem[] {
+    return this.npsWhatsApp
+      .map((n) => {
+        const conversa = this.conversasWhatsApp.find((c) => c.id === n.conversa_id);
+        const cliente = n.cliente_id
+          ? this.clientes.find((c) => c.id === n.cliente_id)
+          : null;
+        const pessoa = cliente ? this.pessoas.find((p) => p.id === cliente.pessoa_id) : null;
+        return {
+          ...n,
+          cliente_nome: pessoa?.nome || n.cliente_nome || conversa?.nome_cliente || null,
+        };
+      })
+      .sort(
+        (a, b) => new Date(b.enviada_em).getTime() - new Date(a.enviada_em).getTime()
+      );
+  }
+
+  addNpsWhatsApp(dados: Partial<PesquisaNpsItem>): PesquisaNpsItem {
+    const nova: PesquisaNpsItem = {
+      id: dados.id || `nps-${Date.now()}-${Math.random().toString(36).substr(2, 4)}`,
+      conversa_id: dados.conversa_id!,
+      cliente_id: dados.cliente_id || null,
+      cliente_nome: dados.cliente_nome || null,
+      etapa: dados.etapa || "geral",
+      status: dados.status || "pendente",
+      nota: dados.nota ?? null,
+      comentario: dados.comentario || null,
+      enviada_em: dados.enviada_em || new Date().toISOString(),
+      respondida_em: dados.respondida_em || null,
+    };
+    this.npsWhatsApp.unshift(nova);
+    return nova;
+  }
+
+  responderNpsWhatsApp(
+    id: string,
+    nota: number,
+    comentario?: string | null
+  ): PesquisaNpsItem | null {
+    const index = this.npsWhatsApp.findIndex((n) => n.id === id);
+    if (index === -1) return null;
+    this.npsWhatsApp[index] = {
+      ...this.npsWhatsApp[index],
+      nota,
+      comentario: comentario ?? this.npsWhatsApp[index].comentario,
+      status: "respondida",
+      respondida_em: new Date().toISOString(),
+    };
+    return this.npsWhatsApp[index];
+  }
+
+  getNpsPendentePorConversaWhatsApp(conversaId: string): PesquisaNpsItem | null {
+    return (
+      this.npsWhatsApp.find(
+        (n) => n.conversa_id === conversaId && n.status === "pendente"
+      ) || null
+    );
+  }
+
+  // ---- LGPD: direito de exclusão ----
+
+  removerConversaWhatsApp(id: string): boolean {
+    const index = this.conversasWhatsApp.findIndex((c) => c.id === id);
+    if (index === -1) return false;
+    this.conversasWhatsApp.splice(index, 1);
+    // Apaga também interações espelhadas e pesquisas vinculadas à conversa.
+    this.interacoes = this.interacoes.filter(
+      (i) => (i.dados_extra as { conversa_id?: string } | undefined)?.conversa_id !== id
+    );
+    this.npsWhatsApp = this.npsWhatsApp.filter((n) => n.conversa_id !== id);
+    return true;
+  }
+
+  // ---- Auditoria de acesso (LGPD: log de quem acessou o histórico) ----
+
+  registrarAcessoWhatsApp(
+    dados: Partial<RegistroAcessoWhatsAppItem>
+  ): RegistroAcessoWhatsAppItem {
+    const novo: RegistroAcessoWhatsAppItem = {
+      id:
+        dados.id ||
+        `acs-${Date.now()}-${Math.random().toString(36).substr(2, 4)}`,
+      conversa_id: dados.conversa_id || "-",
+      cliente: dados.cliente || "—",
+      usuario: dados.usuario || "sistema",
+      acao: dados.acao || "acesso",
+      em: dados.em || new Date().toISOString(),
+    };
+    this.acessosWhatsApp.unshift(novo);
+    return novo;
+  }
+
+  getAcessosWhatsApp(): RegistroAcessoWhatsAppItem[] {
+    return [...this.acessosWhatsApp].sort(
+      (a, b) => new Date(b.em).getTime() - new Date(a.em).getTime()
+    );
   }
 
   getStats() {

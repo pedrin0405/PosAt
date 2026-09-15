@@ -4,6 +4,7 @@ import { TarefaRepository } from "./adapters/repositories/tarefa.repository";
 import { HandoffRepository } from "./adapters/repositories/handoff.repository";
 import { InteracaoRepository } from "./adapters/repositories/interacao.repository";
 import { OportunidadeRepository } from "./adapters/repositories/oportunidade.repository";
+import { WhatsAppRepository } from "./adapters/repositories/whatsapp.repository";
 
 import { CriarClienteUseCase } from "./use-cases/CriarCliente";
 import { ListarClientesUseCase } from "./use-cases/ListarClientes";
@@ -25,6 +26,27 @@ import { CriarOportunidadeUseCase } from "./use-cases/CriarOportunidade";
 import { ListarOportunidadesUseCase } from "./use-cases/ListarOportunidades";
 import { AtualizarOportunidadeUseCase } from "./use-cases/AtualizarOportunidade";
 
+import { ListarConversasWhatsAppUseCase } from "./use-cases/ListarConversasWhatsApp";
+import { ListarConexoesWhatsAppUseCase } from "./use-cases/ListarConexoesWhatsApp";
+import { CriarConexaoWhatsAppUseCase } from "./use-cases/CriarConexaoWhatsApp";
+import { ConectarConexaoWhatsAppUseCase } from "./use-cases/ConectarConexaoWhatsApp";
+import { ConfirmarConexaoWhatsAppUseCase } from "./use-cases/ConfirmarConexaoWhatsApp";
+import { DesconectarConexaoWhatsAppUseCase } from "./use-cases/DesconectarConexaoWhatsApp";
+import { AtualizarConexaoWhatsAppUseCase } from "./use-cases/AtualizarConexaoWhatsApp";
+import { ReceberMensagemWhatsAppUseCase } from "./use-cases/ReceberMensagemWhatsApp";
+import { ResponderMensagemWhatsAppUseCase } from "./use-cases/ResponderMensagemWhatsApp";
+import { VincularConversaWhatsAppUseCase } from "./use-cases/VincularConversaWhatsApp";
+import { AtualizarEspelhamentoWhatsAppUseCase } from "./use-cases/AtualizarEspelhamentoWhatsApp";
+import { ObterMetricasWhatsAppUseCase } from "./use-cases/ObterMetricasWhatsApp";
+import { ObterRelatorioGestorWhatsAppUseCase } from "./use-cases/ObterRelatorioGestorWhatsApp";
+import { AplicarFollowUpsWhatsAppUseCase } from "./use-cases/AplicarFollowUpsWhatsApp";
+import { DispararNpsWhatsAppUseCase } from "./use-cases/DispararNpsWhatsApp";
+import { ListarNpsWhatsAppUseCase } from "./use-cases/ListarNpsWhatsApp";
+import { ResponderNpsWhatsAppUseCase } from "./use-cases/ResponderNpsWhatsApp";
+import { ExportarHistoricoWhatsAppUseCase } from "./use-cases/ExportarHistoricoWhatsApp";
+import { ObterLogAcessosWhatsAppUseCase } from "./use-cases/ObterLogAcessosWhatsApp";
+import { ExcluirConversaWhatsAppUseCase } from "./use-cases/ExcluirConversaWhatsApp";
+
 // Repositories (Driven Adapters)
 export const pessoaRepo = new PessoaRepository();
 export const clienteRepo = new ClienteRepository();
@@ -32,6 +54,7 @@ export const tarefaRepo = new TarefaRepository();
 export const handoffRepo = new HandoffRepository();
 export const interacaoRepo = new InteracaoRepository();
 export const oportunidadeRepo = new OportunidadeRepository();
+export const whatsAppRepo = new WhatsAppRepository();
 
 // Use Cases (Application Core)
 export const criarClienteUseCase = new CriarClienteUseCase(pessoaRepo, clienteRepo);
@@ -53,3 +76,39 @@ export const criarInteracaoUseCase = new CriarInteracaoUseCase(interacaoRepo, cl
 export const listarOportunidadesUseCase = new ListarOportunidadesUseCase(oportunidadeRepo);
 export const criarOportunidadeUseCase = new CriarOportunidadeUseCase(oportunidadeRepo);
 export const atualizarOportunidadeUseCase = new AtualizarOportunidadeUseCase(oportunidadeRepo);
+
+export const listarConversasWhatsAppUseCase = new ListarConversasWhatsAppUseCase(whatsAppRepo);
+export const listarConexoesWhatsAppUseCase = new ListarConexoesWhatsAppUseCase(whatsAppRepo);
+export const criarConexaoWhatsAppUseCase = new CriarConexaoWhatsAppUseCase(whatsAppRepo);
+export const conectarConexaoWhatsAppUseCase = new ConectarConexaoWhatsAppUseCase(whatsAppRepo);
+export const confirmarConexaoWhatsAppUseCase = new ConfirmarConexaoWhatsAppUseCase(whatsAppRepo);
+export const desconectarConexaoWhatsAppUseCase = new DesconectarConexaoWhatsAppUseCase(whatsAppRepo);
+export const atualizarConexaoWhatsAppUseCase = new AtualizarConexaoWhatsAppUseCase(whatsAppRepo);
+export const receberMensagemWhatsAppUseCase = new ReceberMensagemWhatsAppUseCase(
+  whatsAppRepo,
+  interacaoRepo,
+  clienteRepo
+);
+export const responderMensagemWhatsAppUseCase = new ResponderMensagemWhatsAppUseCase(
+  whatsAppRepo,
+  interacaoRepo
+);
+export const vincularConversaWhatsAppUseCase = new VincularConversaWhatsAppUseCase(
+  whatsAppRepo,
+  clienteRepo
+);
+export const atualizarEspelhamentoWhatsAppUseCase = new AtualizarEspelhamentoWhatsAppUseCase(
+  whatsAppRepo
+);
+export const obterMetricasWhatsAppUseCase = new ObterMetricasWhatsAppUseCase(whatsAppRepo);
+export const obterRelatorioGestorWhatsAppUseCase = new ObterRelatorioGestorWhatsAppUseCase(whatsAppRepo);
+export const aplicarFollowUpsWhatsAppUseCase = new AplicarFollowUpsWhatsAppUseCase(
+  whatsAppRepo,
+  tarefaRepo
+);
+export const dispararNpsWhatsAppUseCase = new DispararNpsWhatsAppUseCase(whatsAppRepo);
+export const listarNpsWhatsAppUseCase = new ListarNpsWhatsAppUseCase(whatsAppRepo);
+export const responderNpsWhatsAppUseCase = new ResponderNpsWhatsAppUseCase(whatsAppRepo);
+export const exportarHistoricoWhatsAppUseCase = new ExportarHistoricoWhatsAppUseCase(whatsAppRepo);
+export const obterLogAcessosWhatsAppUseCase = new ObterLogAcessosWhatsAppUseCase(whatsAppRepo);
+export const excluirConversaWhatsAppUseCase = new ExcluirConversaWhatsAppUseCase(whatsAppRepo);

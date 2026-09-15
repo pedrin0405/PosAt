@@ -287,6 +287,228 @@ export interface DashboardStats {
   investidoresPotenciais?: number;
 }
 
+// ---- WhatsApp (Espelhamento de Conversas) ----
+
+export type OrigemMensagem = "recebida" | "enviada";
+
+export type TipoMensagemWhatsApp =
+  | "texto"
+  | "imagem"
+  | "audio"
+  | "video"
+  | "documento"
+  | "ligacao"
+  | "outro";
+
+export type StatusConexaoWhatsApp =
+  | "conectado"
+  | "conectando"
+  | "desconectado"
+  | "qr_expirado";
+
+export interface ConexaoWhatsApp {
+  id: string;
+  corretor: string;
+  numero: string;
+  sessao_id: string;
+  status: StatusConexaoWhatsApp;
+  qr_code: string | null;
+  qr_expira_em: string | null;
+  ultimo_ping_em: string | null;
+  criado_em: string;
+  atualizado_em: string;
+}
+
+export interface MensagemWhatsApp {
+  id: string;
+  conversa_id: string;
+  origem: OrigemMensagem;
+  tipo: TipoMensagemWhatsApp;
+  conteudo: string;
+  anexo_url: string | null;
+  lida: boolean;
+  enviado_em: string;
+  criado_em: string;
+}
+
+export interface ConversaWhatsApp {
+  id: string;
+  conexao_id: string;
+  corretor: string | null;
+  numero_cliente: string;
+  nome_cliente: string | null;
+  cliente_id: string | null;
+  empreendimento: string | null;
+  etapa: string | null;
+  espelhando: boolean;
+  privada_motivo: string | null;
+  consentimento_lgpd: string | null;
+  primeiro_mensagem_em: string;
+  ultima_mensagem_em: string;
+  criado_em: string;
+  atualizado_em: string;
+  mensagens: MensagemWhatsApp[];
+  cliente?: {
+    id: string;
+    nome: string | null;
+    telefone: string | null;
+    finalidade_principal: FinalidadeCliente;
+    status: StatusRelacionamento;
+  } | null;
+}
+
+export interface ConversaSemResposta {
+  conversaId: string;
+  nomeCliente: string | null;
+  numero: string;
+  corretor: string | null;
+  etapa: string | null;
+  ultimaMensagem: string | null;
+  vencidoAposHoras: number;
+}
+
+export interface MetricaPorCorretor {
+  corretor: string;
+  conversas: number;
+  mensagens: number;
+  semResposta: number;
+  hoje: number;
+}
+
+export interface VolumeMensagemDia {
+  data: string;
+  total: number;
+  recebidas: number;
+  enviadas: number;
+}
+
+export interface WhatsAppMetrics {
+  totalConversas: number;
+  espelhadas: number;
+  semMatch: number;
+  privadas: number;
+  mensagensEspelhadas: number;
+  semResposta: ConversaSemResposta[];
+  porCorretor: MetricaPorCorretor[];
+  volumePorDia: VolumeMensagemDia[];
+}
+
+// ---- IA heurística sobre as conversas ----
+
+export type SentimentoWhatsApp = "satisfeito" | "neutro" | "irritado";
+
+export interface AnaliseConversaWhatsApp {
+  conversaId: string;
+  sentimento: SentimentoWhatsApp;
+  resumo: string;
+  proximaAcao: string | null;
+}
+
+// ---- Follow-up automático (pós-atendimento) ----
+
+export interface GatilhoFollowUp {
+  id: string;
+  nome: string;
+  etapa: string;
+  prazoDias: number;
+  tituloTarefa: string;
+  descricaoTarefa: string;
+  responsavelPadrao: string | null;
+  disparaNps: boolean;
+  ativo: boolean;
+}
+
+export interface TarefaFollowUpCriada {
+  gatilhoId: string;
+  gatilhoNome: string;
+  clienteId: string;
+  clienteNome: string | null;
+  conversaId: string;
+  tarefaId: string;
+  titulo: string;
+  prazoEm: string;
+}
+
+// ---- Pesquisa de satisfação (NPS) ----
+
+export interface PesquisaNps {
+  id: string;
+  conversa_id: string;
+  cliente_id: string | null;
+  cliente_nome: string | null;
+  etapa: string;
+  status: "pendente" | "respondida";
+  nota: number | null;
+  comentario: string | null;
+  enviada_em: string;
+  respondida_em: string | null;
+}
+
+// ---- LGPD / Auditoria ----
+
+export interface RegistroAcessoWhatsApp {
+  id: string;
+  conversa_id: string;
+  cliente: string;
+  usuario: string;
+  acao: string;
+  em: string;
+}
+
+export interface DuplicidadeWhatsApp {
+  numero: string;
+  mesmosCorretores: boolean;
+  conversas: {
+    id: string;
+    corretor: string | null;
+    nomeCliente: string | null;
+    clienteId: string | null;
+    ultimaMensagemEm: string;
+  }[];
+}
+
+// ---- Relatório do gestor ----
+
+export interface EscalonadaWhatsApp {
+  conversaId: string;
+  nomeCliente: string | null;
+  corretor: string | null;
+  numero: string;
+  ultimaMensagem: string;
+  motivo: string;
+}
+
+export interface RelatorioGestorWhatsApp {
+  geradoEm: string;
+  totalConversas: number;
+  totalMensagens: number;
+  espelhadas: number;
+  semMatch: number;
+  semResposta: ConversaSemResposta[];
+  escalonadas: EscalonadaWhatsApp[];
+  porCorretor: {
+    corretor: string;
+    conversas: number;
+    mensagens: number;
+    recebidas: number;
+    enviadas: number;
+    semResposta: number;
+    tempoMedioRespostaMin: number | null;
+    npsPendentes: number;
+  }[];
+  porEtapa: { etapa: string; conversas: number }[];
+  porEmpreendimento: { empreendimento: string | null; conversas: number }[];
+  horariosPico: { hora: string; total: number }[];
+  sentimento: Record<SentimentoWhatsApp, number>;
+  duplicidades: DuplicidadeWhatsApp[];
+  nps: {
+    media: number | null;
+    total: number;
+    respondidas: number;
+    pendentes: number;
+  };
+}
+
 // ---- Value Objects for Classification ----
 
 export interface DadosParaClassificacao {

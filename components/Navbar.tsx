@@ -17,6 +17,7 @@ import {
   Sun,
   Target,
   KanbanSquare,
+  MessageSquare,
 } from "lucide-react";
 import NovoClienteModal from "./NovoClienteModal";
 
@@ -27,6 +28,7 @@ const navItems = [
   { label: "Tarefas", href: "/tarefas", icon: CheckSquare },
   { label: "Kanban", href: "/kanban", icon: KanbanSquare },
   { label: "Handoffs", href: "/handoffs", icon: ArrowRightLeft },
+  { label: "Conversas", href: "/mensagens", icon: MessageSquare },
 ];
 
 export default function Navbar() {
