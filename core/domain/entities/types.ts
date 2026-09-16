@@ -102,12 +102,24 @@ export type TipoOportunidade =
 
 export type StatusOportunidade =
   | "identificada"
+  | "em_andamento"
+  | "aguardando_decisao"
   | "em_avaliacao"
   | "proposta_enviada"
   | "negociacao"
+  | "convertida"
+  | "removida"
+  | "encerrada"
   | "ganha"
   | "perdida"
   | "arquivada";
+
+export type RegraGeradoraOportunidade =
+  | "base_retrabalho"
+  | "venda_recente"
+  | "locacao_recente"
+  | "origem_manual"
+  | "outra";
 
 export interface Oportunidade {
   id: string;
@@ -125,6 +137,18 @@ export interface Oportunidade {
   ganha_em: string | null;
   perdida_em: string | null;
   motivo_perda: string | null;
+  // Nova camada (sugestões / vendedores / anunciantes)
+  vendedor_id: string | null;
+  imovel_id: string | null;
+  regra_geradora: RegraGeradoraOportunidade;
+  tags: string[];
+  origem: OrigemPessoa;
+  removida_motivo: string | null;
+  removida_em: string | null;
+  convertida_em: string | null;
+  lead_criado_id: string | null;
+  lead_duplicado_id: string | null;
+  tarefa_primeiro_contato_id: string | null;
   criado_em: string;
   atualizado_em: string;
   cliente?: {
@@ -136,6 +160,72 @@ export interface Oportunidade {
     status: StatusRelacionamento;
     nivel_confianca: NivelConfianca;
   };
+  vendedor?: {
+    id: string;
+    nome: string | null;
+  };
+  imovel?: {
+    id: string;
+    codigo_imovel: string | null;
+    empreendimento: string | null;
+    bairro: string | null;
+    cidade: string | null;
+    regiao: string | null;
+    tipo_negocio: string | null;
+    valor_venda: number | null;
+  };
+}
+
+export type AcaoHistoricoOportunidade =
+  | "criada"
+  | "sugerida"
+  | "status_alterado"
+  | "removida"
+  | "convertida"
+  | "reativada"
+  | "observacao";
+
+export interface HistoricoOportunidade {
+  id: string;
+  oportunidade_id: string;
+  acao: AcaoHistoricoOportunidade;
+  de: string | null;
+  para: string | null;
+  observacao: string | null;
+  criado_por: string | null;
+  criado_em: string;
+}
+
+export interface Vendedor {
+  id: string;
+  nome: string;
+  telefone: string | null;
+  email: string | null;
+  documento_cpf: string | null;
+  creci: string | null;
+  status: "ativo" | "inativo";
+  origem: OrigemPessoa;
+  criado_em: string;
+  atualizado_em: string;
+}
+
+export interface Imovel {
+  id: string;
+  codigo_imovel: string;
+  empreendimento: string;
+  bairro: string;
+  cidade: string;
+  regiao: string;
+  tipologia: string;
+  padrao: string | null;
+  tipo_negocio: "venda" | "locacao" | "ambos";
+  valor_venda: number | null;
+  valor_locacao: number | null;
+  status: "disponivel" | "reservado" | "vendido" | "locado";
+  caracteristicas: string[];
+  vendedor_id: string | null;
+  criado_em: string;
+  atualizado_em: string;
 }
 
 export interface DonoLead {
@@ -285,6 +375,7 @@ export interface DashboardStats {
   oportunidadesAtivas?: number;
   oportunidadesValor?: number;
   investidoresPotenciais?: number;
+  vendedoresAtivos?: number;
 }
 
 // ---- WhatsApp (Espelhamento de Conversas) ----

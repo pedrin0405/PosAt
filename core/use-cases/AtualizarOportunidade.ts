@@ -1,4 +1,7 @@
-import { IOportunidadeRepository } from "../ports/out/repositories";
+import {
+  IOportunidadeRepository,
+  IHistoricoOportunidadeRepository,
+} from "../ports/out/repositories";
 import {
   IAtualizarOportunidadeUseCase,
   IAtualizarOportunidadeInput,
@@ -6,9 +9,15 @@ import {
 import { Oportunidade } from "../domain/entities/types";
 
 export class AtualizarOportunidadeUseCase implements IAtualizarOportunidadeUseCase {
-  constructor(private readonly oportunidadeRepo: IOportunidadeRepository) {}
+  constructor(
+    private readonly oportunidadeRepo: IOportunidadeRepository,
+    private readonly historicoRepo: IHistoricoOportunidadeRepository
+  ) {}
 
   async execute(input: IAtualizarOportunidadeInput): Promise<Oportunidade | null> {
+    const atual = await this.oportunidadeRepo.findById(input.id);
+    if (!atual) return null;
+
     const updates: Partial<Oportunidade> = {};
 
     if (input.status !== undefined && input.status !== null) {
@@ -26,7 +35,26 @@ export class AtualizarOportunidadeUseCase implements IAtualizarOportunidadeUseCa
     if (input.prazoEm !== undefined) updates.prazo_em = input.prazoEm;
     if (input.proximoPasso !== undefined) updates.proximo_passo = input.proximoPasso;
     if (input.motivoPerda !== undefined) updates.motivo_perda = input.motivoPerda;
+    if (input.vendedorId !== undefined) updates.vendedor_id = input.vendedorId;
+    if (input.imovelId !== undefined) updates.imovel_id = input.imovelId;
+    if (input.tags !== undefined) updates.tags = input.tags ?? [];
+    if (input.regraGeradora !== undefined)
+      updates.regra_geradora = (input.regraGeradora as Oportunidade["regra_geradora"]) || "outra";
 
-    return this.oportunidadeRepo.update(input.id, updates);
+    const atualizada = await this.oportunidadeRepo.update(input.id, updates);
+    if (!atualizada) return null;
+
+    if (input.status && input.status !== atual.status) {
+      await this.historicoRepo.create({
+        oportunidade_id: input.id,
+        acao: "status_alterado",
+        de: atual.status,
+        para: input.status,
+        observacao: `Status atualizado de "${atual.status}" para "${input.status}".`,
+        criado_por: input.usuario ?? null,
+      });
+    }
+
+    return atualizada;
   }
 }

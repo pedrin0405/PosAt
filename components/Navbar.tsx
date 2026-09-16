@@ -9,7 +9,6 @@ import {
   CheckSquare,
   ArrowRightLeft,
   LayoutDashboard,
-  PlusCircle,
   Building2,
   Menu,
   X,
@@ -19,7 +18,6 @@ import {
   KanbanSquare,
   MessageSquare,
 } from "lucide-react";
-import NovoClienteModal from "./NovoClienteModal";
 
 const navItems = [
   { label: "Visão Geral", href: "/", icon: LayoutDashboard },
@@ -35,7 +33,6 @@ export default function Navbar() {
   const pathname = usePathname();
   const { resolvedTheme, setTheme } = useTheme();
   const [mounted, setMounted] = useState(false);
-  const [modalNovoAberto, setModalNovoAberto] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
 
   useEffect(() => setMounted(true), []);
@@ -43,8 +40,7 @@ export default function Navbar() {
   const isDark = resolvedTheme === "dark";
 
   return (
-    <>
-      <header className="sticky top-0 z-40 border-b border-slate-200/80 bg-white/80 backdrop-blur-md dark:border-zinc-800 dark:bg-zinc-900/80">
+    <header className="sticky top-0 z-40 border-b border-slate-200/80 bg-white/80 backdrop-blur-md dark:border-zinc-800 dark:bg-zinc-900/80">
         <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-8 lg:px-10">
           {/* Logo */}
           <Link href="/" className="flex shrink-0 items-center gap-2.5 group">
@@ -102,14 +98,6 @@ export default function Navbar() {
               {mounted ? (isDark ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />) : <Moon className="h-4 w-4" />}
             </button>
 
-            <button
-              onClick={() => setModalNovoAberto(true)}
-              className="hidden items-center gap-1.5 rounded-full bg-slate-900 px-4 py-2 text-sm font-semibold text-white transition hover:scale-[1.02] hover:bg-black sm:flex dark:bg-white dark:text-zinc-900 dark:hover:bg-zinc-200"
-            >
-              <PlusCircle className="h-4 w-4" />
-              <span>Novo Cadastro</span>
-            </button>
-
             {/* Profile */}
             <div className="flex items-center rounded-full border border-slate-200 bg-white p-1.5 pl-3 shadow-sm transition hover:shadow dark:border-zinc-700 dark:bg-zinc-800">
               <span className="hidden pr-2 text-sm font-medium text-slate-700 lg:block dark:text-zinc-200">
@@ -156,28 +144,8 @@ export default function Navbar() {
                 );
               })}
             </nav>
-            <button
-              onClick={() => {
-                setModalNovoAberto(true);
-                setMobileOpen(false);
-              }}
-              className="mt-3 flex w-full items-center justify-center gap-2 rounded-full bg-slate-900 px-4 py-2.5 text-sm font-semibold text-white dark:bg-white dark:text-zinc-900"
-            >
-              <PlusCircle className="h-4 w-4" />
-              Novo Cadastro
-            </button>
           </div>
         )}
       </header>
-
-      <NovoClienteModal
-        aberto={modalNovoAberto}
-        aoFechar={() => setModalNovoAberto(false)}
-        aoSalvar={() => {
-          setModalNovoAberto(false);
-          window.location.reload();
-        }}
-      />
-    </>
   );
 }

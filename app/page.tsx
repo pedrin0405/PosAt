@@ -16,6 +16,7 @@ import {
   ListChecks,
   MessageSquare,
   ShieldCheck,
+  Store,
 } from "lucide-react";
 
 interface DashboardData {
@@ -38,6 +39,14 @@ interface DashboardData {
     oportunidadesAtivas: number;
     pipelineValor: number;
   };
+  vendedoresRecentes?: {
+    id: string;
+    nome: string;
+    creci?: string | null;
+    status?: string;
+    telefone?: string | null;
+    criado_em?: string;
+  }[];
   composicaoStatus?: Record<string, number>;
   whatsapp?: {
     totalConversas: number;
@@ -54,7 +63,7 @@ const formatoMoeda = (v: number) =>
 
 export default function HomePage() {
   const [stats, setStats] = useState<DashboardData>({});
-  const [carregando, setCarregando] = useState(true);
+  const [, setCarregando] = useState(true);
 
   useEffect(() => {
     fetch("/api/dashboard")
@@ -75,6 +84,7 @@ export default function HomePage() {
   };
   const pipeline = stats.pipeline || { oportunidadesAtivas: 0, pipelineValor: 0 };
   const temAlerta = alertas.tarefasVencidas + alertas.clientesSemContatoSemanal + alertas.clientesIncompletos + alertas.clientesDistrato + alertas.oportunidadesVencidas > 0;
+  const vendedoresRecentes = stats.vendedoresRecentes || [];
 
   const metricas = [
     {
@@ -384,6 +394,76 @@ export default function HomePage() {
                 mensagens espelhadas hoje
               </p>
             </div>
+          </div>
+        </section>
+      )}
+
+      {/* ── Vendedores / Anunciantes recém-cadastrados ── */}
+      {vendedoresRecentes.length > 0 && (
+        <section
+          className="rounded-2xl p-6"
+          style={{ background: "var(--white)", border: "1px solid var(--border)" }}
+        >
+          <div className="flex flex-wrap items-center justify-between gap-4 mb-5">
+            <div className="flex items-center gap-3">
+              <div
+                className="flex h-10 w-10 items-center justify-center rounded-xl text-white"
+                style={{ background: "var(--text-primary)" }}
+              >
+                <Store className="h-5 w-5" />
+              </div>
+              <div>
+                <p className="text-sm font-bold" style={{ color: "var(--text-primary)" }}>
+                  Anunciantes e corretores
+                </p>
+                <p className="text-xs" style={{ color: "var(--text-secondary)" }}>
+                  {vendedoresRecentes.length} cadastro(s) recente(s)
+                </p>
+              </div>
+            </div>
+            <Link
+              href="/vendedores"
+              className="flex items-center gap-1.5 rounded-xl px-3.5 py-2 text-xs font-semibold transition-colors"
+              style={{ background: "var(--surface)", color: "var(--text-primary)" }}
+            >
+              Ver todos
+              <ArrowRight className="h-3.5 w-3.5" />
+            </Link>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+            {vendedoresRecentes.map((v) => (
+              <Link
+                key={v.id}
+                href="/vendedores"
+                className="flex items-center gap-3 rounded-xl p-3 transition-colors hover:bg-[var(--surface)]"
+                style={{ border: "1px solid var(--border)" }}
+              >
+                <span
+                  className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-xs font-bold"
+                  style={{ background: "var(--surface)", color: "var(--text-primary)" }}
+                >
+                  {(v.nome || "?").split(" ").filter(Boolean).slice(0, 2).map((p) => p[0]?.toUpperCase() || "").join("")}
+                </span>
+                <div className="min-w-0 flex-1">
+                  <p className="truncate text-xs font-semibold" style={{ color: "var(--text-primary)" }}>
+                    {v.nome}
+                  </p>
+                  <p className="truncate text-[11px]" style={{ color: "var(--text-secondary)" }}>
+                    {v.creci ? `CREci ${v.creci}` : v.telefone || "Sem CREci"}
+                  </p>
+                </div>
+                <span
+                  className="shrink-0 rounded-full px-2 py-0.5 text-[10px] font-bold"
+                  style={{
+                    background: v.status === "ativo" ? "var(--accent-light)" : "var(--surface)",
+                    color: v.status === "ativo" ? "var(--success)" : "var(--text-secondary)",
+                  }}
+                >
+                  {v.status === "ativo" ? "Ativo" : "Inativo"}
+                </span>
+              </Link>
+            ))}
           </div>
         </section>
       )}

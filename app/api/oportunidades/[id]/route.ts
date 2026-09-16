@@ -12,9 +12,14 @@ interface Contexto {
 const updateSchema = z.object({
   status: z.enum([
     "identificada",
+    "em_andamento",
+    "aguardando_decisao",
     "em_avaliacao",
     "proposta_enviada",
     "negociacao",
+    "convertida",
+    "removida",
+    "encerrada",
     "ganha",
     "perdida",
     "arquivada",
@@ -27,6 +32,11 @@ const updateSchema = z.object({
   prazoEm: z.string().nullish(),
   proximoPasso: z.string().nullish(),
   motivoPerda: z.string().nullish(),
+  vendedorId: z.string().nullish(),
+  imovelId: z.string().nullish(),
+  tags: z.array(z.string()).nullish(),
+  regraGeradora: z.string().nullish(),
+  usuario: z.string().nullish(),
 });
 
 export async function GET(request: NextRequest, context: Contexto) {
@@ -69,6 +79,11 @@ export async function PATCH(request: NextRequest, context: Contexto) {
       prazoEm: body.prazoEm,
       proximoPasso: body.proximoPasso,
       motivoPerda: body.motivoPerda,
+      vendedorId: body.vendedorId,
+      imovelId: body.imovelId,
+      tags: body.tags,
+      regraGeradora: body.regraGeradora,
+      usuario: body.usuario ?? "Equipe",
     });
 
     if (!atualizado) {

@@ -4,6 +4,9 @@ import { TarefaRepository } from "./adapters/repositories/tarefa.repository";
 import { HandoffRepository } from "./adapters/repositories/handoff.repository";
 import { InteracaoRepository } from "./adapters/repositories/interacao.repository";
 import { OportunidadeRepository } from "./adapters/repositories/oportunidade.repository";
+import { VendedorRepository } from "./adapters/repositories/vendedor.repository";
+import { ImovelRepository } from "./adapters/repositories/imovel.repository";
+import { HistoricoOportunidadeRepository } from "./adapters/repositories/historico-oportunidade.repository";
 import { WhatsAppRepository } from "./adapters/repositories/whatsapp.repository";
 
 import { CriarClienteUseCase } from "./use-cases/CriarCliente";
@@ -25,6 +28,16 @@ import { CriarInteracaoUseCase } from "./use-cases/CriarInteracao";
 import { CriarOportunidadeUseCase } from "./use-cases/CriarOportunidade";
 import { ListarOportunidadesUseCase } from "./use-cases/ListarOportunidades";
 import { AtualizarOportunidadeUseCase } from "./use-cases/AtualizarOportunidade";
+import { RemoverOportunidadeUseCase } from "./use-cases/RemoverOportunidade";
+import { ConverterOportunidadeUseCase } from "./use-cases/ConverterOportunidade";
+
+import { ListarVendedoresUseCase } from "./use-cases/ListarVendedores";
+import { ObterVendedorUseCase } from "./use-cases/ObterVendedor";
+import { CriarVendedorUseCase } from "./use-cases/CriarVendedor";
+import { AtualizarVendedorUseCase } from "./use-cases/AtualizarVendedor";
+
+import { ListarImoveisUseCase } from "./use-cases/ListarImoveis";
+import { ListarHistoricoOportunidadesUseCase } from "./use-cases/ListarHistoricoOportunidades";
 
 import { ListarConversasWhatsAppUseCase } from "./use-cases/ListarConversasWhatsApp";
 import { ListarConexoesWhatsAppUseCase } from "./use-cases/ListarConexoesWhatsApp";
@@ -54,6 +67,9 @@ export const tarefaRepo = new TarefaRepository();
 export const handoffRepo = new HandoffRepository();
 export const interacaoRepo = new InteracaoRepository();
 export const oportunidadeRepo = new OportunidadeRepository();
+export const vendedorRepo = new VendedorRepository();
+export const imovelRepo = new ImovelRepository();
+export const historicoOportunidadeRepo = new HistoricoOportunidadeRepository();
 export const whatsAppRepo = new WhatsAppRepository();
 
 // Use Cases (Application Core)
@@ -75,7 +91,30 @@ export const criarInteracaoUseCase = new CriarInteracaoUseCase(interacaoRepo, cl
 
 export const listarOportunidadesUseCase = new ListarOportunidadesUseCase(oportunidadeRepo);
 export const criarOportunidadeUseCase = new CriarOportunidadeUseCase(oportunidadeRepo);
-export const atualizarOportunidadeUseCase = new AtualizarOportunidadeUseCase(oportunidadeRepo);
+export const atualizarOportunidadeUseCase = new AtualizarOportunidadeUseCase(
+  oportunidadeRepo,
+  historicoOportunidadeRepo
+);
+export const removerOportunidadeUseCase = new RemoverOportunidadeUseCase(
+  oportunidadeRepo,
+  historicoOportunidadeRepo
+);
+export const converterOportunidadeUseCase = new ConverterOportunidadeUseCase(
+  oportunidadeRepo,
+  pessoaRepo,
+  clienteRepo,
+  tarefaRepo,
+  historicoOportunidadeRepo
+);
+
+export const listarVendedoresUseCase = new ListarVendedoresUseCase(vendedorRepo);
+export const obterVendedorUseCase = new ObterVendedorUseCase(vendedorRepo);
+export const criarVendedorUseCase = new CriarVendedorUseCase(vendedorRepo);
+export const atualizarVendedorUseCase = new AtualizarVendedorUseCase(vendedorRepo);
+
+export const listarImoveisUseCase = new ListarImoveisUseCase(imovelRepo);
+export const listarHistoricoOportunidadesUseCase =
+  new ListarHistoricoOportunidadesUseCase(historicoOportunidadeRepo);
 
 export const listarConversasWhatsAppUseCase = new ListarConversasWhatsAppUseCase(whatsAppRepo);
 export const listarConexoesWhatsAppUseCase = new ListarConexoesWhatsAppUseCase(whatsAppRepo);

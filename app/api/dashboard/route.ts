@@ -4,18 +4,21 @@ import {
   listarClientesUseCase,
   listarTarefasUseCase,
   listarOportunidadesUseCase,
+  listarVendedoresUseCase,
   obterMetricasWhatsAppUseCase,
 } from "@/core/container";
 
 export async function GET() {
   try {
-    const [stats, clientes, tarefas, oportunidades, whatsapp] = await Promise.all([
-      obterStatsUseCase.execute(),
-      listarClientesUseCase.execute(),
-      listarTarefasUseCase.execute(),
-      listarOportunidadesUseCase.execute(),
-      obterMetricasWhatsAppUseCase.execute(),
-    ]);
+    const [stats, clientes, tarefas, oportunidades, vendedores, whatsapp] =
+      await Promise.all([
+        obterStatsUseCase.execute(),
+        listarClientesUseCase.execute(),
+        listarTarefasUseCase.execute(),
+        listarOportunidadesUseCase.execute(),
+        listarVendedoresUseCase.execute(),
+        obterMetricasWhatsAppUseCase.execute(),
+      ]);
 
     const agora = Date.now();
     const dias = (iso?: string | null) =>
@@ -41,8 +44,15 @@ export async function GET() {
       (c) => c.alerta_distrato_ativo || c.termometro_cx === "insatisfeito_distrato"
     );
 
-    const oportunidadesAtivas = oportunidades.filter(
-      (o) => ["identificada", "em_avaliacao", "proposta_enviada", "negociacao"].includes(o.status)
+    const oportunidadesAtivas = oportunidades.filter((o) =>
+      [
+        "identificada",
+        "em_andamento",
+        "aguardando_decisao",
+        "em_avaliacao",
+        "proposta_enviada",
+        "negociacao",
+      ].includes(o.status)
     );
     const pipelineValor = oportunidadesAtivas.reduce((s, o) => s + (o.valor_estimado || 0), 0);
     const oportunidadesVencidas = oportunidadesAtivas.filter(
@@ -71,6 +81,19 @@ export async function GET() {
         acc[c.status] = (acc[c.status] || 0) + 1;
         return acc;
       }, {}),
+      vendedoresRecentes: vendedores
+        .sort(
+          (a, b) => new Date(b.criado_em).getTime() - new Date(a.criado_em).getTime()
+        )
+        .slice(0, 4)
+        .map((v) => ({
+          id: v.id,
+          nome: v.nome,
+          status: v.status,
+          creci: v.creci,
+          telefone: v.telefone,
+          criado_em: v.criado_em,
+        })),
       whatsapp: {
         totalConversas: whatsapp.totalConversas,
         espelhadas: whatsapp.espelhadas,

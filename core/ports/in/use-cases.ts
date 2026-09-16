@@ -11,6 +11,9 @@ import {
   Tarefa,
   Handoff,
   Oportunidade,
+  Vendedor,
+  Imovel,
+  HistoricoOportunidade,
   DashboardStats,
   FiltrosCliente,
   ResultadoClassificacao,
@@ -179,10 +182,90 @@ export interface IAtualizarOportunidadeInput {
   prazoEm?: string | null;
   proximoPasso?: string | null;
   motivoPerda?: string | null;
+  vendedorId?: string | null;
+  imovelId?: string | null;
+  tags?: string[] | null;
+  regraGeradora?: string | null;
+  usuario?: string | null;
 }
 
 export interface IAtualizarOportunidadeUseCase {
   execute(input: IAtualizarOportunidadeInput): Promise<Oportunidade | null>;
+}
+
+// --- Sugestões / vendedores e anunciantes ---
+
+export interface IListarVendedoresUseCase {
+  execute(): Promise<Vendedor[]>;
+}
+
+export interface IObterVendedorUseCase {
+  execute(id: string): Promise<Vendedor | null>;
+}
+
+export interface ICriarVendedorInput {
+  nome: string;
+  telefone?: string | null;
+  email?: string | null;
+  documentoCpf?: string | null;
+  creci?: string | null;
+  origem?: string | null;
+}
+
+export interface ICriarVendedorUseCase {
+  execute(input: ICriarVendedorInput): Promise<Vendedor>;
+}
+
+export interface IAtualizarVendedorInput {
+  id: string;
+  nome?: string | null;
+  telefone?: string | null;
+  email?: string | null;
+  documentoCpf?: string | null;
+  creci?: string | null;
+  status?: string | null;
+}
+
+export interface IAtualizarVendedorUseCase {
+  execute(input: IAtualizarVendedorInput): Promise<Vendedor | null>;
+}
+
+export interface IListarImoveisUseCase {
+  execute(): Promise<Imovel[]>;
+}
+
+export interface IListarHistoricoOportunidadesUseCase {
+  execute(oportunidadeId?: string): Promise<HistoricoOportunidade[]>;
+}
+
+export interface IRemoverOportunidadeInput {
+  id: string;
+  motivo: string;
+  usuario?: string | null;
+}
+
+export interface IRemoverOportunidadeUseCase {
+  execute(input: IRemoverOportunidadeInput): Promise<Oportunidade | null>;
+}
+
+export interface IConverterOportunidadeInput {
+  id: string;
+  usuario?: string | null;
+  nome?: string | null;
+  telefone?: string | null;
+  email?: string | null;
+  documento?: string | null;
+}
+
+export interface IConverterOportunidadeResult {
+  oportunidade: Oportunidade;
+  lead: Cliente;
+  duplicado: boolean;
+  tarefa: Tarefa | null;
+}
+
+export interface IConverterOportunidadeUseCase {
+  execute(input: IConverterOportunidadeInput): Promise<IConverterOportunidadeResult>;
 }
 
 // --- Classificação ---

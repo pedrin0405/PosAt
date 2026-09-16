@@ -74,6 +74,17 @@ export class OportunidadeRepository implements IOportunidadeRepository {
           responsavel_id: data.responsavel_id ?? null,
           prazo_em: data.prazo_em ?? null,
           proximo_passo: data.proximo_passo ?? null,
+          vendedor_id: data.vendedor_id ?? null,
+          imovel_id: data.imovel_id ?? null,
+          regra_geradora: data.regra_geradora ?? "origem_manual",
+          tags: data.tags ?? [],
+          origem: data.origem ?? "manual",
+          removida_motivo: data.removida_motivo ?? null,
+          removida_em: data.removida_em ?? null,
+          convertida_em: data.convertida_em ?? null,
+          lead_criado_id: data.lead_criado_id ?? null,
+          lead_duplicado_id: data.lead_duplicado_id ?? null,
+          tarefa_primeiro_contato_id: data.tarefa_primeiro_contato_id ?? null,
         })
         .select(`
           *,

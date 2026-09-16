@@ -1,277 +1,371 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { Suspense, useEffect, useRef, useState } from "react";
+import { useSearchParams } from "next/navigation";
 import Link from "next/link";
-import {
-  Target,
-  Plus,
-  RefreshCw,
-  ArrowRight,
-  TrendingUp,
-  Flag,
-  Calendar,
-  RotateCcw,
-} from "lucide-react";
-import { OportunidadeItem, TipoOportunidade } from "@/lib/segmentacao/tipos";
-import { executeGraphQL, QUERIES, MUTATIONS } from "@/lib/graphql-client";
+import { RefreshCw, Plus, SlidersHorizontal, X, Store } from "lucide-react";
+import { executeGraphQL, QUERIES } from "@/lib/graphql-client";
+import { OportunidadeItem } from "@/lib/segmentacao/tipos";
 import NovaOportunidadeModal from "@/components/NovaOportunidadeModal";
+import OportunidadeCard from "@/components/oportunidade/OportunidadeCard";
+import OportunidadeDetailPanel from "@/components/oportunidade/OportunidadeDetailPanel";
+import OportunidadeFiltersDrawer, {
+  FiltrosOportunidade,
+} from "@/components/oportunidade/OportunidadeFiltersDrawer";
+import OportunidadeRemoverModal from "@/components/oportunidade/OportunidadeRemoverModal";
+import OportunidadeConverterModal, {
+  DadosConversaoLead,
+} from "@/components/oportunidade/OportunidadeConverterModal";
+import {
+  GRUPO,
+  GrupoOportunidade,
+  STATUS_LABEL,
+  grupoDeOportunidade,
+  formataMoeda,
+} from "@/components/oportunidade/oportunidade-ui";
 
-const TIPO_LABEL: Record<TipoOportunidade, { label: string; badge: string }> = {
-  recompra: { label: "Recompra", badge: "bg-sky-100 text-sky-800 dark:bg-sky-500/15 dark:text-sky-300" },
-  upgrade: { label: "Upgrade", badge: "bg-indigo-100 text-indigo-800 dark:bg-indigo-500/15 dark:text-indigo-300" },
-  investimento_novo: { label: "Investimento", badge: "bg-emerald-100 text-emerald-800 dark:bg-emerald-500/15 dark:text-emerald-300" },
-  indicacao: { label: "Indicação", badge: "bg-violet-100 text-violet-800 dark:bg-violet-500/15 dark:text-violet-300" },
-  servicos: { label: "Serviços", badge: "bg-amber-100 text-amber-800 dark:bg-amber-500/15 dark:text-amber-300" },
-  outro: { label: "Outro", badge: "bg-slate-100 text-slate-700 dark:bg-zinc-700 dark:text-zinc-200" },
-};
-
-const STATUS_ORDEM = [
-  "identificada",
-  "em_avaliacao",
-  "proposta_enviada",
-  "negociacao",
-  "ganha",
-] as const;
-
-const STATUS_RESOLVIDO = ["ganha", "perdida", "arquivada"] as const;
-
-const STATUS_LABEL: Record<string, string> = {
-  identificada: "Identificada",
-  em_avaliacao: "Em avaliação",
-  proposta_enviada: "Proposta enviada",
-  negociacao: "Negociação",
-  ganha: "Ganha",
-  perdida: "Perdida",
-  arquivada: "Arquivada",
-};
-
-const formataMoeda = (v: number) =>
-  new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL", maximumFractionDigits: 0 }).format(v);
+const FILTROS_VAZIOS: FiltrosOportunidade = { busca: "", origem: "", regra: "", vendedor: "" };
 
 export default function OportunidadesPage() {
+  return (
+    <Suspense fallback={<div className="py-10 text-center text-sm text-slate-400 dark:text-zinc-500">Carregando…</div>}>
+      <OportunidadesContent />
+    </Suspense>
+  );
+}
+
+function OportunidadesContent() {
+  const searchParams = useSearchParams();
+  const opIdInicial = useRef(searchParams.get("oportunidade"));
   const [oportunidades, setOportunidades] = useState<OportunidadeItem[]>([]);
   const [carregando, setCarregando] = useState(true);
-  const [modalAberto, setModalAberto] = useState(false);
+  const [modalNova, setModalNova] = useState(false);
+  const [grupo, setGrupo] = useState<GrupoOportunidade>("ativas");
+  const [filtrosAberto, setFiltrosAberto] = useState(false);
+  const [filtros, setFiltros] = useState<FiltrosOportunidade>(FILTROS_VAZIOS);
+  const [detalhe, setDetalhe] = useState<OportunidadeItem | null>(null);
+  const [removerModal, setRemoverModal] = useState<OportunidadeItem | null>(null);
+  const [converterModal, setConverterModal] = useState<OportunidadeItem | null>(null);
+  const [aviso, setAviso] = useState<{ texto: string; ok: boolean } | null>(null);
+  const [vendedores, setVendedores] = useState<{ id: string; nome: string }[]>([]);
 
-  async function carregar(resetLoading: boolean = true) {
-    if (resetLoading) setCarregando(true);
-    try {
-      try {
-        const data = await executeGraphQL<{ oportunidades: OportunidadeItem[] }>(QUERIES.GET_OPORTUNIDADES);
-        if (data?.oportunidades) {
-          setOportunidades(data.oportunidades);
-          return;
-        }
-      } catch { /* fallback */ }
-      const res = await fetch("/api/oportunidades");
-      if (res.ok) {
-        const json = await res.json();
-        setOportunidades(json.oportunidades || []);
-      }
-    } catch (e) {
-      console.error(e);
-    } finally {
-      setCarregando(false);
-    }
+  function mostrarAviso(texto: string, ok = true) {
+    setAviso({ texto, ok });
+    setTimeout(() => setAviso(null), 4500);
   }
 
-  useEffect(() => { carregar(false); }, []);
-
-  async function atualizarStatus(id: string, status: string) {
-    setOportunidades((prev) =>
-      prev.map((o) => (o.id === id ? { ...o, status: status as OportunidadeItem["status"] } : o))
-    );
-    try {
+  function obterDados() {
+    return (async () => {
       try {
-        await executeGraphQL(MUTATIONS.ATUALIZAR_OPORTUNIDADE, { input: { id, status } });
-        return;
-      } catch { /* fallback */ }
-      await fetch(`/api/oportunidades/${id}`, {
+        let lista: OportunidadeItem[] | null = null;
+        try {
+          const data = await executeGraphQL<{ oportunidades: OportunidadeItem[] }>(QUERIES.GET_OPORTUNIDADES);
+          if (data?.oportunidades) lista = data.oportunidades;
+        } catch { /* fallback REST */ }
+
+        if (!lista) {
+          const res = await fetch("/api/oportunidades");
+          if (res.ok) {
+            const json = await res.json();
+            lista = json.oportunidades || [];
+          }
+        }
+
+        const resV = await fetch("/api/vendedores");
+        const jsonV = resV.ok ? await resV.json() : { vendedores: [] };
+
+        return { oportunidades: lista || [], vendedores: jsonV.vendedores || [] };
+      } catch (e) {
+        console.error(e);
+        return { oportunidades: [], vendedores: [] };
+      }
+    })();
+  }
+
+  function carregar() {
+    setCarregando(true);
+    obterDados()
+      .then((dados) => {
+        setOportunidades(dados.oportunidades);
+        setVendedores(dados.vendedores);
+      })
+      .finally(() => setCarregando(false));
+  }
+
+  useEffect(() => {
+    let ativo = true;
+    obterDados().then((dados) => {
+      if (ativo) {
+        setOportunidades(dados.oportunidades);
+        setVendedores(dados.vendedores);
+        setCarregando(false);
+        const opId = opIdInicial.current;
+        if (opId) {
+          const alvo = dados.oportunidades.find((o) => o.id === opId);
+          if (alvo) {
+            setGrupo(grupoDeOportunidade(alvo.status));
+            setDetalhe(alvo);
+          }
+        }
+      }
+    });
+    return () => { ativo = false; };
+  }, []);
+
+  function recarregar() { carregar(); }
+
+  /* ---------- Mutations ---------- */
+
+  async function avancarStatus(op: OportunidadeItem) {
+    const proximo = ((): string | null => {
+      if (op.status === "identificada") return "em_andamento";
+      if (op.status === "em_andamento") return "aguardando_decisao";
+      if (op.status === "em_avaliacao") return "proposta_enviada";
+      if (op.status === "proposta_enviada") return "negociacao";
+      return null;
+    })();
+    if (!proximo) return;
+    setOportunidades((prev) => prev.map((o) => (o.id === op.id ? { ...o, status: proximo as OportunidadeItem["status"] } : o)));
+    try {
+      await fetch(`/api/oportunidades/${op.id}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ status }),
+        body: JSON.stringify({ status: proximo }),
       });
-    } catch (e) {
-      console.error(e);
+      mostrarAviso(`Status alterado para ${STATUS_LABEL[proximo]}`);
+    } catch { mostrarAviso("Falha ao atualizar status", false); }
+  }
+
+  async function reabrir(op: OportunidadeItem) {
+    setOportunidades((prev) => prev.map((o) => (o.id === op.id ? { ...o, status: "identificada" as OportunidadeItem["status"] } : o)));
+    try {
+      await fetch(`/api/oportunidades/${op.id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ status: "identificada" }),
+      });
+      mostrarAviso("Oportunidade reaberta");
+    } catch { mostrarAviso("Falha ao reabrir", false); }
+  }
+
+  async function removerOp(op: OportunidadeItem, motivo: string) {
+    setOportunidades((prev) => prev.map((o) => (o.id === op.id ? { ...o, status: "removida" as OportunidadeItem["status"], removida_motivo: motivo, removida_em: new Date().toISOString(), tags: [...(o.tags || []), "Removido"] } : o)));
+    setRemoverModal(null);
+    try {
+      await fetch(`/api/oportunidades/${op.id}/remover`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ motivo }),
+      });
+      mostrarAviso("Oportunidade removida (perdeu interesse)");
+    } catch { mostrarAviso("Falha ao remover", false); }
+  }
+
+  async function converterOp(op: OportunidadeItem, dados: DadosConversaoLead) {
+    setConverterModal(null);
+    try {
+      const res = await fetch(`/api/oportunidades/${op.id}/converter`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(dados),
+      });
+      if (!res.ok) {
+        const json = await res.json().catch(() => null);
+        throw new Error(json?.erro || "Falha ao converter");
+      }
+      const json = await res.json();
+      const leadId = json.lead?.id || null;
+      setOportunidades((prev) => prev.map((o) => (o.id === op.id ? {
+        ...o,
+        status: "convertida" as OportunidadeItem["status"],
+        convertida_em: new Date().toISOString(),
+        lead_criado_id: json.duplicado ? null : leadId,
+        lead_duplicado_id: json.duplicado ? leadId : null,
+        tarefa_primeiro_contato_id: json.tarefa?.id || null,
+        tags: [...(o.tags || []), "Convertido"],
+      } : o)));
+      mostrarAviso(
+        json.duplicado
+          ? "Cadastro deduplicado — tarefa de primeiro contato criada"
+          : "Lead criado com tarefa de primeiro contato"
+      );
+    } catch (e: unknown) {
+      mostrarAviso(e instanceof Error ? e.message : "Falha ao converter", false);
     }
   }
 
-  const ativas = oportunidades.filter((o) => !STATUS_RESOLVIDO.includes(o.status as any));
-  const resolvidas = oportunidades.filter((o) => STATUS_RESOLVIDO.includes(o.status as any));
-  const totalValor = ativas.reduce((s, o) => s + (o.valor_estimado || 0), 0);
-  const vencidas = ativas.filter((o) => o.prazo_em && new Date(o.prazo_em) < new Date());
+  /* ---------- Filtering ---------- */
 
-  const Cards = ({ list, avancavel }: { list: OportunidadeItem[]; avancavel: boolean }) =>
-    list.length === 0 ? (
-      <div className="rounded-2xl border border-dashed border-slate-300 py-10 text-center text-sm text-slate-400 dark:border-zinc-600 dark:text-zinc-500">
-        Nenhuma oportunidade aqui.
-      </div>
-    ) : (
-      <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
-        {list.map((o) => {
-          const tipo = TIPO_LABEL[o.tipo] || TIPO_LABEL.outro;
-          const idx = STATUS_ORDEM.indexOf(o.status as (typeof STATUS_ORDEM)[number]);
-          const proximo = idx >= 0 ? STATUS_ORDEM[idx + 1] : null;
-          const estaVencida = avancavel && o.prazo_em && new Date(o.prazo_em) < new Date();
-          return (
-            <div
-              key={o.id}
-              className="flex flex-col gap-3 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm transition hover:shadow-md dark:border-zinc-700 dark:bg-zinc-800"
-            >
-              <div className="flex items-start justify-between gap-2">
-                <div className="min-w-0">
-                  <span className={`inline-flex rounded-full px-2.5 py-0.5 text-[11px] font-bold ${tipo.badge}`}>
-                    {tipo.label}
-                  </span>
-                  <h3 className="mt-2 text-sm font-semibold leading-snug text-slate-900 dark:text-zinc-100">
-                    {o.descricao}
-                  </h3>
-                </div>
-                {o.valor_estimado ? (
-                  <span className="shrink-0 whitespace-nowrap text-sm font-extrabold text-emerald-700 dark:text-emerald-400">
-                    {formataMoeda(o.valor_estimado)}
-                  </span>
-                ) : null}
-              </div>
+  function correspondeFiltros(o: OportunidadeItem) {
+    const busca = filtros.busca.toLowerCase();
+    if (busca) {
+      const alvo = `${o.descricao} ${o.cliente?.nome || ""} ${o.vendedor?.nome || ""} ${o.imovel?.codigo_imovel || ""} ${o.imovel?.empreendimento || ""}`.toLowerCase();
+      if (!alvo.includes(busca)) return false;
+    }
+    if (filtros.origem && o.origem !== filtros.origem) return false;
+    if (filtros.regra && o.regra_geradora !== filtros.regra) return false;
+    if (filtros.vendedor && o.vendedor_id !== filtros.vendedor) return false;
+    return true;
+  }
 
-              {o.cliente?.id && (
-                <Link
-                  href={`/clientes/${o.cliente.id}`}
-                  className="flex items-center gap-1 text-xs font-semibold text-slate-700 hover:underline dark:text-zinc-200"
-                >
-                  <Target className="h-3 w-3" />
-                  {o.cliente.nome || "Cliente"}
-                  <ArrowRight className="h-3 w-3" />
-                </Link>
-              )}
+  const filtradas = oportunidades.filter((o) => grupoDeOportunidade(o.status) === grupo && correspondeFiltros(o));
+  const contagem = Object.fromEntries(GRUPO.map((g) => [g.id, oportunidades.filter((o) => grupoDeOportunidade(o.status) === g.id).length])) as Record<GrupoOportunidade, number>;
+  const totalValorAtivas = oportunidades.filter((o) => grupoDeOportunidade(o.status) === "ativas").reduce((s, o) => s + (o.valor_estimado || 0), 0);
 
-              {o.evidencia && (
-                <p className="text-xs leading-relaxed text-slate-500 dark:text-zinc-400">
-                  {o.evidencia}
-                </p>
-              )}
-
-              {o.proximo_passo && (
-                <div className="rounded-xl bg-slate-50 px-3 py-2 text-xs text-slate-600 dark:bg-zinc-700/50 dark:text-zinc-300">
-                  <span className="font-semibold">Próximo passo: </span>
-                  {o.proximo_passo}
-                </div>
-              )}
-
-              <div className="mt-auto flex flex-wrap items-center justify-between gap-2 border-t border-slate-100 pt-3 text-xs text-slate-500 dark:border-zinc-700 dark:text-zinc-400">
-                <span className="flex items-center gap-1">
-                  <Flag className="h-3 w-3" />
-                  {STATUS_LABEL[o.status] || o.status}
-                </span>
-                {o.prazo_em && (
-                  <span
-                    className={`flex items-center gap-1 ${estaVencida ? "font-semibold text-rose-600 dark:text-rose-400" : ""}`}
-                  >
-                    <Calendar className="h-3 w-3" />
-                    {new Date(o.prazo_em).toLocaleDateString("pt-BR")}
-                    {estaVencida ? " (vencida)" : ""}
-                  </span>
-                )}
-              </div>
-
-              {avancavel && proximo && (
-                <div className="flex flex-wrap gap-2">
-                  <button
-                    onClick={() => atualizarStatus(o.id, proximo)}
-                    className="flex flex-1 items-center justify-center gap-1 rounded-lg bg-slate-900 px-3 py-1.5 text-[11px] font-semibold text-white transition hover:bg-slate-700 dark:bg-white dark:text-zinc-900 dark:hover:bg-zinc-200"
-                  >
-                    Avançar para {STATUS_LABEL[proximo]}
-                    <ArrowRight className="h-3 w-3" />
-                  </button>
-                  <button
-                    onClick={() => atualizarStatus(o.id, "perdida")}
-                    className="rounded-lg bg-rose-50 px-3 py-1.5 text-[11px] font-semibold text-rose-700 transition hover:bg-rose-100 dark:bg-rose-500/15 dark:text-rose-300 dark:hover:bg-rose-500/25"
-                  >
-                    Perder
-                  </button>
-                </div>
-              )}
-
-              {!avancavel && (
-                <button
-                  onClick={() => atualizarStatus(o.id, "identificada")}
-                  className="flex items-center justify-center gap-1 rounded-lg border border-slate-200 px-3 py-1.5 text-[11px] font-semibold text-slate-600 transition hover:bg-slate-50 dark:border-zinc-600 dark:text-zinc-300 dark:hover:bg-zinc-700"
-                >
-                  <RotateCcw className="h-3 w-3" />
-                  Reabrir
-                </button>
-              )}
-            </div>
-          );
-        })}
-      </div>
-    );
+  const filtresAtivos = filtros.busca || filtros.origem || filtros.regra || filtros.vendedor;
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-6">
+      {aviso && (
+        <div className="fixed right-5 top-5 z-50 flex items-center gap-2 rounded-xl border px-4 py-3 text-sm font-medium shadow-lg transition dark:border-zinc-600"
+          style={{
+            background: aviso.ok ? "var(--surface, #fff)" : "var(--surface, #fff)",
+            color: aviso.ok ? "var(--text-primary)" : "var(--text-primary)",
+            borderColor: aviso.ok ? "var(--accent, #10b981)" : "var(--error, #ef4444)",
+          }}
+        >
+          <span>{aviso.texto}</span>
+          <button onClick={() => setAviso(null)} className="ml-1 rounded p-1 text-slate-400 hover:bg-slate-100 dark:text-zinc-500 dark:hover:bg-zinc-800">
+            <X className="h-3.5 w-3.5" />
+          </button>
+        </div>
+      )}
+
       {/* Header */}
       <div className="flex flex-wrap items-center justify-between gap-4">
         <div>
-          <p className="mb-1 text-xs font-semibold uppercase tracking-widest text-slate-500 dark:text-zinc-400">
-            Crescimento
-          </p>
-          <h1 className="text-2xl font-semibold tracking-tight text-slate-900 dark:text-zinc-50">
-            Oportunidades
-          </h1>
+          <p className="mb-1 text-xs font-semibold uppercase tracking-widest text-slate-500 dark:text-zinc-400">Crescimento</p>
+          <h1 className="text-2xl font-semibold tracking-tight text-slate-900 dark:text-zinc-50">Oportunidades</h1>
           <p className="mt-1 text-sm text-slate-500 dark:text-zinc-400">
-            {ativas.length} em andamento · {formataMoeda(totalValor)} em jogo
-            {vencidas.length > 0 && ` · ${vencidas.length} vencida(s)`}
+            {contagem.ativas} em andamento · {formataMoeda(totalValorAtivas)} em jogo
           </p>
         </div>
-
         <div className="flex items-center gap-2">
-          <button
-            onClick={() => carregar()}
+          <Link
+            href="/vendedores"
             className="flex h-11 items-center gap-1.5 rounded-xl border border-slate-200 bg-white px-3.5 text-sm font-medium text-slate-700 transition hover:bg-slate-50 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-200 dark:hover:bg-zinc-700"
           >
+            <Store className="h-4 w-4" />
+            <span className="hidden sm:inline">Vendedores</span>
+          </Link>
+          <button onClick={recarregar} className="flex h-11 items-center gap-1.5 rounded-xl border border-slate-200 bg-white px-3.5 text-sm font-medium text-slate-700 transition hover:bg-slate-50 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-200 dark:hover:bg-zinc-700">
             <RefreshCw className="h-4 w-4" />
             <span className="hidden sm:inline">Atualizar</span>
           </button>
-          <button
-            onClick={() => setModalAberto(true)}
-            className="flex h-11 items-center gap-1.5 rounded-xl bg-slate-900 px-4 text-sm font-semibold text-white transition hover:bg-slate-800 dark:bg-white dark:text-zinc-900 dark:hover:bg-zinc-200"
-          >
+          <button onClick={() => setModalNova(true)} className="flex h-11 items-center gap-1.5 rounded-xl bg-slate-900 px-4 text-sm font-semibold text-white transition hover:bg-slate-800 dark:bg-white dark:text-zinc-900 dark:hover:bg-zinc-200">
             <Plus className="h-4 w-4" />
             Nova Oportunidade
           </button>
         </div>
       </div>
 
+      {/* Tabs + filtro */}
+      <div className="flex flex-wrap items-center gap-4">
+        <div className="flex flex-1 rounded-2xl bg-slate-100 p-1 dark:bg-zinc-800">
+          {GRUPO.map((g) => (
+            <button
+              key={g.id}
+              onClick={() => setGrupo(g.id)}
+              className={`flex-1 rounded-2xl px-3 py-2 text-xs font-semibold transition sm:text-sm ${
+                grupo === g.id
+                  ? "bg-white text-slate-900 shadow-sm dark:bg-zinc-700 dark:text-zinc-100"
+                  : "text-slate-500 hover:text-slate-900 dark:text-zinc-400 dark:hover:text-zinc-100"
+              }`}
+            >
+              {g.label}
+              <span className="ml-1 text-[11px] opacity-60">{contagem[g.id]}</span>
+            </button>
+          ))}
+        </div>
+        <button
+          onClick={() => setFiltrosAberto(true)}
+          className={`flex h-10 items-center gap-1.5 rounded-xl border px-3.5 text-sm font-medium transition dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-200 dark:hover:bg-zinc-700 ${
+            filtresAtivos
+              ? "border-slate-900 bg-slate-900 text-white hover:bg-slate-800 dark:border-white dark:text-white"
+              : "border-slate-200 bg-white text-slate-700 hover:bg-slate-50"
+          }`}
+        >
+          <SlidersHorizontal className="h-4 w-4" />
+          <span className="hidden sm:inline">Filtros</span>
+          {filtresAtivos && (
+            <span className="ml-1 flex h-4 w-4 items-center justify-center rounded-full bg-white/20 text-[10px] font-bold text-white dark:bg-zinc-600">
+              {[filtros.busca, filtros.origem, filtros.regra, filtros.vendedor].filter(Boolean).length}
+            </span>
+          )}
+        </button>
+      </div>
+
+      {/* Cards */}
       {carregando ? (
         <div className="rounded-2xl border border-slate-100 bg-white py-16 text-center text-sm text-slate-400 dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-500">
           <RefreshCw className="mx-auto mb-3 h-5 w-5 animate-spin" />
           Carregando oportunidades…
         </div>
+      ) : filtradas.length === 0 ? (
+        <div className="rounded-2xl border border-dashed border-slate-300 py-10 text-center text-sm text-slate-400 dark:border-zinc-600 dark:text-zinc-500">
+          {filtresAtivos ? "Nenhuma oportunidade encontrada com esses filtros." : "Nenhuma oportunidade nesta aba."}
+        </div>
       ) : (
-        <>
-          <section className="space-y-4">
-            <h2 className="flex items-center gap-2 text-lg font-bold text-slate-900 dark:text-zinc-100">
-              <TrendingUp className="h-5 w-5 text-emerald-600 dark:text-emerald-400" />
-              Pipeline ativo
-            </h2>
-            <Cards list={ativas} avancavel />
-          </section>
-
-          <section className="space-y-4">
-            <h2 className="flex items-center gap-2 text-lg font-bold text-slate-900 dark:text-zinc-100">
-              <RotateCcw className="h-5 w-5 text-slate-500 dark:text-zinc-400" />
-              Resolvidas / Arquivadas
-            </h2>
-            <Cards list={resolvidas} avancavel={false} />
-          </section>
-        </>
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
+          {filtradas.map((op) => (
+            <OportunidadeCard
+              key={op.id}
+              oportunidade={op}
+              aoAbrir={() => setDetalhe(op)}
+              aoAvancar={() => avancarStatus(op)}
+              aoConverter={() => setConverterModal(op)}
+              aoRemover={() => setRemoverModal(op)}
+              aoReabrir={() => reabrir(op)}
+            />
+          ))}
+        </div>
       )}
 
+      {/* Modais / Panels */}
       <NovaOportunidadeModal
-        aberto={modalAberto}
-        aoFechar={() => setModalAberto(false)}
-        aoSalvar={() => { setModalAberto(false); carregar(); }}
+        aberto={modalNova}
+        aoFechar={() => setModalNova(false)}
+        aoSalvar={() => { setModalNova(false); recarregar(); mostrarAviso("Oportunidade criada"); }}
       />
+
+      <OportunidadeFiltersDrawer
+        aberto={filtrosAberto}
+        aoFechar={() => setFiltrosAberto(false)}
+        filtros={filtros}
+        setFiltros={setFiltros}
+        vendedores={vendedores}
+        aoLimpar={() => setFiltros(FILTROS_VAZIOS)}
+      />
+
+      {detalhe && (
+        <OportunidadeDetailPanel
+          key={detalhe.id}
+          oportunidade={detalhe}
+          aoFechar={() => setDetalhe(null)}
+          aoAvancar={() => { avancarStatus(detalhe); setDetalhe(null); }}
+          aoConverter={() => { setConverterModal(detalhe); setDetalhe(null); }}
+          aoRemover={() => { setRemoverModal(detalhe); setDetalhe(null); }}
+          aoReabrir={() => { reabrir(detalhe); setDetalhe(null); }}
+        />
+      )}
+
+      {removerModal && (
+        <OportunidadeRemoverModal
+          key={removerModal.id}
+          oportunidade={removerModal}
+          aoFechar={() => setRemoverModal(null)}
+          aoConfirmar={(motivo) => removerOp(removerModal, motivo)}
+        />
+      )}
+
+      {converterModal && (
+        <OportunidadeConverterModal
+          key={converterModal.id}
+          oportunidade={converterModal}
+          aoFechar={() => setConverterModal(null)}
+          aoConfirmar={(dados) => converterOp(converterModal, dados)}
+        />
+      )}
     </div>
   );
 }

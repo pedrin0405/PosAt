@@ -11,6 +11,9 @@ import {
   Tarefa,
   Handoff,
   Oportunidade,
+  Vendedor,
+  Imovel,
+  HistoricoOportunidade,
   DashboardStats,
   FiltrosCliente,
   ConexaoWhatsApp,
@@ -73,6 +76,31 @@ export interface IOportunidadeRepository {
   findById(id: string): Promise<Oportunidade | null>;
   create(data: Partial<Oportunidade>): Promise<Oportunidade>;
   update(id: string, data: Partial<Oportunidade>): Promise<Oportunidade | null>;
+}
+
+// --- Vendedor / Anunciante Repository ---
+
+export interface IVendedorRepository {
+  findAll(): Promise<Vendedor[]>;
+  findById(id: string): Promise<Vendedor | null>;
+  create(data: Partial<Vendedor>): Promise<Vendedor>;
+  update(id: string, data: Partial<Vendedor>): Promise<Vendedor | null>;
+}
+
+// --- Imóvel Repository ---
+
+export interface IImovelRepository {
+  findAll(): Promise<Imovel[]>;
+  findById(id: string): Promise<Imovel | null>;
+  create(data: Partial<Imovel>): Promise<Imovel>;
+  update(id: string, data: Partial<Imovel>): Promise<Imovel | null>;
+}
+
+// --- Histórico de Oportunidades Repository ---
+
+export interface IHistoricoOportunidadeRepository {
+  findAll(oportunidadeId?: string): Promise<HistoricoOportunidade[]>;
+  create(data: Partial<HistoricoOportunidade>): Promise<HistoricoOportunidade>;
 }
 
 // --- WhatsApp Repository ---

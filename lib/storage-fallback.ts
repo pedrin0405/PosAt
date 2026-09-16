@@ -5,6 +5,9 @@ import {
   TarefaItem,
   HandoffItem,
   OportunidadeItem,
+  HistoricoOportunidadeItem,
+  VendedorItem,
+  ImovelItem,
   ConexaoWhatsAppItem,
   ConversaWhatsAppItem,
   MensagemWhatsAppItem,
@@ -408,7 +411,7 @@ const INITIAL_OPORTUNIDADES: OportunidadeItem[] = [
     tipo: "investimento_novo",
     descricao: "Reserva de 2 studios do próximo lançamento em Pinheiros.",
     valor_estimado: 2400000,
-    status: "em_avaliacao",
+    status: "em_andamento",
     prioridade: 1,
     evidencia: "Check-in trimestral de pós-venda (int-003): cliente sinalizou interesse em reservar 2 studios no próximo lançamento em Pinheiros.",
     criado_por: "Gestora Fernanda",
@@ -418,6 +421,17 @@ const INITIAL_OPORTUNIDADES: OportunidadeItem[] = [
     ganha_em: null,
     perdida_em: null,
     motivo_perda: null,
+    vendedor_id: "ven-003",
+    imovel_id: "imo-003",
+    regra_geradora: "venda_recente",
+    tags: ["Investidor", "Lançamento Pinheiros"],
+    origem: "crm",
+    removida_motivo: null,
+    removida_em: null,
+    convertida_em: null,
+    lead_criado_id: null,
+    lead_duplicado_id: null,
+    tarefa_primeiro_contato_id: null,
     criado_em: new Date(Date.now() - 3 * 86400000).toISOString(),
     atualizado_em: new Date(Date.now() - 3 * 86400000).toISOString(),
   },
@@ -437,6 +451,17 @@ const INITIAL_OPORTUNIDADES: OportunidadeItem[] = [
     ganha_em: null,
     perdida_em: null,
     motivo_perda: null,
+    vendedor_id: "ven-002",
+    imovel_id: "imo-005",
+    regra_geradora: "origem_manual",
+    tags: ["Upgrade", "Garagem"],
+    origem: "manual",
+    removida_motivo: null,
+    removida_em: null,
+    convertida_em: null,
+    lead_criado_id: null,
+    lead_duplicado_id: null,
+    tarefa_primeiro_contato_id: null,
     criado_em: new Date(Date.now() - 2 * 86400000).toISOString(),
     atualizado_em: new Date(Date.now() - 2 * 86400000).toISOString(),
   },
@@ -446,7 +471,7 @@ const INITIAL_OPORTUNIDADES: OportunidadeItem[] = [
     tipo: "investimento_novo",
     descricao: "Carteira de 2 unidades no Vista Jardins para locação via Airbnb.",
     valor_estimado: 1200000,
-    status: "proposta_enviada",
+    status: "aguardando_decisao",
     prioridade: 1,
     evidencia: "interação int-001: cliente confirmou interesse em 2 unidades no Vista Jardins para locação via Airbnb.",
     criado_por: "Consultor André",
@@ -456,9 +481,691 @@ const INITIAL_OPORTUNIDADES: OportunidadeItem[] = [
     ganha_em: null,
     perdida_em: null,
     motivo_perda: null,
+    vendedor_id: "ven-001",
+    imovel_id: "imo-001",
+    regra_geradora: "venda_recente",
+    tags: ["Airbnb", "2 unidades"],
+    origem: "crm",
+    removida_motivo: null,
+    removida_em: null,
+    convertida_em: null,
+    lead_criado_id: null,
+    lead_duplicado_id: null,
+    tarefa_primeiro_contato_id: null,
     criado_em: new Date(Date.now() - 1 * 86400000).toISOString(),
     atualizado_em: new Date(Date.now() - 1 * 86400000).toISOString(),
   },
+  {
+    id: "op-004",
+    cliente_id: "c-003",
+    tipo: "investimento_novo",
+    descricao: "Carteira de 1 unidade em Ribeirão Preto (interior).",
+    valor_estimado: 680000,
+    status: "removida",
+    prioridade: 3,
+    evidencia: "Cliente citou em ligação o interesse em investir fora da capital.",
+    criado_por: "Gestora Fernanda",
+    responsavel_id: null,
+    prazo_em: null,
+    proximo_passo: null,
+    ganha_em: null,
+    perdida_em: null,
+    motivo_perda: null,
+    vendedor_id: "ven-003",
+    imovel_id: null,
+    regra_geradora: "base_retrabalho",
+    tags: ["Removido"],
+    origem: "crm",
+    removida_motivo: "Cliente confirmou que já está investindo em outra incorporadora.",
+    removida_em: new Date(Date.now() - 2 * 86400000).toISOString(),
+    convertida_em: null,
+    lead_criado_id: null,
+    lead_duplicado_id: null,
+    tarefa_primeiro_contato_id: null,
+    criado_em: new Date(Date.now() - 5 * 86400000).toISOString(),
+    atualizado_em: new Date(Date.now() - 2 * 86400000).toISOString(),
+  },
+  {
+    id: "op-005",
+    cliente_id: "c-002",
+    tipo: "upgrade",
+    descricao: "Viabilização de 1 unidade extra na torre para renda.",
+    valor_estimado: 780000,
+    status: "convertida",
+    prioridade: 2,
+    evidencia: "Feedback de pós-entrega: família considera nova unidade para renda.",
+    criado_por: "Gerente Patrícia",
+    responsavel_id: null,
+    prazo_em: null,
+    proximo_passo: null,
+    ganha_em: null,
+    perdida_em: null,
+    motivo_perda: null,
+    vendedor_id: "ven-002",
+    imovel_id: "imo-005",
+    regra_geradora: "locacao_recente",
+    tags: ["Convertido"],
+    origem: "crm",
+    removida_motivo: null,
+    removida_em: null,
+    convertida_em: new Date(Date.now() - 1 * 86400000).toISOString(),
+    lead_criado_id: null,
+    lead_duplicado_id: "c-002",
+    tarefa_primeiro_contato_id: "t-ref-005",
+    criado_em: new Date(Date.now() - 6 * 86400000).toISOString(),
+    atualizado_em: new Date(Date.now() - 1 * 86400000).toISOString(),
+  },
+  {
+    id: "op-006",
+    cliente_id: "c-003",
+    tipo: "recompra",
+    descricao: "Recompra de unidade adicional no Vista Jardins para renda mensal.",
+    valor_estimado: 980000,
+    status: "em_avaliacao",
+    prioridade: 1,
+    evidencia: "Conversa no WhatsApp (espelhada): investidor pediu avaliação de mais uma unidade no mesmo empreendimento.",
+    criado_por: "Consultor André",
+    responsavel_id: null,
+    prazo_em: new Date(Date.now() + 12 * 86400000).toISOString(),
+    proximo_passo: "Levar proposta de permuta do flat atual pela unidade 3 dorm.",
+    ganha_em: null,
+    perdida_em: null,
+    motivo_perda: null,
+    vendedor_id: "ven-001",
+    imovel_id: "imo-001",
+    regra_geradora: "base_retrabalho",
+    tags: ["Recompra", "Renda mensal"],
+    origem: "whatsapp",
+    removida_motivo: null,
+    removida_em: null,
+    convertida_em: null,
+    lead_criado_id: null,
+    lead_duplicado_id: null,
+    tarefa_primeiro_contato_id: null,
+    criado_em: new Date(Date.now() - 8 * 86400000).toISOString(),
+    atualizado_em: new Date(Date.now() - 2 * 86400000).toISOString(),
+  },
+  {
+    id: "op-007",
+    cliente_id: "c-004",
+    tipo: "indicacao",
+    descricao: "Indicação do casal Castilho: amiga procurando studio no Pinheiros Urban.",
+    valor_estimado: 940000,
+    status: "proposta_enviada",
+    prioridade: 2,
+    evidencia: "Formulário de indicação preenchido no site com autorização de contato pela cliente c-002.",
+    criado_por: "Gestora Fernanda",
+    responsavel_id: null,
+    prazo_em: new Date(Date.now() + 8 * 86400000).toISOString(),
+    proximo_passo: "Aguardar retorno da proposta enviada para a unidade PU-16.",
+    ganha_em: null,
+    perdida_em: null,
+    motivo_perda: null,
+    vendedor_id: "ven-003",
+    imovel_id: "imo-004",
+    regra_geradora: "venda_recente",
+    tags: ["Indicação", "Site"],
+    origem: "formulario",
+    removida_motivo: null,
+    removida_em: null,
+    convertida_em: null,
+    lead_criado_id: null,
+    lead_duplicado_id: null,
+    tarefa_primeiro_contato_id: null,
+    criado_em: new Date(Date.now() - 7 * 86400000).toISOString(),
+    atualizado_em: new Date(Date.now() - 1 * 86400000).toISOString(),
+  },
+  {
+    id: "op-008",
+    cliente_id: "c-003",
+    tipo: "servicos",
+    descricao: "Renovação do contrato de serviços do estande e vitrine digital.",
+    valor_estimado: 120000,
+    status: "negociacao",
+    prioridade: 2,
+    evidencia: "Renovação anual do pacote de serviços: regularização documental, vitrine digital e relatório de valorização.",
+    criado_por: "Gestora Fernanda",
+    responsavel_id: null,
+    prazo_em: new Date(Date.now() + 20 * 86400000).toISOString(),
+    proximo_passo: "Fechar escopo e valores finais com o cliente em reunião.",
+    ganha_em: null,
+    perdida_em: null,
+    motivo_perda: null,
+    vendedor_id: null,
+    imovel_id: null,
+    regra_geradora: "origem_manual",
+    tags: ["Serviços", "Contrato"],
+    origem: "manual",
+    removida_motivo: null,
+    removida_em: null,
+    convertida_em: null,
+    lead_criado_id: null,
+    lead_duplicado_id: null,
+    tarefa_primeiro_contato_id: null,
+    criado_em: new Date(Date.now() - 6 * 86400000).toISOString(),
+    atualizado_em: new Date(Date.now() - 1 * 86400000).toISOString(),
+  },
+  {
+    id: "op-009",
+    cliente_id: "c-005",
+    tipo: "outro",
+    descricao: "Permuta parcial avaliada para casa na Fazenda Boa Vista (Itu).",
+    valor_estimado: null,
+    status: "encerrada",
+    prioridade: 3,
+    evidencia: "Plano de permuta avaliado; encerrado em reunião com o cliente por decisão de adiar a mudança.",
+    criado_por: "Gerente Patrícia",
+    responsavel_id: null,
+    prazo_em: null,
+    proximo_passo: null,
+    ganha_em: null,
+    perdida_em: null,
+    motivo_perda: null,
+    vendedor_id: "ven-002",
+    imovel_id: "imo-009",
+    regra_geradora: "origem_manual",
+    tags: ["Encerrado", "Permuta"],
+    origem: "planilha",
+    removida_motivo: null,
+    removida_em: null,
+    convertida_em: null,
+    lead_criado_id: null,
+    lead_duplicado_id: null,
+    tarefa_primeiro_contato_id: null,
+    criado_em: new Date(Date.now() - 20 * 86400000).toISOString(),
+    atualizado_em: new Date(Date.now() - 4 * 86400000).toISOString(),
+  },
+  {
+    id: "op-010",
+    cliente_id: "c-002",
+    tipo: "recompra",
+    descricao: "Unidade complementar reservada na Torre Central (renda).",
+    valor_estimado: 780000,
+    status: "ganha",
+    prioridade: 1,
+    evidencia: "Unidade TC-77 reservada após negociação de condições especiais de entrada.",
+    criado_por: "Gerente Patrícia",
+    responsavel_id: null,
+    prazo_em: null,
+    proximo_passo: null,
+    ganha_em: new Date(Date.now() - 3 * 86400000).toISOString(),
+    perdida_em: null,
+    motivo_perda: null,
+    vendedor_id: "ven-002",
+    imovel_id: "imo-005",
+    regra_geradora: "locacao_recente",
+    tags: ["Ganha", "Renda"],
+    origem: "crm",
+    removida_motivo: null,
+    removida_em: null,
+    convertida_em: null,
+    lead_criado_id: null,
+    lead_duplicado_id: null,
+    tarefa_primeiro_contato_id: null,
+    criado_em: new Date(Date.now() - 15 * 86400000).toISOString(),
+    atualizado_em: new Date(Date.now() - 3 * 86400000).toISOString(),
+  },
+  {
+    id: "op-011",
+    cliente_id: "c-003",
+    tipo: "investimento_novo",
+    descricao: "Studio no Pinheiros Urban avaliado e perdido para concorrente.",
+    valor_estimado: 940000,
+    status: "perdida",
+    prioridade: 3,
+    evidencia: "Cliente optou por empreendimento de concorrente com entrega mais curta.",
+    criado_por: "Gestora Fernanda",
+    responsavel_id: null,
+    prazo_em: null,
+    proximo_passo: null,
+    ganha_em: null,
+    perdida_em: new Date(Date.now() - 6 * 86400000).toISOString(),
+    motivo_perda: "Escolheu outro lançamento com prazo menor de entrega.",
+    vendedor_id: "ven-003",
+    imovel_id: "imo-004",
+    regra_geradora: "base_retrabalho",
+    tags: ["Perdido"],
+    origem: "planilha",
+    removida_motivo: null,
+    removida_em: null,
+    convertida_em: null,
+    lead_criado_id: null,
+    lead_duplicado_id: null,
+    tarefa_primeiro_contato_id: null,
+    criado_em: new Date(Date.now() - 18 * 86400000).toISOString(),
+    atualizado_em: new Date(Date.now() - 6 * 86400000).toISOString(),
+  },
+  {
+    id: "op-012",
+    cliente_id: "c-006",
+    tipo: "indicacao",
+    descricao: "Indicação via WhatsApp de cliente c-004: amiga quer conhecer o Vista Jardins.",
+    valor_estimado: 900000,
+    status: "identificada",
+    prioridade: 2,
+    evidencia: "Mensagem espelhada: 'minha amiga quer visitar o Vista Jardins, posso indicar?'",
+    criado_por: "Consultor André",
+    responsavel_id: null,
+    prazo_em: new Date(Date.now() - 2 * 86400000).toISOString(),
+    proximo_passo: "Agendar visita e confirmar perfil de compra.",
+    ganha_em: null,
+    perdida_em: null,
+    motivo_perda: null,
+    vendedor_id: "ven-001",
+    imovel_id: "imo-002",
+    regra_geradora: "venda_recente",
+    tags: ["Indicação", "WhatsApp"],
+    origem: "whatsapp",
+    removida_motivo: null,
+    removida_em: null,
+    convertida_em: null,
+    lead_criado_id: null,
+    lead_duplicado_id: null,
+    tarefa_primeiro_contato_id: null,
+    criado_em: new Date(Date.now() - 5 * 86400000).toISOString(),
+    atualizado_em: new Date(Date.now() - 2 * 86400000).toISOString(),
+  },
+  {
+    id: "op-013",
+    cliente_id: "c-005",
+    tipo: "servicos",
+    descricao: "Assessoria de aquisição para segunda residência (survey e documentação).",
+    valor_estimado: 85000,
+    status: "aguardando_decisao",
+    prioridade: 2,
+    evidencia: "Proposta de assessoria apresentada ao cliente para segunda residência no interior.",
+    criado_por: "Gerente Patrícia",
+    responsavel_id: null,
+    prazo_em: new Date(Date.now() + 30 * 86400000).toISOString(),
+    proximo_passo: "Aguardar retorno do cliente sobre o pacote de assessoria.",
+    ganha_em: null,
+    perdida_em: null,
+    motivo_perda: null,
+    vendedor_id: null,
+    imovel_id: null,
+    regra_geradora: "origem_manual",
+    tags: ["Assessoria"],
+    origem: "manual",
+    removida_motivo: null,
+    removida_em: null,
+    convertida_em: null,
+    lead_criado_id: null,
+    lead_duplicado_id: null,
+    tarefa_primeiro_contato_id: null,
+    criado_em: new Date(Date.now() - 4 * 86400000).toISOString(),
+    atualizado_em: new Date(Date.now() - 1 * 86400000).toISOString(),
+  },
+];
+
+const INITIAL_VENDEDORES: VendedorItem[] = [
+  {
+    id: "ven-001",
+    nome: "Consultor André",
+    telefone: "(11) 97000-0001",
+    email: "andre@quadra.com.br",
+    documento_cpf: "411.222.333-44",
+    creci: "CRECI 98.765-F",
+    status: "ativo",
+    origem: "crm",
+    criado_em: new Date(Date.now() - 90 * 86400000).toISOString(),
+    atualizado_em: new Date(Date.now() - 3 * 86400000).toISOString(),
+  },
+  {
+    id: "ven-002",
+    nome: "Gerente Patrícia",
+    telefone: "(11) 97000-0002",
+    email: "patricia@quadra.com.br",
+    documento_cpf: "522.333.444-55",
+    creci: "CRECI 87.654-F",
+    status: "ativo",
+    origem: "crm",
+    criado_em: new Date(Date.now() - 85 * 86400000).toISOString(),
+    atualizado_em: new Date(Date.now() - 1 * 86400000).toISOString(),
+  },
+  {
+    id: "ven-003",
+    nome: "Gestora Fernanda",
+    telefone: "(11) 97000-0003",
+    email: "fernanda@quadra.com.br",
+    documento_cpf: "633.444.555-66",
+    creci: null,
+    status: "ativo",
+    origem: "manual",
+    criado_em: new Date(Date.now() - 40 * 86400000).toISOString(),
+    atualizado_em: new Date(Date.now() - 2 * 86400000).toISOString(),
+  },
+  {
+    id: "ven-004",
+    nome: "Capital Realty (Anunciante)",
+    telefone: "(11) 97000-0004",
+    email: "unidades@capitalrealty.com.br",
+    documento_cpf: null,
+    creci: null,
+    status: "ativo",
+    origem: "planilha",
+    criado_em: new Date(Date.now() - 15 * 86400000).toISOString(),
+    atualizado_em: new Date(Date.now() - 5 * 86400000).toISOString(),
+  },
+  {
+    id: "ven-005",
+    nome: "Paula Moreira",
+    telefone: "(11) 97000-0005",
+    email: "paula.moreira@parceiras.com.br",
+    documento_cpf: "744.555.666-77",
+    creci: "CRECI SP 12.345-F",
+    status: "inativo",
+    origem: "formulario",
+    criado_em: new Date(Date.now() - 60 * 86400000).toISOString(),
+    atualizado_em: new Date(Date.now() - 10 * 86400000).toISOString(),
+  },
+];
+
+const INITIAL_IMOVEIS: ImovelItem[] = [
+  {
+    id: "imo-001",
+    codigo_imovel: "VJ-202",
+    empreendimento: "Vista Jardins",
+    bairro: "Jardins",
+    cidade: "São Paulo",
+    regiao: "Oeste",
+    tipologia: "2 dorm (Fitness)",
+    padrao: "alto padrão",
+    tipo_negocio: "ambos",
+    valor_venda: 1200000,
+    valor_locacao: 6200,
+    status: "disponivel",
+    caracteristicas: ["Varanda gourmet", "2 vagas"],
+    vendedor_id: "ven-001",
+    criado_em: new Date(Date.now() - 10 * 86400000).toISOString(),
+    atualizado_em: new Date(Date.now() - 10 * 86400000).toISOString(),
+  },
+  {
+    id: "imo-002",
+    codigo_imovel: "VJ-418",
+    empreendimento: "Vista Jardins",
+    bairro: "Jardins",
+    cidade: "São Paulo",
+    regiao: "Oeste",
+    tipologia: "1 dorm (Studio Plus)",
+    padrao: "alto padrão",
+    tipo_negocio: "venda",
+    valor_venda: 900000,
+    valor_locacao: null,
+    status: "disponivel",
+    caracteristicas: ["Mobiliado", "1 vaga"],
+    vendedor_id: "ven-001",
+    criado_em: new Date(Date.now() - 9 * 86400000).toISOString(),
+    atualizado_em: new Date(Date.now() - 9 * 86400000).toISOString(),
+  },
+  {
+    id: "imo-003",
+    codigo_imovel: "PU-15",
+    empreendimento: "Pinheiros Urban",
+    bairro: "Pinheiros",
+    cidade: "São Paulo",
+    regiao: "Oeste",
+    tipologia: "Studio",
+    padrao: "alto padrão",
+    tipo_negocio: "venda",
+    valor_venda: 950000,
+    valor_locacao: null,
+    status: "reservado",
+    caracteristicas: ["Lançamento", "Lazer completo"],
+    vendedor_id: "ven-003",
+    criado_em: new Date(Date.now() - 8 * 86400000).toISOString(),
+    atualizado_em: new Date(Date.now() - 8 * 86400000).toISOString(),
+  },
+  {
+    id: "imo-004",
+    codigo_imovel: "PU-16",
+    empreendimento: "Pinheiros Urban",
+    bairro: "Pinheiros",
+    cidade: "São Paulo",
+    regiao: "Oeste",
+    tipologia: "Studio",
+    padrao: "alto padrão",
+    tipo_negocio: "venda",
+    valor_venda: 940000,
+    valor_locacao: null,
+    status: "disponivel",
+    caracteristicas: ["Lançamento", "Andar alto"],
+    vendedor_id: "ven-003",
+    criado_em: new Date(Date.now() - 7 * 86400000).toISOString(),
+    atualizado_em: new Date(Date.now() - 7 * 86400000).toISOString(),
+  },
+  {
+    id: "imo-005",
+    codigo_imovel: "TC-77",
+    empreendimento: "Torre Central",
+    bairro: "Centro",
+    cidade: "São Paulo",
+    regiao: "Centro",
+    tipologia: "1 dorm",
+    padrao: "médio padrão",
+    tipo_negocio: "ambos",
+    valor_venda: 620000,
+    valor_locacao: 3400,
+    status: "disponivel",
+    caracteristicas: ["1 vaga", "Academia"],
+    vendedor_id: "ven-002",
+    criado_em: new Date(Date.now() - 6 * 86400000).toISOString(),
+    atualizado_em: new Date(Date.now() - 6 * 86400000).toISOString(),
+  },
+  {
+    id: "imo-006",
+    codigo_imovel: "TC-09",
+    empreendimento: "Torre Central",
+    bairro: "Centro",
+    cidade: "São Paulo",
+    regiao: "Centro",
+    tipologia: "2 dorm",
+    padrao: "médio padrão",
+    tipo_negocio: "locacao",
+    valor_venda: null,
+    valor_locacao: 4200,
+    status: "locado",
+    caracteristicas: ["Varanda", "1 vaga"],
+    vendedor_id: "ven-002",
+    criado_em: new Date(Date.now() - 45 * 86400000).toISOString(),
+    atualizado_em: new Date(Date.now() - 12 * 86400000).toISOString(),
+  },
+  {
+    id: "imo-007",
+    codigo_imovel: "IBR-55",
+    empreendimento: "Ibirapuera Gardens",
+    bairro: "Moema",
+    cidade: "São Paulo",
+    regiao: "Zona Sul",
+    tipologia: "3 dorm (Luxo)",
+    padrao: "alto padrão",
+    tipo_negocio: "venda",
+    valor_venda: 2600000,
+    valor_locacao: null,
+    status: "vendido",
+    caracteristicas: ["Lazer rooftop", "2 vagas", "Piscina"],
+    vendedor_id: "ven-001",
+    criado_em: new Date(Date.now() - 30 * 86400000).toISOString(),
+    atualizado_em: new Date(Date.now() - 8 * 86400000).toISOString(),
+  },
+  {
+    id: "imo-008",
+    codigo_imovel: "BTP-101",
+    empreendimento: "Barra Funda Ámbit",
+    bairro: "Barra Funda",
+    cidade: "São Paulo",
+    regiao: "Oeste",
+    tipologia: "2 dorm",
+    padrao: "médio-alto padrão",
+    tipo_negocio: "ambos",
+    valor_venda: 680000,
+    valor_locacao: 3800,
+    status: "disponivel",
+    caracteristicas: ["Coworking", "Pet place"],
+    vendedor_id: "ven-004",
+    criado_em: new Date(Date.now() - 14 * 86400000).toISOString(),
+    atualizado_em: new Date(Date.now() - 6 * 86400000).toISOString(),
+  },
+  {
+    id: "imo-009",
+    codigo_imovel: "ITU-03",
+    empreendimento: "Fazenda Boa Vista",
+    bairro: "Fazenda Boa Vista",
+    cidade: "Itu",
+    regiao: "Interior",
+    tipologia: "Casa 4 dorm (condomínio)",
+    padrao: "alto padrão",
+    tipo_negocio: "venda",
+    valor_venda: 2400000,
+    valor_locacao: null,
+    status: "disponivel",
+    caracteristicas: ["Lote grande", "Segurança 24h"],
+    vendedor_id: "ven-002",
+    criado_em: new Date(Date.now() - 22 * 86400000).toISOString(),
+    atualizado_em: new Date(Date.now() - 3 * 86400000).toISOString(),
+  },
+];
+
+const INITIAL_HISTORICO_OPORTUNIDADES: HistoricoOportunidadeItem[] = [
+  {
+    id: "his-001",
+    oportunidade_id: "op-001",
+    acao: "sugerida",
+    de: null,
+    para: "identificada",
+    observacao: "Regra 'venda recente': cliente converteu em unidade há menos de 90 dias e é investidor confirmado.",
+    criado_por: "sistema",
+    criado_em: new Date(Date.now() - 3 * 86400000).toISOString(),
+  },
+  {
+    id: "his-002",
+    oportunidade_id: "op-001",
+    acao: "status_alterado",
+    de: "identificada",
+    para: "em_andamento",
+    observacao: "Próximo passo definido: enviar maquete do lançamento.",
+    criado_por: "Gestora Fernanda",
+    criado_em: new Date(Date.now() - 2 * 86400000).toISOString(),
+  },
+  {
+    id: "his-003",
+    oportunidade_id: "op-004",
+    acao: "removida",
+    de: "identificada",
+    para: "removida",
+    observacao: "Cliente confirmou que já investe em outra incorporadora.",
+    criado_por: "Gestora Fernanda",
+    criado_em: new Date(Date.now() - 2 * 86400000).toISOString(),
+  },
+  {
+    id: "his-004",
+    oportunidade_id: "op-005",
+    acao: "convertida",
+    de: "aguardando_decisao",
+    para: "convertida",
+    observacao: "Lead criado na base para primeiro contato (deduplicado com cliente c-002).",
+    criado_por: "Gerente Patrícia",
+    criado_em: new Date(Date.now() - 1 * 86400000).toISOString(),
+  },
+  {
+    id: "his-005",
+    oportunidade_id: "op-003",
+    acao: "sugerida",
+    de: null,
+    para: "identificada",
+    observacao: "Regra 'venda recente': cliente converteu em 2 units e pediu simulação de fluxo.",
+    criado_por: "sistema",
+    criado_em: new Date(Date.now() - 1 * 86400000).toISOString(),
+  },
+  {
+    id: "his-006",
+    oportunidade_id: "op-003",
+    acao: "status_alterado",
+    de: "identificada",
+    para: "aguardando_decisao",
+    observacao: "Simulação de fluxo encaminhada; aguardando decisão do cliente.",
+    criado_por: "Consultor André",
+    criado_em: new Date(Date.now() - 6 * 3600000).toISOString(),
+  },
+  {
+    id: "his-007",
+    oportunidade_id: "op-006",
+    acao: "sugerida",
+    de: null,
+    para: "identificada",
+    observacao: "Regra 'base retrabalho': investidor recorrente reativou conversa no WhatsApp.",
+    criado_por: "sistema",
+    criado_em: new Date(Date.now() - 8 * 86400000).toISOString(),
+  },
+  {
+    id: "his-008",
+    oportunidade_id: "op-006",
+    acao: "status_alterado",
+    de: "identificada",
+    para: "em_avaliacao",
+    observacao: "Investidor pediu avaliação de permuta do flat atual.",
+    criado_por: "Consultor André",
+    criado_em: new Date(Date.now() - 2 * 86400000).toISOString(),
+  },
+  {
+    id: "his-009",
+    oportunidade_id: "op-007",
+    acao: "status_alterado",
+    de: "identificada",
+    para: "proposta_enviada",
+    observacao: "Proposta enviada para a unidade PU-16 da indicação.",
+    criado_por: "Gestora Fernanda",
+    criado_em: new Date(Date.now() - 1 * 86400000).toISOString(),
+  },
+  {
+    id: "his-010",
+    oportunidade_id: "op-008",
+    acao: "status_alterado",
+    de: "identificada",
+    para: "negociacao",
+    observacao: "Cliente aceitou negociar escopo do contrato de serviços.",
+    criado_por: "Gestora Fernanda",
+    criado_em: new Date(Date.now() - 1 * 86400000).toISOString(),
+  },
+  {
+    id: "his-011",
+    oportunidade_id: "op-009",
+    acao: "status_alterado",
+    de: "identificada",
+    para: "encerrada",
+    observacao: "Cliente decidiu adiar a mudança para o interior.",
+    criado_por: "Gerente Patrícia",
+    criado_em: new Date(Date.now() - 4 * 86400000).toISOString(),
+  },
+  {
+    id: "his-012",
+    oportunidade_id: "op-010",
+    acao: "status_alterado",
+    de: "negociacao",
+    para: "ganha",
+    observacao: "Unidade TC-77 reservada com condições especiais de entrada.",
+    criado_por: "Gerente Patrícia",
+    criado_em: new Date(Date.now() - 3 * 86400000).toISOString(),
+  },
+  {
+    id: "his-013",
+    oportunidade_id: "op-011",
+    acao: "status_alterado",
+    de: "proposta_enviada",
+    para: "perdida",
+    observacao: "Cliente optou por lançamento de concorrente com entrega mais curta.",
+    criado_por: "Gestora Fernanda",
+    criado_em: new Date(Date.now() - 6 * 86400000).toISOString(),
+  },
+  {
+    id: "his-014",
+    oportunidade_id: "op-005",
+    acao: "observacao",
+    de: null,
+    para: null,
+    observacao: "Tarefa 'Primeiro contato' agendada para o novo lead.",
+    criado_por: "Gerente Patrícia",
+    criado_em: new Date(Date.now() - 1 * 86400000).toISOString(),
+  }
 ];
 
 const H = 3600000;
@@ -765,6 +1472,9 @@ class StorageMemoryFallback {
   private tarefas: TarefaItem[] = [...INITIAL_TAREFAS];
   private handoffs: HandoffItem[] = [...INITIAL_HANDOFFS];
   private oportunidades: OportunidadeItem[] = [...INITIAL_OPORTUNIDADES];
+  private vendedores: VendedorItem[] = [...INITIAL_VENDEDORES];
+  private imoveis: ImovelItem[] = [...INITIAL_IMOVEIS];
+  private historicoOportunidades: HistoricoOportunidadeItem[] = [...INITIAL_HISTORICO_OPORTUNIDADES];
   private conexoesWhatsApp: ConexaoWhatsAppItem[] = [...INITIAL_CONEXOES];
   private conversasWhatsApp: ConversaWhatsAppItem[] = [...INITIAL_CONVERSAS];
   private npsWhatsApp: PesquisaNpsItem[] = [...INITIAL_NPS];
@@ -1035,6 +1745,10 @@ class StorageMemoryFallback {
   getOportunidades() {
     return this.oportunidades.map((o) => {
       const cliente = this.getClienteById(o.cliente_id);
+      const vendedor = o.vendedor_id
+        ? this.vendedores.find((v) => v.id === o.vendedor_id)
+        : null;
+      const imovel = o.imovel_id ? this.imoveis.find((i) => i.id === o.imovel_id) : null;
       return {
         ...o,
         cliente: cliente
@@ -1046,6 +1760,24 @@ class StorageMemoryFallback {
               finalidade_principal: cliente.finalidade_principal,
               status: cliente.status,
               nivel_confianca: cliente.nivel_confianca,
+            }
+          : undefined,
+        vendedor: vendedor
+          ? {
+              id: vendedor.id,
+              nome: vendedor.nome,
+            }
+          : undefined,
+        imovel: imovel
+          ? {
+              id: imovel.id,
+              codigo_imovel: imovel.codigo_imovel,
+              empreendimento: imovel.empreendimento,
+              bairro: imovel.bairro,
+              cidade: imovel.cidade,
+              regiao: imovel.regiao,
+              tipo_negocio: imovel.tipo_negocio,
+              valor_venda: imovel.valor_venda,
             }
           : undefined,
       };
@@ -1069,6 +1801,17 @@ class StorageMemoryFallback {
       ganha_em: oportunidade.ganha_em || null,
       perdida_em: oportunidade.perdida_em || null,
       motivo_perda: oportunidade.motivo_perda || null,
+      vendedor_id: oportunidade.vendedor_id || null,
+      imovel_id: oportunidade.imovel_id || null,
+      regra_geradora: oportunidade.regra_geradora || "origem_manual",
+      tags: oportunidade.tags || [],
+      origem: oportunidade.origem || "manual",
+      removida_motivo: oportunidade.removida_motivo || null,
+      removida_em: oportunidade.removida_em || null,
+      convertida_em: oportunidade.convertida_em || null,
+      lead_criado_id: oportunidade.lead_criado_id || null,
+      lead_duplicado_id: oportunidade.lead_duplicado_id || null,
+      tarefa_primeiro_contato_id: oportunidade.tarefa_primeiro_contato_id || null,
       criado_em: new Date().toISOString(),
       atualizado_em: new Date().toISOString(),
     };
@@ -1090,8 +1833,118 @@ class StorageMemoryFallback {
     if (updates.status === "perdida" && !updated.perdida_em) {
       updated.perdida_em = new Date().toISOString();
     }
+    if (updates.status === "removida" && !updated.removida_em) {
+      updated.removida_em = new Date().toISOString();
+    }
+    if (updates.status === "convertida" && !updated.convertida_em) {
+      updated.convertida_em = new Date().toISOString();
+    }
     this.oportunidades[index] = updated;
     return updated;
+  }
+
+  getVendedores(): VendedorItem[] {
+    return [...this.vendedores];
+  }
+
+  getVendedorById(id: string): VendedorItem | null {
+    return this.vendedores.find((v) => v.id === id) || null;
+  }
+
+  addVendedor(dados: Partial<VendedorItem>): VendedorItem {
+    const novo: VendedorItem = {
+      id: dados.id || `ven-${Date.now()}-${Math.random().toString(36).substr(2, 4)}`,
+      nome: dados.nome || "Sem nome",
+      telefone: dados.telefone || null,
+      email: dados.email || null,
+      documento_cpf: dados.documento_cpf || null,
+      creci: dados.creci || null,
+      status: dados.status || "ativo",
+      origem: dados.origem || "manual",
+      criado_em: new Date().toISOString(),
+      atualizado_em: new Date().toISOString(),
+    };
+    this.vendedores.push(novo);
+    return novo;
+  }
+
+  updateVendedor(id: string, dados: Partial<VendedorItem>): VendedorItem | null {
+    const index = this.vendedores.findIndex((v) => v.id === id);
+    if (index === -1) return null;
+    const atualizado: VendedorItem = {
+      ...this.vendedores[index],
+      ...dados,
+      atualizado_em: new Date().toISOString(),
+    };
+    this.vendedores[index] = atualizado;
+    return atualizado;
+  }
+
+  getImoveis(): ImovelItem[] {
+    return [...this.imoveis].sort((a, b) => a.codigo_imovel.localeCompare(b.codigo_imovel));
+  }
+
+  getImovelById(id: string): ImovelItem | null {
+    return this.imoveis.find((i) => i.id === id) || null;
+  }
+
+  addImovel(dados: Partial<ImovelItem>): ImovelItem {
+    const novo: ImovelItem = {
+      id: dados.id || `imo-${Date.now()}-${Math.random().toString(36).substr(2, 4)}`,
+      codigo_imovel: dados.codigo_imovel || `IMO-${Date.now()}`,
+      empreendimento: dados.empreendimento || "—",
+      bairro: dados.bairro || "",
+      cidade: dados.cidade || "",
+      regiao: dados.regiao || "",
+      tipologia: dados.tipologia || "",
+      padrao: dados.padrao || null,
+      tipo_negocio: dados.tipo_negocio || "venda",
+      valor_venda: dados.valor_venda ?? null,
+      valor_locacao: dados.valor_locacao ?? null,
+      status: dados.status || "disponivel",
+      caracteristicas: dados.caracteristicas || [],
+      vendedor_id: dados.vendedor_id || null,
+      criado_em: new Date().toISOString(),
+      atualizado_em: new Date().toISOString(),
+    };
+    this.imoveis.push(novo);
+    return novo;
+  }
+
+  updateImovel(id: string, dados: Partial<ImovelItem>): ImovelItem | null {
+    const index = this.imoveis.findIndex((v) => v.id === id);
+    if (index === -1) return null;
+    const atualizado: ImovelItem = {
+      ...this.imoveis[index],
+      ...dados,
+      atualizado_em: new Date().toISOString(),
+    };
+    this.imoveis[index] = atualizado;
+    return atualizado;
+  }
+
+  getHistoricoOportunidades(oportunidadeId?: string): HistoricoOportunidadeItem[] {
+    const lista = oportunidadeId
+      ? this.historicoOportunidades.filter((h) => h.oportunidade_id === oportunidadeId)
+      : this.historicoOportunidades;
+    return [...lista].sort(
+      (a, b) => new Date(b.criado_em).getTime() - new Date(a.criado_em).getTime()
+    );
+  }
+
+  addHistoricoOportunidade(dados: Partial<HistoricoOportunidadeItem>): HistoricoOportunidadeItem {
+    const novo: HistoricoOportunidadeItem = {
+      id: dados.id || `his-${Date.now()}-${Math.random().toString(36).substr(2, 4)}`,
+      oportunidade_id: dados.oportunidade_id || "-",
+      acao: dados.acao || "status_alterado",
+      de: dados.de || null,
+      para: dados.para || null,
+      observacao: dados.observacao || null,
+      criado_por: dados.criado_por || null,
+      criado_em: new Date().toISOString(),
+    };
+    this.historicoOportunidades.unshift(novo);
+    return novo;
   }
 
   // ---- WhatsApp (Espelhamento) ----
@@ -1481,11 +2334,26 @@ class StorageMemoryFallback {
       (h) => h.status !== "concluido"
     ).length;
     const oportunidadesAtivas = this.oportunidades.filter(
-      (o) => o.status !== "ganha" && o.status !== "perdida" && o.status !== "arquivada"
+      (o) =>
+        o.status !== "ganha" &&
+        o.status !== "perdida" &&
+        o.status !== "arquivada" &&
+        o.status !== "convertida" &&
+        o.status !== "removida" &&
+        o.status !== "encerrada"
     ).length;
     const oportunidadesValor = this.oportunidades
-      .filter((o) => o.status !== "ganha" && o.status !== "perdida" && o.status !== "arquivada")
+      .filter(
+        (o) =>
+          o.status !== "ganha" &&
+          o.status !== "perdida" &&
+          o.status !== "arquivada" &&
+          o.status !== "convertida" &&
+          o.status !== "removida" &&
+          o.status !== "encerrada"
+      )
       .reduce((sum, o) => sum + (o.valor_estimado || 0), 0);
+    const vendedoresAtivos = this.vendedores.filter((v) => v.status === "ativo").length;
     const investidoresPotenciais = this.clientes.filter(
       (c) => c.finalidade_principal === "possivel_investidor" || c.oportunidade_upsell
     ).length;
@@ -1499,6 +2367,7 @@ class StorageMemoryFallback {
       oportunidadesAtivas,
       oportunidadesValor,
       investidoresPotenciais,
+      vendedoresAtivos,
     };
   }
 }
