@@ -176,7 +176,7 @@ export const resolvers = {
 
   Cliente: {
     pessoaId: (c: any) => c.pessoa_id,
-    finalidadePrincipal: (c: any) => c.finalidade_principal,
+    finalidadePrincipal: (c: any) => c.finalidade_principal || "Não informada",
     finalidadesSecundarias: (c: any) => c.finalidades_secundarias || [],
     regiaoInteresse: (c: any) => c.regiao_interesse,
     cidadeInteresse: (c: any) => c.cidade_interesse,
@@ -217,7 +217,7 @@ export const resolvers = {
       if (!t.cliente) return null;
       return {
         id: t.cliente.id,
-        finalidadePrincipal: t.cliente.finalidade_principal,
+        finalidadePrincipal: t.cliente.finalidadePrincipal ?? t.cliente.finalidade_principal ?? "Não informada",
         status: t.cliente.status,
         pessoa: t.cliente.pessoa,
       };
@@ -255,6 +255,12 @@ export const resolvers = {
     motivoPerda: (o: any) => o.motivo_perda,
     criadoEm: (o: any) => o.criado_em || new Date().toISOString(),
     atualizadoEm: (o: any) => o.atualizado_em || new Date().toISOString(),
-    cliente: (o: any) => o.cliente,
+    cliente: (o: any) => {
+      if (!o.cliente) return null;
+      return {
+        ...o.cliente,
+        finalidadePrincipal: o.cliente.finalidadePrincipal ?? o.cliente.finalidade_principal ?? "Não informada",
+      };
+    },
   },
 };

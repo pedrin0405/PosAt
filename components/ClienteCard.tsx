@@ -8,7 +8,6 @@ import {
   MessageSquarePlus,
   CheckSquare,
   TrendingUp,
-  Sparkles,
 } from "lucide-react";
 import {
   ClienteCompleto,
@@ -31,55 +30,55 @@ export const finalidadeConfig: Record<
   FinalidadeCliente,
   { label: string; bg: string; text: string; border: string }
 > = {
-  primeiro_imovel:    { label: "Primeiro Imóvel",      bg: "bg-blue-50 dark:bg-blue-500/15",    text: "text-blue-700 dark:text-blue-300",    border: "border-blue-100 dark:border-blue-500/30" },
-  moradia:            { label: "Moradia",               bg: "bg-emerald-50 dark:bg-emerald-500/15", text: "text-emerald-700 dark:text-emerald-300", border: "border-emerald-100 dark:border-emerald-500/30" },
-  investimento:       { label: "Investidor",            bg: "bg-amber-50 dark:bg-amber-500/15",   text: "text-amber-700 dark:text-amber-300",   border: "border-amber-100 dark:border-amber-500/30" },
-  possivel_investidor:{ label: "Possível Invest.",      bg: "bg-amber-50 dark:bg-amber-500/15",   text: "text-amber-600 dark:text-amber-300",   border: "border-amber-100 dark:border-amber-500/30" },
-  upgrade:            { label: "Upgrade",               bg: "bg-purple-50 dark:bg-purple-500/15",  text: "text-purple-700 dark:text-purple-300",  border: "border-purple-100 dark:border-purple-500/30" },
-  segunda_residencia: { label: "2ª Residência",         bg: "bg-teal-50 dark:bg-teal-500/15",    text: "text-teal-700 dark:text-teal-300",    border: "border-teal-100 dark:border-teal-500/30" },
-  compra_para_familiar:{ label: "Compra Familiar",      bg: "bg-indigo-50 dark:bg-indigo-500/15",  text: "text-indigo-700 dark:text-indigo-300",  border: "border-indigo-100 dark:border-indigo-500/30" },
-  locacao:            { label: "Locação",               bg: "bg-stone-100 dark:bg-zinc-700/60",  text: "text-stone-600 dark:text-zinc-300",   border: "border-stone-200 dark:border-zinc-600" },
-  imovel_comercial:   { label: "Comercial",             bg: "bg-orange-50 dark:bg-orange-500/15",  text: "text-orange-700 dark:text-orange-300",  border: "border-orange-100 dark:border-orange-500/30" },
-  cliente_recorrente: { label: "Recorrente",            bg: "bg-emerald-100 dark:bg-emerald-500/20",text: "text-emerald-800 dark:text-emerald-200", border: "border-emerald-200 dark:border-emerald-500/30" },
-  potencial_indicacao:{ label: "Indicação",             bg: "bg-rose-50 dark:bg-rose-500/15",    text: "text-rose-700 dark:text-rose-300",    border: "border-rose-100 dark:border-rose-500/30" },
-  nao_identificado:   { label: "Sem perfil",            bg: "bg-stone-100 dark:bg-zinc-700/60",  text: "text-stone-500 dark:text-zinc-400",   border: "border-stone-200 dark:border-zinc-600" },
+  primeiro_imovel:    { label: "Primeiro Imóvel",      bg: "bg-blue-500/15",      text: "text-blue-300",      border: "border-blue-500/30" },
+  moradia:            { label: "Moradia",               bg: "bg-emerald-500/15",     text: "text-emerald-300",     border: "border-emerald-500/30" },
+  investimento:       { label: "Investidor",            bg: "bg-amber-500/15",    text: "text-amber-300",    border: "border-amber-500/30" },
+  possivel_investidor:{ label: "Possível Invest.",      bg: "bg-amber-500/10",    text: "text-amber-300",    border: "border-amber-500/25" },
+  upgrade:            { label: "Upgrade",               bg: "bg-purple-500/15",    text: "text-purple-300",    border: "border-purple-500/30" },
+  segunda_residencia: { label: "2ª Residência",         bg: "bg-teal-500/15",     text: "text-teal-300",     border: "border-teal-500/30" },
+  compra_para_familiar:{ label: "Compra Familiar",       bg: "bg-indigo-500/15",  text: "text-indigo-300",  border: "border-indigo-500/30" },
+  locacao:            { label: "Locação",               bg: "bg-slate-700/40",     text: "text-slate-300",     border: "border-slate-600" },
+  imovel_comercial:   { label: "Comercial",             bg: "bg-orange-500/15",   text: "text-orange-300",   border: "border-orange-500/30" },
+  cliente_recorrente: { label: "Recorrente",            bg: "bg-emerald-500/20",  text: "text-emerald-200",  border: "border-emerald-500/30" },
+  potencial_indicacao:{ label: "Indicação",             bg: "bg-rose-500/15",     text: "text-rose-300",     border: "border-rose-500/30" },
+  nao_identificado:   { label: "Sem perfil",            bg: "bg-slate-700/40",     text: "text-slate-400",     border: "border-slate-600" },
 };
 
 export const statusConfig: Record<
   StatusRelacionamento,
   { label: string; bg: string; text: string }
 > = {
-  novo_lead:        { label: "Novo Lead",          bg: "bg-blue-50 dark:bg-blue-500/15",    text: "text-blue-700 dark:text-blue-300" },
-  em_qualificacao:  { label: "Em Qualificação",    bg: "bg-amber-50 dark:bg-amber-500/15",   text: "text-amber-700 dark:text-amber-300" },
-  em_negociacao:    { label: "Em Negociação",      bg: "bg-indigo-50 dark:bg-indigo-500/15",  text: "text-indigo-700 dark:text-indigo-300" },
-  convertido:       { label: "Convertido",         bg: "bg-emerald-50 dark:bg-emerald-500/15", text: "text-emerald-700 dark:text-emerald-300" },
-  handoff_pendente: { label: "Handoff Pendente",   bg: "bg-rose-50 dark:bg-rose-500/15",    text: "text-rose-700 dark:text-rose-300" },
-  onboarding:       { label: "Onboarding",         bg: "bg-purple-50 dark:bg-purple-500/15",  text: "text-purple-700 dark:text-purple-300" },
-  pos_venda:        { label: "Pós-Venda",          bg: "bg-teal-50 dark:bg-teal-500/15",    text: "text-teal-700 dark:text-teal-300" },
-  cliente_ativo:    { label: "Ativo",              bg: "bg-emerald-50 dark:bg-emerald-500/15", text: "text-emerald-700 dark:text-emerald-300" },
-  cliente_inativo:  { label: "Inativo",            bg: "bg-stone-100 dark:bg-zinc-700/60",  text: "text-stone-500 dark:text-zinc-400" },
-  reativacao:       { label: "Reativação",         bg: "bg-yellow-50 dark:bg-yellow-500/15",  text: "text-yellow-700 dark:text-yellow-300" },
-  sem_resposta:     { label: "Sem Resposta",       bg: "bg-stone-100 dark:bg-zinc-700/60",  text: "text-stone-500 dark:text-zinc-400" },
-  encerrado:        { label: "Encerrado",          bg: "bg-stone-200 dark:bg-zinc-700",     text: "text-stone-600 dark:text-zinc-300" },
+  novo_lead:        { label: "Novo Lead",          bg: "bg-blue-500/15",    text: "text-blue-300" },
+  em_qualificacao:  { label: "Em Qualificação",    bg: "bg-amber-500/15",   text: "text-amber-300" },
+  em_negociacao:    { label: "Em Negociação",      bg: "bg-indigo-500/15",  text: "text-indigo-300" },
+  convertido:       { label: "Convertido",         bg: "bg-emerald-500/15", text: "text-emerald-300" },
+  handoff_pendente: { label: "Handoff Pendente",   bg: "bg-rose-500/15",    text: "text-rose-300" },
+  onboarding:       { label: "Onboarding",         bg: "bg-purple-500/15",  text: "text-purple-300" },
+  pos_venda:        { label: "Pós-Venda",          bg: "bg-teal-500/15",    text: "text-teal-300" },
+  cliente_ativo:    { label: "Ativo",              bg: "bg-emerald-500/15", text: "text-emerald-300" },
+  cliente_inativo:  { label: "Inativo",            bg: "bg-slate-700/40",   text: "text-slate-400" },
+  reativacao:       { label: "Reativação",         bg: "bg-yellow-500/15",  text: "text-yellow-300" },
+  sem_resposta:     { label: "Sem Resposta",       bg: "bg-slate-700/40",   text: "text-slate-400" },
+  encerrado:        { label: "Encerrado",          bg: "bg-slate-700/40",   text: "text-slate-300" },
 };
 
 export const confiancaConfig: Record<
   NivelConfianca,
   { label: string; bg: string; text: string }
 > = {
-  alta:              { label: "Alta",             bg: "bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-500/15 dark:text-emerald-300 dark:border-emerald-500/30", text: "text-emerald-700 dark:text-emerald-300" },
-  media:             { label: "Média",            bg: "bg-amber-50 text-amber-700 border-amber-200 dark:bg-amber-500/15 dark:text-amber-300 dark:border-amber-500/30",       text: "text-amber-700 dark:text-amber-300" },
-  baixa:             { label: "Baixa",            bg: "bg-stone-100 text-stone-600 border-stone-200 dark:bg-zinc-700/60 dark:text-zinc-300 dark:border-zinc-600",      text: "text-stone-600 dark:text-zinc-300" },
-  revisao_necessaria:{ label: "Revisão",          bg: "bg-rose-50 text-rose-700 border-rose-200 dark:bg-rose-500/15 dark:text-rose-300 dark:border-rose-500/30",          text: "text-rose-700 dark:text-rose-300" },
+  alta:              { label: "Alta",             bg: "bg-emerald-500/15 text-emerald-300 border-emerald-500/30",  text: "text-emerald-300" },
+  media:             { label: "Média",            bg: "bg-amber-500/15 text-amber-300 border-amber-500/30",          text: "text-amber-300" },
+  baixa:             { label: "Baixa",            bg: "bg-slate-700/40 text-slate-300 border-slate-600",             text: "text-slate-300" },
+  revisao_necessaria:{ label: "Revisão",          bg: "bg-rose-500/15 text-rose-300 border-rose-500/30",             text: "text-rose-300" },
 };
 
 export const termometroCXConfig: Record<
   string,
   { label: string; dot: string; bg: string; text: string; border: string }
 > = {
-  promotor_mgm:        { label: "Promotor / MGM",   dot: "bg-emerald-500", bg: "bg-emerald-50 dark:bg-emerald-500/15", text: "text-emerald-800 dark:text-emerald-200", border: "border-emerald-200 dark:border-emerald-500/30" },
-  neutro_nutricao:     { label: "Neutro",            dot: "bg-amber-400",   bg: "bg-amber-50 dark:bg-amber-500/15",   text: "text-amber-800 dark:text-amber-200",   border: "border-amber-200 dark:border-amber-500/30" },
-  insatisfeito_distrato: { label: "Risco de Distrato", dot: "bg-rose-500",  bg: "bg-rose-50 dark:bg-rose-500/15",    text: "text-rose-800 dark:text-rose-200",    border: "border-rose-200 dark:border-rose-500/30" },
+  promotor_mgm:        { label: "Promotor / MGM",   dot: "bg-emerald-400", bg: "bg-emerald-500/15",   text: "text-emerald-200",   border: "border-emerald-500/30" },
+  neutro_nutricao:     { label: "Neutro",            dot: "bg-amber-400",   bg: "bg-amber-500/15",     text: "text-amber-200",     border: "border-amber-500/30" },
+  insatisfeito_distrato: { label: "Risco de Distrato", dot: "bg-rose-500",  bg: "bg-rose-500/15",     text: "text-rose-200",     border: "border-rose-500/30" },
 };
 
 // ─── Avatar helper ───
@@ -109,7 +108,7 @@ export default function ClienteCard({ cliente, onAtualizado }: ClienteCardProps)
 
   const nome = cliente.pessoa?.nome || "Lead Sem Nome";
   const telefone = cliente.pessoa?.telefone;
-  const status = statusConfig[cliente.status] ?? { label: cliente.status, bg: "bg-stone-100", text: "text-stone-600" };
+  const status = statusConfig[cliente.status] ?? { label: cliente.status, bg: "bg-slate-700/40", text: "text-slate-300" };
   const cx = cliente.termometro_cx ? termometroCXConfig[cliente.termometro_cx] : null;
   const finalidade = finalidadeConfig[cliente.finalidade_principal] ?? finalidadeConfig.nao_identificado;
 
@@ -123,18 +122,18 @@ export default function ClienteCard({ cliente, onAtualizado }: ClienteCardProps)
   return (
     <>
       <article
-        className="group flex flex-col rounded-2xl transition-all duration-200 overflow-hidden"
+        className="group flex flex-col overflow-hidden rounded-3xl border bg-[#161F33] transition-all duration-200"
         style={{
-          background: "var(--white)",
-          border: isDistrato ? "1px solid #fca5a5" : "1px solid var(--border)",
-          boxShadow: "var(--shadow-xs)",
+          borderColor: isDistrato ? "rgba(244,63,94,0.5)" : "rgba(30,41,59,0.6)",
         }}
         onMouseEnter={(e) => {
-          (e.currentTarget as HTMLElement).style.boxShadow = "var(--shadow-md)";
+          (e.currentTarget as HTMLElement).style.borderColor = isDistrato ? "rgba(244,63,94,0.7)" : "rgba(51,65,85,0.8)";
+          (e.currentTarget as HTMLElement).style.boxShadow = "0 10px 30px rgba(0,0,0,0.35)";
           (e.currentTarget as HTMLElement).style.transform = "translateY(-2px)";
         }}
         onMouseLeave={(e) => {
-          (e.currentTarget as HTMLElement).style.boxShadow = "var(--shadow-xs)";
+          (e.currentTarget as HTMLElement).style.borderColor = isDistrato ? "rgba(244,63,94,0.5)" : "rgba(30,41,59,0.6)";
+          (e.currentTarget as HTMLElement).style.boxShadow = "none";
           (e.currentTarget as HTMLElement).style.transform = "translateY(0)";
         }}
       >
@@ -148,7 +147,7 @@ export default function ClienteCard({ cliente, onAtualizado }: ClienteCardProps)
           <div className="flex items-start gap-3">
             {/* Avatar */}
             <div
-              className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full text-sm font-bold text-white"
+              className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full text-sm font-bold text-white shadow-lg shadow-black/20"
               style={{ background: avatarColor(nome) }}
             >
               {initials(nome)}
@@ -156,26 +155,25 @@ export default function ClienteCard({ cliente, onAtualizado }: ClienteCardProps)
 
             {/* Name + Empreendimento */}
             <div className="flex-1 min-w-0">
-              <h2 className="text-[15px] font-semibold leading-tight truncate" style={{ color: "var(--text-primary)" }}>
+              <h2 className="text-[15px] font-black tracking-wide leading-tight truncate text-white">
                 <Link
                   href={`/clientes/${cliente.id}`}
-                  className="hover:underline"
-                  style={{ color: "inherit" }}
+                  className="hover:text-sky-300"
                 >
                   {nome}
                 </Link>
               </h2>
               {empreendimento && (
-                <p className="flex items-center gap-1 text-xs mt-0.5 truncate" style={{ color: "var(--accent)" }}>
-                  <Building2 className="h-3 w-3 shrink-0" />
-                  <span className="truncate font-medium">{empreendimento}{cliente.unidade ? ` · ${cliente.unidade}` : ""}</span>
+                <p className="flex items-center gap-1.5 text-sm mt-0.5 truncate text-slate-400">
+                  <Building2 className="h-3.5 w-3.5 shrink-0 text-sky-400" />
+                  <span className="truncate">{empreendimento}{cliente.unidade ? ` · ${cliente.unidade}` : ""}</span>
                 </p>
               )}
             </div>
 
             {/* Status badge */}
             <span
-              className={`shrink-0 rounded-full px-2.5 py-0.5 text-[11px] font-semibold ${status.bg} ${status.text}`}
+              className={`shrink-0 rounded-full px-3 py-1 text-[11px] font-black uppercase tracking-wider ${status.bg} ${status.text}`}
             >
               {status.label}
             </span>
@@ -185,19 +183,19 @@ export default function ClienteCard({ cliente, onAtualizado }: ClienteCardProps)
           <div className="mt-3 flex flex-wrap items-center gap-1.5">
             {cx && (
               <span
-                className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-[11px] font-semibold border ${cx.bg} ${cx.text} ${cx.border}`}
+                className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-[11px] font-bold border ${cx.bg} ${cx.text} ${cx.border}`}
               >
                 <span className={`h-1.5 w-1.5 rounded-full ${cx.dot}`} />
                 {cx.label}
               </span>
             )}
             <span
-              className={`rounded-full px-2.5 py-0.5 text-[11px] font-medium border ${finalidade.bg} ${finalidade.text} ${finalidade.border}`}
+              className={`rounded-full border px-3 py-1 text-[11px] font-bold ${finalidade.bg} ${finalidade.text} ${finalidade.border}`}
             >
               {finalidade.label}
             </span>
             {cliente.oportunidade_upsell && (
-              <span className="rounded-full px-2.5 py-0.5 text-[11px] font-semibold bg-purple-50 text-purple-700 border border-purple-100 dark:bg-purple-500/15 dark:text-purple-300 dark:border-purple-500/30">
+              <span className="rounded-full border border-purple-500/30 bg-purple-500/15 px-3 py-1 text-[11px] font-bold text-purple-300">
                 Up-Sell ✦
               </span>
             )}
@@ -206,11 +204,10 @@ export default function ClienteCard({ cliente, onAtualizado }: ClienteCardProps)
           {/* Meta: Corretor + Telefone */}
           {(cliente.corretor_original_nome || telefone) && (
             <div
-              className="mt-3 flex items-center gap-4 text-xs"
-              style={{ color: "var(--text-secondary)" }}
+              className="mt-3 flex items-center gap-4 text-sm text-slate-400"
             >
               {cliente.corretor_original_nome && (
-                <span>Corretor: <strong style={{ color: "var(--text-primary)" }}>{cliente.corretor_original_nome}</strong></span>
+                <span>Corretor: <strong className="text-slate-200">{cliente.corretor_original_nome}</strong></span>
               )}
               {telefone && (
                 <span className="truncate">{telefone}</span>
@@ -221,11 +218,8 @@ export default function ClienteCard({ cliente, onAtualizado }: ClienteCardProps)
           {/* Próxima ação (se houver) — very compact */}
           {cliente.proxima_acao && (
             <p
-              className="mt-3 text-xs leading-relaxed line-clamp-2 pl-2"
-              style={{
-                color: "var(--text-secondary)",
-                borderLeft: "2px solid var(--border-strong)",
-              }}
+              className="mt-3 text-xs leading-relaxed line-clamp-2 pl-2 text-slate-400"
+              style={{ borderLeft: "2px solid var(--border-strong)" }}
             >
               {cliente.proxima_acao}
             </p>
@@ -234,17 +228,13 @@ export default function ClienteCard({ cliente, onAtualizado }: ClienteCardProps)
 
         {/* Footer: actions */}
         <div
-          className="flex items-center justify-between px-5 py-3"
-          style={{ borderTop: "1px solid var(--border)", background: "var(--surface)" }}
+          className="flex items-center justify-between gap-2 px-5 py-3 border-t border-slate-800/80 bg-[#0B0F17]"
         >
           <div className="flex items-center gap-1">
             <button
               onClick={() => setModalInteracaoAberto(true)}
               title="Registrar Interação"
-              className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-xs font-medium transition-colors"
-              style={{ color: "var(--text-secondary)" }}
-              onMouseEnter={(e) => (e.currentTarget.style.background = "var(--surface-2)")}
-              onMouseLeave={(e) => (e.currentTarget.style.background = "transparent")}
+              className="flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-xs font-semibold text-slate-400 transition-colors hover:bg-slate-800 hover:text-white"
             >
               <MessageSquarePlus className="h-3.5 w-3.5" />
               <span className="hidden sm:inline">Interação</span>
@@ -252,10 +242,7 @@ export default function ClienteCard({ cliente, onAtualizado }: ClienteCardProps)
             <button
               onClick={() => setModalTarefaAberto(true)}
               title="Criar Tarefa"
-              className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-xs font-medium transition-colors"
-              style={{ color: "var(--text-secondary)" }}
-              onMouseEnter={(e) => (e.currentTarget.style.background = "var(--surface-2)")}
-              onMouseLeave={(e) => (e.currentTarget.style.background = "transparent")}
+              className="flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-xs font-semibold text-slate-400 transition-colors hover:bg-slate-800 hover:text-white"
             >
               <CheckSquare className="h-3.5 w-3.5" />
               <span className="hidden sm:inline">Tarefa</span>
@@ -263,10 +250,7 @@ export default function ClienteCard({ cliente, onAtualizado }: ClienteCardProps)
             <button
               onClick={() => setModalHandoffAberto(true)}
               title="Passagem de Bastão"
-              className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-xs font-medium transition-colors"
-              style={{ color: "var(--text-secondary)" }}
-              onMouseEnter={(e) => (e.currentTarget.style.background = "var(--surface-2)")}
-              onMouseLeave={(e) => (e.currentTarget.style.background = "transparent")}
+              className="flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-xs font-semibold text-slate-400 transition-colors hover:bg-slate-800 hover:text-white"
             >
               <TrendingUp className="h-3.5 w-3.5" />
               <span className="hidden sm:inline">Handoff</span>
@@ -275,10 +259,7 @@ export default function ClienteCard({ cliente, onAtualizado }: ClienteCardProps)
 
           <Link
             href={`/clientes/${cliente.id}`}
-            className="flex items-center gap-1 text-xs font-semibold px-3 py-1.5 rounded-lg transition-colors"
-            style={{ color: "var(--accent)" }}
-            onMouseEnter={(e) => (e.currentTarget.style.background = "var(--accent-light)")}
-            onMouseLeave={(e) => (e.currentTarget.style.background = "transparent")}
+            className="flex items-center gap-1.5 rounded-lg bg-blue-600 px-3.5 py-1.5 text-xs font-bold text-white transition-colors hover:bg-blue-500"
           >
             Ver perfil
             <ArrowRight className="h-3.5 w-3.5" />

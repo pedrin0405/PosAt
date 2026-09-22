@@ -73,8 +73,8 @@ export default function ClienteFilters({
 
   return (
     <div
-      className="rounded-2xl overflow-hidden"
-      style={{ background: "var(--white)", border: "1px solid var(--border)" }}
+      className="rounded-3xl overflow-hidden"
+      style={{ background: "var(--white)", border: "1px solid rgba(30,41,59,0.6)" }}
     >
       {/* ── Main search bar ── */}
       <div className="flex items-center gap-2 px-4 py-3">

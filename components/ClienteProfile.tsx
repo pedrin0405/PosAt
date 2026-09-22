@@ -212,9 +212,9 @@ export default function ClienteProfile({ clienteInicial }: ClienteProfileProps) 
         <button
           onClick={handleReclassificar}
           disabled={reclassificando}
-          className="flex items-center gap-2 rounded-xl bg-white px-4 py-2 text-sm font-semibold text-slate-700 shadow-sm ring-1 ring-slate-200 transition hover:bg-slate-50 disabled:opacity-50 dark:bg-zinc-800 dark:text-zinc-200 dark:ring-zinc-700 dark:hover:bg-zinc-700"
+          className="flex items-center gap-2 rounded-xl border border-slate-700/80 bg-slate-900/40 px-4 py-2 text-sm font-semibold text-slate-200 transition hover:bg-slate-800 disabled:opacity-50"
         >
-          <RefreshCw className={`h-4 w-4 ${reclassificando ? "animate-spin" : ""}`} />
+          <RefreshCw className={`h-4 w-4 text-sky-400 ${reclassificando ? "animate-spin" : ""}`} />
           <span>{reclassificando ? "Recalculando..." : "Recalcular Classificação"}</span>
         </button>
       </div>
@@ -252,58 +252,58 @@ export default function ClienteProfile({ clienteInicial }: ClienteProfileProps) 
       )}
 
       {/* 1. Header 360° Profile Card */}
-      <div className="space-y-6 rounded-3xl border border-slate-100 bg-white p-6 shadow-sm sm:p-8 dark:border-zinc-700 dark:bg-zinc-900">
+      <div className="space-y-6 rounded-3xl border border-slate-800/60 bg-[#161F33] p-6 shadow-sm sm:p-8 transition hover:border-slate-700/80">
         <div className="flex flex-col gap-6 lg:flex-row lg:items-start lg:justify-between">
           <div className="space-y-3">
             <div className="flex flex-wrap items-center gap-2">
-              <span className={`inline-flex items-center rounded-full border px-3 py-1 text-xs font-semibold ${cxBadge.bg} ${cxBadge.text} ${cxBadge.border}`}>
+              <span className={`inline-flex items-center rounded-full border px-3 py-1 text-xs font-bold ${cxBadge.bg} ${cxBadge.text} ${cxBadge.border}`}>
                 {cxBadge.label}
               </span>
-              <span className={`inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold ${status.bg} ${status.text}`}>
+              <span className={`inline-flex items-center rounded-full px-3 py-1 text-xs font-bold ${status.bg} ${status.text}`}>
                 {status.label}
               </span>
-              <span className={`inline-flex items-center gap-1 rounded-full border px-3 py-1 text-xs font-semibold ${finalidade.bg} ${finalidade.text} ${finalidade.border}`}>
+              <span className={`inline-flex items-center gap-1 rounded-full border px-3 py-1 text-xs font-bold ${finalidade.bg} ${finalidade.text} ${finalidade.border}`}>
                 <Sparkles className="h-3.5 w-3.5" />
                 {finalidade.label}
               </span>
-              <span className="rounded-full border border-slate-200 bg-slate-50 px-3 py-1 text-xs font-medium text-slate-600 dark:border-zinc-700 dark:bg-zinc-800/60 dark:text-zinc-400">
+              <span className="rounded-full border border-slate-700/60 bg-slate-900/80 px-3 py-1 text-xs font-bold uppercase tracking-wider text-slate-300">
                 {cliente.origem_fluxo === "re_trabalho" ? "♻️ Base de Re-trabalho" : "⚡ Novos Dados (Tempo Real)"}
               </span>
             </div>
 
-            <h1 className="text-2xl font-semibold tracking-tight text-slate-900 dark:text-zinc-100">
+            <h1 className="text-2xl font-black tracking-tight text-white">
               {cliente.pessoa?.nome || "Lead Sem Nome"}
             </h1>
 
-            <div className="flex flex-wrap items-center gap-x-6 gap-y-2 text-sm text-slate-500 dark:text-zinc-400">
-              <span className="flex items-center gap-1.5 font-semibold text-slate-900 dark:text-zinc-100">
-                <Building2 className="h-4 w-4 text-slate-400 dark:text-zinc-500" />
+            <div className="flex flex-wrap items-center gap-x-6 gap-y-2 text-sm text-slate-400">
+              <span className="flex items-center gap-1.5 font-bold text-slate-200">
+                <Building2 className="h-4 w-4 text-sky-400" />
                 {empreendimento} {cliente.unidade ? `(${cliente.unidade})` : ""}
               </span>
               {cliente.pessoa?.telefone && (
                 <span className="flex items-center gap-1.5">
-                  <Phone className="h-4 w-4 text-slate-400 dark:text-zinc-500" />
+                  <Phone className="h-4 w-4 text-slate-500" />
                   {cliente.pessoa.telefone}
                 </span>
               )}
               {cliente.pessoa?.email && (
                 <span className="flex items-center gap-1.5">
-                  <Mail className="h-4 w-4 text-slate-400 dark:text-zinc-500" />
+                  <Mail className="h-4 w-4 text-slate-500" />
                   {cliente.pessoa.email}
                 </span>
               )}
               {cliente.pessoa?.documento && (
                 <span className="flex items-center gap-1.5">
-                  <Tag className="h-4 w-4 text-slate-400 dark:text-zinc-500" />
+                  <Tag className="h-4 w-4 text-slate-500" />
                   CPF/Doc: {cliente.pessoa.documento}
                 </span>
               )}
             </div>
 
-            <div className="flex flex-wrap items-center gap-4 pt-1 text-sm text-slate-500 dark:text-zinc-400">
-              <span><strong className="text-slate-700 dark:text-zinc-200">Corretor Original:</strong> {corretor}</span>
+            <div className="flex flex-wrap items-center gap-4 pt-1 text-sm text-slate-400">
+              <span><strong className="text-slate-200">Corretor Original:</strong> {corretor}</span>
               <span>•</span>
-              <span><strong className="text-slate-700 dark:text-zinc-200">Analista CS:</strong> {analistaCS}</span>
+              <span><strong className="text-slate-200">Analista CS:</strong> {analistaCS}</span>
             </div>
           </div>
 
@@ -317,15 +317,15 @@ export default function ClienteProfile({ clienteInicial }: ClienteProfileProps) 
               <span>Acionar Comitê de Prevenção a Distrato</span>
             </button>
 
-            <div className="w-full rounded-2xl bg-slate-50 p-3 text-sm sm:w-60 dark:bg-zinc-800/60">
+            <div className="w-full rounded-2xl border border-slate-800/60 bg-[#0D1320] p-3 text-sm sm:w-60">
               <div className="mb-1 flex items-center justify-between">
-                <span className="font-medium text-slate-500 dark:text-zinc-400">Score de Relacionamento</span>
-                <span className="text-sm font-bold text-slate-900 dark:text-zinc-100">{scoreSaude}/100</span>
+                <span className="font-medium text-slate-400">Score de Relacionamento</span>
+                <span className="text-sm font-extrabold text-white">{scoreSaude}/100</span>
               </div>
-              <div className="h-2 w-full overflow-hidden rounded-full bg-slate-200 dark:bg-zinc-700">
+              <div className="h-2 w-full overflow-hidden rounded-full bg-slate-800">
                 <div
                   className={`h-full transition-all duration-500 ${
-                    scoreSaude >= 80 ? "bg-emerald-600" : scoreSaude >= 50 ? "bg-amber-500" : "bg-rose-600"
+                    scoreSaude >= 80 ? "bg-emerald-400" : scoreSaude >= 50 ? "bg-amber-400" : "bg-rose-400"
                   }`}
                   style={{ width: `${scoreSaude}%` }}
                 />
@@ -335,7 +335,7 @@ export default function ClienteProfile({ clienteInicial }: ClienteProfileProps) 
         </div>
 
         {/* 2. Barra de Ações Rápidas & Integrações */}
-        <div className="flex flex-wrap items-center justify-between gap-3 border-t border-slate-100 pt-5 dark:border-zinc-700">
+        <div className="flex flex-wrap items-center justify-between gap-3 border-t border-slate-800/80 pt-5">
           <div className="flex flex-wrap items-center gap-2">
             {telefoneLimpo && (
               <button
@@ -347,18 +347,18 @@ export default function ClienteProfile({ clienteInicial }: ClienteProfileProps) 
                     "_blank"
                   )
                 }
-                className="flex items-center gap-1.5 rounded-xl border border-emerald-200 bg-emerald-50 px-3.5 py-2 text-sm font-semibold text-emerald-900 transition hover:bg-emerald-100 dark:border-emerald-900 dark:bg-emerald-500/15 dark:text-emerald-300 dark:hover:bg-emerald-500/25"
+                className="flex items-center gap-1.5 rounded-xl border border-emerald-500/30 bg-emerald-500/15 px-3.5 py-2 text-sm font-bold text-emerald-300 transition hover:bg-emerald-500/25"
               >
-                <MessageSquare className="h-4 w-4 text-emerald-700 dark:text-emerald-400" />
+                <MessageSquare className="h-4 w-4 text-emerald-400" />
                 <span>Mensagem EZ Chat (WhatsApp)</span>
               </button>
             )}
 
             <button
               onClick={() => setModalInteracaoAberto(true)}
-              className="flex items-center gap-1.5 rounded-xl bg-white px-3.5 py-2 text-sm font-semibold text-slate-700 shadow-sm ring-1 ring-slate-200 transition hover:bg-slate-50 dark:bg-zinc-800 dark:text-zinc-200 dark:ring-zinc-700 dark:hover:bg-zinc-700"
+              className="flex items-center gap-1.5 rounded-xl border border-slate-700/80 bg-slate-900/40 px-3.5 py-2 text-sm font-semibold text-slate-200 transition hover:bg-slate-800"
             >
-              <Send className="h-4 w-4" />
+              <Send className="h-4 w-4 text-sky-400" />
               <span>Disparo de E-mail da Régua</span>
             </button>
 
@@ -367,16 +367,16 @@ export default function ClienteProfile({ clienteInicial }: ClienteProfileProps) 
                 setMensagemSucesso("Cliente sinalizado no CRM para oferta de 2º Imóvel (Investimento)!");
                 setTimeout(() => setMensagemSucesso(null), 4000);
               }}
-              className="flex items-center gap-1.5 rounded-xl border border-purple-200 bg-purple-50 px-3.5 py-2 text-sm font-semibold text-purple-900 transition hover:bg-purple-100 dark:border-purple-900 dark:bg-purple-500/15 dark:text-purple-300 dark:hover:bg-purple-500/25"
+              className="flex items-center gap-1.5 rounded-xl border border-purple-500/30 bg-purple-500/15 px-3.5 py-2 text-sm font-bold text-purple-300 transition hover:bg-purple-500/25"
             >
-              <Sparkles className="h-4 w-4 text-purple-700 dark:text-purple-400" />
+              <Sparkles className="h-4 w-4 text-purple-400" />
               <span>Mapear Up-Sell / 2º Imóvel</span>
             </button>
           </div>
 
           <button
             onClick={() => setModalHandoffAberto(true)}
-            className="flex items-center gap-1.5 rounded-xl bg-slate-900 px-4 py-2 text-sm font-semibold text-white transition hover:bg-slate-800"
+            className="flex items-center gap-1.5 rounded-xl bg-blue-600 px-4 py-2 text-sm font-bold text-white transition hover:bg-blue-500"
           >
             <Repeat className="h-4 w-4" />
             <span>Revisar Handoff</span>
@@ -385,16 +385,16 @@ export default function ClienteProfile({ clienteInicial }: ClienteProfileProps) 
 
         {/* Missing fields alert */}
         {cliente.campos_faltantes && cliente.campos_faltantes.length > 0 && (
-          <div className="rounded-2xl border border-amber-100 bg-amber-50 p-4 dark:border-amber-900 dark:bg-amber-500/15">
-            <div className="flex items-center gap-2 text-sm font-semibold text-amber-900 dark:text-amber-300">
-              <AlertCircle className="h-4 w-4 flex-shrink-0 text-amber-600 dark:text-amber-400" />
+          <div className="rounded-2xl border border-amber-500/30 bg-amber-500/10 p-4">
+            <div className="flex items-center gap-2 text-sm font-bold text-amber-300">
+              <AlertCircle className="h-4 w-4 flex-shrink-0 text-amber-400" />
               <span>Dados cadastrais ausentes para atingir 100% de qualificação:</span>
             </div>
             <div className="mt-2 flex flex-wrap gap-2">
               {cliente.campos_faltantes.map((campo) => (
                 <span
                   key={campo}
-                  className="rounded-full bg-white px-2.5 py-1 text-sm font-medium text-amber-800 ring-1 ring-amber-200 dark:bg-zinc-800 dark:text-amber-300 dark:ring-amber-700"
+                  className="rounded-full border border-amber-500/30 bg-slate-900/60 px-2.5 py-1 text-sm font-semibold text-amber-300"
                 >
                   {campo.replace(/_/g, " ")}
                 </span>
@@ -409,20 +409,20 @@ export default function ClienteProfile({ clienteInicial }: ClienteProfileProps) 
         {/* Left Column: Handoff, Promessas e Repasse Financeiro */}
         <div className="space-y-6 lg:col-span-6">
           {/* MÓDULO DE HANDOFF (Passagem de Bastão & Promessas de Venda) */}
-          <div className="space-y-4 rounded-3xl border border-slate-100 bg-white p-6 shadow-sm dark:border-zinc-700 dark:bg-zinc-900">
+          <div className="space-y-4 rounded-3xl border border-slate-800/60 bg-[#161F33] p-6 shadow-sm transition hover:border-slate-700/80">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
-                <FileText className="h-4 w-4 text-slate-400 dark:text-zinc-500" />
-                <h2 className="text-sm font-semibold uppercase tracking-wide text-slate-900 dark:text-zinc-100">
+                <FileText className="h-4 w-4 text-sky-400" />
+                <h2 className="text-sm font-black uppercase tracking-widest text-white">
                   Passagem de Bastão (Handoff)
                 </h2>
               </div>
-              <span className="rounded-full bg-purple-50 px-2.5 py-1 text-xs font-semibold text-purple-800 ring-1 ring-purple-100 dark:bg-purple-500/15 dark:text-purple-300 dark:ring-purple-900/40">
+              <span className="rounded-full border border-purple-500/30 bg-purple-500/15 px-2.5 py-1 text-xs font-bold text-purple-300">
                 Status: {statusHandoffLocal.replace(/_/g, " ")}
               </span>
             </div>
 
-            <div className="space-y-3 rounded-2xl border border-slate-100 bg-slate-50 p-4 text-sm dark:border-zinc-700 dark:bg-zinc-800/60">
+            <div className="space-y-3 rounded-2xl border border-slate-800/60 bg-[#0D1320] p-4 text-sm">
               <div className="flex items-center justify-between">
                 <span className="font-semibold text-slate-700 dark:text-zinc-200">
                   🎯 Promessas de Venda Feitas pelo Corretor ({corretor}):
@@ -437,22 +437,22 @@ export default function ClienteProfile({ clienteInicial }: ClienteProfileProps) 
                     onClick={() => togglePromessa(p.id)}
                     className={`flex cursor-pointer items-start gap-2.5 rounded-xl border p-3 transition ${
                       p.cumprida
-                        ? "border-emerald-200 bg-emerald-50/50 text-emerald-950 dark:border-emerald-900 dark:bg-emerald-500/15 dark:text-emerald-200"
-                        : "border-slate-200 bg-white text-slate-900 hover:bg-slate-50 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-100 dark:hover:bg-zinc-800"
+                        ? "border-emerald-500/30 bg-emerald-500/10 text-emerald-300"
+                        : "border-slate-700/60 bg-[#0D1320] text-slate-200 hover:border-slate-600"
                     }`}
                   >
                     <div
                       className={`mt-0.5 flex h-5 w-5 flex-shrink-0 items-center justify-center rounded-md border ${
-                        p.cumprida ? "border-emerald-600 bg-emerald-600 text-white" : "border-slate-300 dark:border-zinc-600"
+                        p.cumprida ? "border-emerald-500 bg-emerald-500 text-white" : "border-slate-600"
                       }`}
                     >
                       {p.cumprida && <Check className="h-3 w-3" />}
                     </div>
                     <div className="flex-1">
-                      <p className={`font-medium ${p.cumprida ? "text-stone-500 line-through" : ""}`}>
+                      <p className={`font-medium ${p.cumprida ? "text-slate-500 line-through" : ""}`}>
                         {p.descricao}
                       </p>
-                      <span className="text-xs uppercase tracking-wide text-slate-400 dark:text-zinc-500">
+                      <span className="text-xs uppercase tracking-wide text-slate-500">
                         Categoria: {p.categoria.replace(/_/g, " ")}
                       </span>
                     </div>
@@ -468,7 +468,7 @@ export default function ClienteProfile({ clienteInicial }: ClienteProfileProps) 
                   setMensagemSucesso("Handoff aceito pelo CS! Cliente transferido para a régua de Onboarding.");
                   setTimeout(() => setMensagemSucesso(null), 4000);
                 }}
-                className="flex flex-1 items-center justify-center gap-1.5 rounded-xl bg-emerald-600 py-2.5 text-sm font-semibold text-white transition hover:bg-emerald-700"
+                className="flex flex-1 items-center justify-center gap-1.5 rounded-xl bg-emerald-600 py-2.5 text-sm font-bold text-white transition hover:bg-emerald-500"
               >
                 <CheckCircle2 className="h-4 w-4" />
                 <span>Aceitar Handoff</span>
@@ -479,7 +479,7 @@ export default function ClienteProfile({ clienteInicial }: ClienteProfileProps) 
                   setMensagemSucesso("Handoff devolvido ao corretor para esclarecimento de promessas.");
                   setTimeout(() => setMensagemSucesso(null), 4000);
                 }}
-                className="flex flex-1 items-center justify-center gap-1.5 rounded-xl border border-rose-200 bg-rose-50 py-2.5 text-sm font-semibold text-rose-800 transition hover:bg-rose-100 dark:border-rose-900 dark:bg-rose-500/15 dark:text-rose-300 dark:hover:bg-rose-500/25"
+                className="flex flex-1 items-center justify-center gap-1.5 rounded-xl border border-rose-500/40 bg-slate-900/40 py-2.5 text-sm font-bold text-rose-300 transition hover:bg-rose-500/10"
               >
                 <X className="h-4 w-4" />
                 <span>Devolver ao Corretor</span>
@@ -488,45 +488,45 @@ export default function ClienteProfile({ clienteInicial }: ClienteProfileProps) 
           </div>
 
           {/* MÓDULO FINANCEIRO / REPASSE */}
-          <div className="space-y-4 rounded-3xl border border-slate-100 bg-white p-6 shadow-sm dark:border-zinc-700 dark:bg-zinc-900">
+          <div className="space-y-4 rounded-3xl border border-slate-800/60 bg-[#161F33] p-6 shadow-sm transition hover:border-slate-700/80">
             <div className="flex items-center gap-2">
-              <DollarSign className="h-4 w-4 text-slate-400 dark:text-zinc-500" />
-              <h2 className="text-sm font-semibold uppercase tracking-wide text-slate-900 dark:text-zinc-100">
+              <DollarSign className="h-4 w-4 text-sky-400" />
+              <h2 className="text-sm font-black uppercase tracking-widest text-white">
                 Assessoria de Repasse Financeiro
               </h2>
             </div>
 
             <div className="grid grid-cols-2 gap-3 text-sm">
-              <div className="rounded-2xl bg-slate-50 p-3.5 dark:bg-zinc-800/60">
-                <span className="block text-slate-500 dark:text-zinc-400">Status do Repasse</span>
-                <strong className="mt-0.5 block text-sm font-semibold capitalize text-slate-900 dark:text-zinc-100">
+              <div className="rounded-2xl border border-slate-800/60 bg-[#0D1320] p-3.5">
+                <span className="block text-slate-400">Status do Repasse</span>
+                <strong className="mt-0.5 block text-sm font-extrabold capitalize text-white">
                   {repasseInfo.status.replace(/_/g, " ")}
                 </strong>
               </div>
-              <div className="rounded-2xl bg-slate-50 p-3.5 dark:bg-zinc-800/60">
-                <span className="block text-slate-500 dark:text-zinc-400">Banco Financiador</span>
-                <strong className="mt-0.5 block text-sm font-semibold text-slate-900 dark:text-zinc-100">
+              <div className="rounded-2xl border border-slate-800/60 bg-[#0D1320] p-3.5">
+                <span className="block text-slate-400">Banco Financiador</span>
+                <strong className="mt-0.5 block text-sm font-extrabold text-white">
                   {repasseInfo.bancoFinanciador || "Em análise"}
                 </strong>
               </div>
             </div>
 
             {repasseInfo.valorFinanciado && (
-              <div className="flex items-center justify-between rounded-2xl border border-slate-100 bg-slate-50 p-3 text-sm dark:border-zinc-700 dark:bg-zinc-800/60">
-                <span className="text-slate-500 dark:text-zinc-400">Valor Previsto de Financiamento:</span>
-                <strong className="text-sm font-semibold text-slate-900 dark:text-zinc-100">
+              <div className="flex items-center justify-between rounded-2xl border border-slate-800/60 bg-[#0D1320] p-3 text-sm">
+                <span className="text-slate-400">Valor Previsto de Financiamento:</span>
+                <strong className="text-sm font-extrabold text-white">
                   {valorFormatado(repasseInfo.valorFinanciado)}
                 </strong>
               </div>
             )}
 
             {repasseInfo.pendenciasDocumentais && repasseInfo.pendenciasDocumentais.length > 0 && (
-              <div className="rounded-2xl border border-amber-200 bg-amber-50 p-3.5 text-sm dark:border-amber-900 dark:bg-amber-500/15">
-                <div className="mb-1.5 flex items-center gap-1.5 font-semibold text-amber-900 dark:text-amber-300">
-                  <AlertTriangle className="h-4 w-4 flex-shrink-0 text-amber-600 dark:text-amber-400" />
+              <div className="rounded-2xl border border-amber-500/30 bg-amber-500/10 p-3.5 text-sm">
+                <div className="mb-1.5 flex items-center gap-1.5 font-bold text-amber-300">
+                  <AlertTriangle className="h-4 w-4 flex-shrink-0 text-amber-400" />
                   <span>Pendências Documentais para Repasse:</span>
                 </div>
-                <ul className="list-inside list-disc space-y-1 text-amber-800 dark:text-amber-200">
+                <ul className="list-inside list-disc space-y-1 text-amber-200">
                   {repasseInfo.pendenciasDocumentais.map((doc, idx) => (
                     <li key={idx}>{doc}</li>
                   ))}
@@ -539,19 +539,19 @@ export default function ClienteProfile({ clienteInicial }: ClienteProfileProps) 
         {/* Right Column: Timeline da Régua e Tarefas */}
         <div className="space-y-6 lg:col-span-6">
           {/* Timeline da Régua de Relacionamento */}
-          <div className="rounded-3xl border border-slate-100 bg-white p-6 shadow-sm dark:border-zinc-700 dark:bg-zinc-900">
+          <div className="rounded-3xl border border-slate-800/60 bg-[#161F33] p-6 shadow-sm transition hover:border-slate-700/80">
             <div className="mb-4 flex items-center justify-between">
               <div className="flex items-center gap-2">
-                <Clock className="h-4 w-4 text-slate-400 dark:text-zinc-500" />
-                <h2 className="text-sm font-semibold uppercase tracking-wide text-slate-900 dark:text-zinc-100">
+                <Clock className="h-4 w-4 text-sky-400" />
+                <h2 className="text-sm font-black uppercase tracking-widest text-white">
                   Régua de Relacionamento & Timeline
                 </h2>
               </div>
               <button
                 onClick={() => setModalInteracaoAberto(true)}
-                className="flex items-center gap-1 text-sm font-semibold text-slate-700 transition hover:text-slate-900 dark:text-zinc-200 dark:hover:text-zinc-100"
+                className="flex items-center gap-1.5 rounded-xl border border-slate-700/80 bg-slate-900/40 px-3 py-1.5 text-sm font-bold text-slate-200 transition hover:bg-slate-800"
               >
-                <Plus className="h-4 w-4" />
+                <Plus className="h-4 w-4 text-sky-400" />
                 Registrar Contato
               </button>
             </div>
@@ -571,18 +571,18 @@ export default function ClienteProfile({ clienteInicial }: ClienteProfileProps) 
 
               {cliente.interacoes && cliente.interacoes.length > 0 ? (
                 cliente.interacoes.map((item) => (
-                  <div key={item.id} className="relative border-l-2 border-slate-200 pb-3 pl-6 text-sm dark:border-zinc-700">
-                    <div className="absolute -left-1.5 top-0.5 h-3 w-3 rounded-full bg-slate-900 dark:bg-zinc-100" />
-                    <div className="mb-1 flex items-center justify-between gap-2 text-slate-400 dark:text-zinc-500">
-                      <span className="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-zinc-400">
+                  <div key={item.id} className="relative border-l-2 border-slate-700/60 pb-3 pl-6 text-sm">
+                    <div className="absolute -left-1.5 top-0.5 h-3 w-3 rounded-full bg-slate-700" />
+                    <div className="mb-1 flex items-center justify-between gap-2 text-slate-400">
+                      <span className="text-xs font-semibold uppercase tracking-wide text-slate-400">
                         {item.tipo} {item.canal ? `• ${item.canal}` : ""}
                       </span>
                       <span>{new Date(item.ocorreu_em).toLocaleDateString("pt-BR")}</span>
                     </div>
-                    <p className="font-medium leading-relaxed text-slate-900 dark:text-zinc-100">{item.descricao}</p>
+                    <p className="font-medium leading-relaxed text-white">{item.descricao}</p>
                     {item.resultado && (
-                      <div className="mt-1.5 rounded-lg bg-slate-50 p-2 text-xs text-slate-500 dark:bg-zinc-800/60 dark:text-zinc-400">
-                        <strong className="text-slate-700 dark:text-zinc-200">Resultado: </strong>
+                      <div className="mt-1.5 rounded-xl border border-slate-800/60 bg-[#0D1320] p-2 text-xs text-slate-400">
+                        <strong className="text-slate-300">Resultado: </strong>
                         {item.resultado}
                       </div>
                     )}
@@ -604,19 +604,19 @@ export default function ClienteProfile({ clienteInicial }: ClienteProfileProps) 
           </div>
 
           {/* Tarefas Operacionais de CS */}
-          <div className="rounded-3xl border border-slate-100 bg-white p-6 shadow-sm dark:border-zinc-700 dark:bg-zinc-900">
+          <div className="rounded-3xl border border-slate-800/60 bg-[#161F33] p-6 shadow-sm transition hover:border-slate-700/80">
             <div className="mb-4 flex items-center justify-between">
               <div className="flex items-center gap-2">
-                <CheckSquare className="h-4 w-4 text-slate-400 dark:text-zinc-500" />
-                <h2 className="text-sm font-semibold uppercase tracking-wide text-slate-900 dark:text-zinc-100">
+                <CheckSquare className="h-4 w-4 text-sky-400" />
+                <h2 className="text-sm font-black uppercase tracking-widest text-white">
                   Tarefas Operacionais de CS
                 </h2>
               </div>
               <button
                 onClick={() => setModalTarefaAberto(true)}
-                className="flex items-center gap-1 text-sm font-semibold text-slate-700 transition hover:text-slate-900 dark:text-zinc-200 dark:hover:text-zinc-100"
+                className="flex items-center gap-1.5 rounded-xl border border-slate-700/80 bg-slate-900/40 px-3 py-1.5 text-sm font-bold text-slate-200 transition hover:bg-slate-800"
               >
-                <Plus className="h-4 w-4" />
+                <Plus className="h-4 w-4 text-sky-400" />
                 Nova Tarefa
               </button>
             </div>
@@ -630,14 +630,14 @@ export default function ClienteProfile({ clienteInicial }: ClienteProfileProps) 
                       key={tarefa.id}
                       className={`flex items-start gap-3 rounded-2xl border p-3.5 text-sm transition ${
                         concluida
-                          ? "border-emerald-200 bg-emerald-50/40 text-emerald-900 opacity-75 dark:border-emerald-900 dark:bg-emerald-500/15 dark:text-emerald-200"
-                          : "border-slate-100 bg-slate-50 text-slate-900 dark:border-zinc-700 dark:bg-zinc-800/60 dark:text-zinc-100"
+                          ? "border-emerald-500/30 bg-emerald-500/10 text-emerald-300"
+                          : "border-slate-700/60 bg-[#0D1320] text-slate-200"
                       }`}
                     >
                       <button
                         onClick={() => toggleStatusTarefa(tarefa)}
                         className={`mt-0.5 flex h-5 w-5 flex-shrink-0 items-center justify-center rounded-md border transition ${
-                          concluida ? "border-emerald-600 bg-emerald-600 text-white" : "border-slate-300 bg-white dark:border-zinc-600 dark:bg-zinc-900"
+                          concluida ? "border-emerald-500 bg-emerald-500 text-white" : "border-slate-600"
                         }`}
                       >
                         {concluida && <CheckCircle2 className="h-3 w-3" />}
@@ -645,15 +645,15 @@ export default function ClienteProfile({ clienteInicial }: ClienteProfileProps) 
 
                       <div className="flex-1">
                         <div className="flex items-center justify-between gap-2">
-                          <strong className={concluida ? "text-stone-500 line-through" : "text-slate-900"}>
+                          <strong className={concluida ? "text-slate-500 line-through" : "text-white"}>
                             {tarefa.titulo}
                           </strong>
-                          <span className="rounded-full border border-slate-200 bg-white px-1.5 py-0.5 text-xs font-medium dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-400">
+                          <span className="rounded-full border border-slate-700/60 bg-slate-900/80 px-1.5 py-0.5 text-xs font-bold text-slate-300">
                             Prioridade {tarefa.prioridade}
                           </span>
                         </div>
                         {tarefa.descricao && (
-                          <p className="mt-1 leading-relaxed text-slate-500 dark:text-zinc-400">{tarefa.descricao}</p>
+                          <p className="mt-1 leading-relaxed text-slate-400">{tarefa.descricao}</p>
                         )}
                       </div>
                     </div>
@@ -661,7 +661,7 @@ export default function ClienteProfile({ clienteInicial }: ClienteProfileProps) 
                 })}
               </div>
             ) : (
-              <p className="py-4 text-center text-sm text-slate-400 dark:text-zinc-500">Nenhuma tarefa pendente para este cliente.</p>
+              <p className="py-4 text-center text-sm text-slate-400">Nenhuma tarefa pendente para este cliente.</p>
             )}
           </div>
         </div>

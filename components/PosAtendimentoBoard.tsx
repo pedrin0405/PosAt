@@ -34,22 +34,22 @@ const COLUNAS: Coluna[] = [
     id: "pendente",
     titulo: "Pendentes",
     statusList: ["pendente"],
-    accent: "#f59e0b",
-    badge: "bg-amber-100 text-amber-800",
+    accent: "#fbbf24",
+    badge: "bg-amber-500/15 text-amber-300",
   },
   {
     id: "em_andamento",
     titulo: "Em Andamento",
     statusList: ["em_andamento", "reagendada"],
     accent: "#3b82f6",
-    badge: "bg-blue-100 text-blue-800",
+    badge: "bg-blue-500/15 text-blue-300",
   },
   {
     id: "concluida",
     titulo: "Concluídas",
     statusList: ["concluida"],
-    accent: "#10b981",
-    badge: "bg-emerald-100 text-emerald-800",
+    accent: "#34d399",
+    badge: "bg-emerald-500/15 text-emerald-300",
   },
 ];
 
@@ -158,13 +158,13 @@ export default function PosAtendimentoBoard() {
       {/* Header */}
       <div className="flex flex-wrap items-center justify-between gap-4">
         <div>
-          <p className="mb-1 text-xs font-semibold uppercase tracking-widest text-slate-500 dark:text-zinc-400">
+          <p className="mb-1 text-xs font-bold uppercase tracking-widest text-sky-400">
             Operacional
           </p>
-          <h1 className="text-2xl font-semibold tracking-tight text-slate-900 dark:text-zinc-50">
+          <h1 className="text-2xl font-extrabold tracking-tight text-white">
             Fila de Pós-Atendimento
           </h1>
-          <p className="mt-1 text-sm text-slate-500 dark:text-zinc-400">
+          <p className="mt-1 text-sm text-slate-400">
             {tarefas.length} tarefa{tarefas.length !== 1 ? "s" : ""} no total
           </p>
         </div>
@@ -173,7 +173,7 @@ export default function PosAtendimentoBoard() {
           <select
             value={filtroPrioridade}
             onChange={(e) => setFiltroPrioridade(e.target.value)}
-            className="h-11 rounded-xl border border-slate-200 bg-white px-3 text-sm text-slate-700 focus:border-transparent focus:ring-2 focus:ring-slate-900 focus:outline-none dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-100 dark:focus:ring-zinc-100"
+            className="h-11 rounded-xl border border-slate-700/80 bg-slate-900/40 px-3 text-sm font-semibold text-slate-200 focus:border-sky-400 focus:outline-none focus:ring-2 focus:ring-sky-400/30"
           >
             <option value="">Todas as prioridades</option>
             <option value="1">Crítica</option>
@@ -182,14 +182,14 @@ export default function PosAtendimentoBoard() {
           </select>
           <button
             onClick={carregarTarefas}
-            className="flex h-11 items-center gap-1.5 rounded-xl border border-slate-200 bg-white px-3.5 text-sm font-medium text-slate-700 transition hover:bg-slate-50 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-200 dark:hover:bg-zinc-700"
+            className="flex h-11 items-center gap-1.5 rounded-xl border border-slate-700/80 bg-slate-900/40 px-3.5 text-sm font-semibold text-slate-200 transition hover:border-slate-600 hover:bg-slate-800 hover:text-white"
           >
-            <RefreshCw className="h-4 w-4" />
+            <RefreshCw className="h-4 w-4 text-sky-400" />
             <span className="hidden sm:inline">Atualizar</span>
           </button>
           <button
             onClick={() => setModalAberto(true)}
-            className="flex h-11 items-center gap-1.5 rounded-xl bg-slate-900 px-4 text-sm font-semibold text-white transition hover:bg-slate-800 dark:bg-white dark:text-zinc-900 dark:hover:bg-zinc-200"
+            className="flex h-11 items-center gap-1.5 rounded-xl bg-blue-600 px-4 text-sm font-bold text-white shadow-lg shadow-blue-900/40 transition hover:bg-blue-500"
           >
             <Plus className="h-4 w-4" />
             Nova Tarefa
@@ -198,8 +198,8 @@ export default function PosAtendimentoBoard() {
       </div>
 
       {carregando ? (
-        <div className="rounded-2xl border border-slate-100 bg-white py-16 text-center text-sm text-slate-400 dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-500">
-          <RefreshCw className="mx-auto mb-3 h-5 w-5 animate-spin" />
+        <div className="rounded-3xl border border-slate-800/60 bg-[#161F33] py-16 text-center text-sm text-slate-400">
+          <RefreshCw className="mx-auto mb-3 h-5 w-5 animate-spin text-sky-400" />
           Carregando tarefas…
         </div>
       ) : (
@@ -220,15 +220,15 @@ export default function PosAtendimentoBoard() {
                   }
                 }}
                 onDrop={(e) => handleDropColuna(col, e)}
-                className={`flex flex-col gap-3 rounded-2xl border p-3 transition-colors dark:border-zinc-700 ${
+                className={`flex flex-col gap-3 rounded-3xl border p-3 transition-colors ${
                   isOver
-                    ? "border-slate-300 bg-slate-200/70 ring-2 ring-slate-400/60 dark:border-zinc-500 dark:bg-zinc-700/60 dark:ring-zinc-400"
-                    : "border-slate-200 bg-slate-100/60 dark:bg-zinc-800/50"
+                    ? "border-sky-500/50 bg-slate-900/60 ring-2 ring-sky-500/20"
+                    : "border-slate-800/60 bg-[#0D1320]"
                 }`}
               >
                 {/* Column header */}
-                <div className="flex items-center justify-between border-b border-slate-200 px-2 pb-2.5 pt-1 dark:border-zinc-700">
-                  <h2 className="text-sm font-semibold text-slate-700 dark:text-zinc-100">
+                <div className="flex items-center justify-between border-b border-slate-800/80 px-2 pb-2.5 pt-1">
+                  <h2 className="text-sm font-black uppercase tracking-wide text-white">
                     {col.titulo}
                   </h2>
                   <span className={`rounded-full px-2.5 py-0.5 text-xs font-bold ${col.badge}`}>
@@ -252,11 +252,11 @@ export default function PosAtendimentoBoard() {
                         draggable
                         onDragStart={() => handleDragStart(tarefa.id)}
                         onDragEnd={handleDragEnd}
-                        className={`relative flex cursor-grab flex-col gap-3 overflow-hidden rounded-2xl border bg-white p-4 pl-5 shadow-sm transition active:cursor-grabbing dark:bg-zinc-800 ${
+                        className={`relative flex cursor-grab flex-col gap-3 overflow-hidden rounded-3xl border bg-[#161F33] p-4 pl-5 shadow-sm transition active:cursor-grabbing ${
                           estaArrastando
                             ? "rotate-1 scale-[1.01] opacity-40 shadow-lg"
-                            : "hover:shadow-md"
-                        } ${isVencida ? "border-rose-300" : "border-slate-200 dark:border-zinc-600"}`}
+                            : "hover:shadow-lg hover:shadow-black/20 hover:border-slate-700/80"
+                        } ${isVencida ? "border-rose-500/60" : "border-slate-800/60"}`}
                       >
                         {/* Status indicator stripe (column color) */}
                         <span
@@ -270,11 +270,11 @@ export default function PosAtendimentoBoard() {
                             style={{ background: prio.color }}
                           />
                           <div className="min-w-0 flex-1">
-                            <h3 className="text-sm font-semibold leading-snug text-slate-900 dark:text-zinc-100">
+                            <h3 className="text-sm font-black tracking-wide leading-snug text-white">
                               {tarefa.titulo}
                             </h3>
                             {tarefa.descricao && (
-                              <p className="mt-1 text-xs line-clamp-2 text-slate-500 dark:text-zinc-400">
+                              <p className="mt-1 text-xs line-clamp-2 text-slate-400">
                                 {tarefa.descricao}
                               </p>
                             )}
@@ -282,36 +282,36 @@ export default function PosAtendimentoBoard() {
                         </div>
 
                         {/* Meta row */}
-                        <div className="flex items-center justify-between text-xs text-slate-500 dark:text-zinc-400">
+                        <div className="flex items-center justify-between text-xs text-slate-400">
                           <div className="flex items-center gap-3">
                             {tarefa.prazo_em && (
                               <span
                                 className="flex items-center gap-1"
-                                style={{ color: isVencida ? "#e05b3f" : "" }}
+                                style={{ color: isVencida ? "#f87171" : "" }}
                               >
-                                <Clock className="h-3 w-3" />
+                                <Clock className="h-3 w-3 text-slate-500" />
                                 {new Date(tarefa.prazo_em).toLocaleDateString("pt-BR")}
                               </span>
                             )}
                             {tarefa.cliente && (
-                              <span className="max-w-[100px] truncate font-medium text-slate-700 dark:text-zinc-200">
+                              <span className="max-w-[100px] truncate font-semibold text-slate-200">
                                 {tarefa.cliente.pessoa?.nome || "Cliente"}
                               </span>
                             )}
                           </div>
                           {finalidadeItem && (
-                            <span className={`rounded-full px-2 py-0.5 text-[10px] font-semibold ${finalidadeItem.bg} ${finalidadeItem.text}`}>
+                            <span className={`rounded-full border px-2 py-0.5 text-[10px] font-bold ${finalidadeItem.bg} ${finalidadeItem.text} ${finalidadeItem.border}`}>
                               {finalidadeItem.label}
                             </span>
                           )}
                         </div>
 
                         {/* Actions */}
-                        <div className="flex items-center justify-between border-t border-slate-100 pt-2 dark:border-zinc-700">
+                        <div className="flex items-center justify-between border-t border-slate-800/80 pt-2.5">
                           {tarefa.cliente?.id ? (
                             <Link
                               href={`/clientes/${tarefa.cliente.id}`}
-                              className="flex items-center gap-1 text-xs font-semibold text-slate-900 hover:underline dark:text-zinc-100"
+                              className="flex items-center gap-1 text-xs font-bold text-white hover:text-sky-300"
                             >
                               Ver perfil <ArrowRight className="h-3 w-3" />
                             </Link>
@@ -321,7 +321,7 @@ export default function PosAtendimentoBoard() {
                             {tarefa.status !== "pendente" && (
                               <button
                                 onClick={() => atualizarStatus(tarefa.id, "pendente")}
-                                className="rounded-lg bg-amber-50 px-2.5 py-1 text-[11px] font-medium text-amber-700 transition hover:bg-amber-100 dark:bg-amber-500/15 dark:text-amber-300 dark:hover:bg-amber-500/25"
+                                className="rounded-lg border border-amber-500/30 bg-amber-500/15 px-2.5 py-1 text-[11px] font-bold text-amber-300 transition hover:bg-amber-500/25"
                               >
                                 Fila
                               </button>
@@ -329,7 +329,7 @@ export default function PosAtendimentoBoard() {
                             {tarefa.status !== "em_andamento" && tarefa.status !== "concluida" && (
                               <button
                                 onClick={() => atualizarStatus(tarefa.id, "em_andamento")}
-                                className="rounded-lg bg-blue-50 px-2.5 py-1 text-[11px] font-semibold text-blue-700 transition hover:bg-blue-100 dark:bg-blue-500/15 dark:text-blue-300 dark:hover:bg-blue-500/25"
+                                className="rounded-lg bg-blue-600 px-2.5 py-1 text-[11px] font-bold text-white transition hover:bg-blue-500"
                               >
                                 Iniciar
                               </button>
@@ -337,7 +337,7 @@ export default function PosAtendimentoBoard() {
                             {tarefa.status !== "concluida" && (
                               <button
                                 onClick={() => atualizarStatus(tarefa.id, "concluida")}
-                                className="flex items-center gap-1 rounded-lg bg-emerald-50 px-2.5 py-1 text-[11px] font-semibold text-emerald-700 transition hover:bg-emerald-100 dark:bg-emerald-500/15 dark:text-emerald-300 dark:hover:bg-emerald-500/25"
+                                className="flex items-center gap-1 rounded-lg border border-emerald-500/30 bg-emerald-500/15 px-2.5 py-1 text-[11px] font-bold text-emerald-300 transition hover:bg-emerald-500/25"
                               >
                                 <CheckCircle2 className="h-3 w-3" />
                                 OK
@@ -353,8 +353,8 @@ export default function PosAtendimentoBoard() {
                     <div
                       className={`rounded-2xl border border-dashed px-4 py-8 text-center text-sm transition-colors ${
                         isOver
-                          ? "border-slate-400 bg-slate-200/50 text-slate-500 dark:border-zinc-400 dark:bg-zinc-700/50 dark:text-zinc-300"
-                          : "border-slate-300 text-slate-400 dark:border-zinc-600 dark:text-zinc-500"
+                          ? "border-sky-500/50 bg-slate-900/60 text-slate-300"
+                          : "border-slate-700 text-slate-500"
                       }`}
                     >
                       {isOver ? "Solte aqui" : "Nenhuma tarefa aqui."}

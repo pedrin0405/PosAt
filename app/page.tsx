@@ -203,56 +203,6 @@ export default function HomePage() {
 
   return (
     <div className="space-y-10">
-      {/* ── Hero ── */}
-      <section
-        className="rounded-2xl px-8 py-10 md:py-14"
-        style={{ background: "var(--white)", border: "1px solid var(--border)" }}
-      >
-        <div className="max-w-2xl">
-          <div
-            className="inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-semibold mb-5"
-            style={{ background: "var(--accent-light)", color: "var(--accent)" }}
-          >
-            <Sparkles className="h-3.5 w-3.5" />
-            Painel de Pós-Atendimento Imobiliário
-          </div>
-
-          <h1
-            className="text-3xl md:text-4xl font-bold leading-tight tracking-tight"
-            style={{ color: "var(--text-primary)" }}
-          >
-            Operação com contexto, prioridade e continuidade.
-          </h1>
-
-          <p className="mt-4 text-base leading-relaxed" style={{ color: "var(--text-secondary)" }}>
-            Foco no que mais importa hoje: pendências vencidas, clientes carentes de contato e o pipeline de novas oportunidades.
-          </p>
-
-          <div className="mt-8 flex flex-wrap gap-3">
-            <Link
-              href="/clientes"
-              className="flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold text-white transition-colors"
-              style={{ background: "var(--accent)" }}
-            >
-              Acessar Base de Clientes
-              <ArrowRight className="h-4 w-4" />
-            </Link>
-            <Link
-              href="/oportunidades"
-              className="flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold transition-colors"
-              style={{
-                background: "var(--white)",
-                color: "var(--text-primary)",
-                border: "1px solid var(--border-strong)",
-              }}
-            >
-              <Target className="h-4 w-4" style={{ color: "var(--warning)" }} />
-              Ver Pipeline de Oportunidades
-            </Link>
-          </div>
-        </div>
-      </section>
-
       {/* ── KPI Strip ── */}
       <section
         className="grid grid-cols-2 lg:grid-cols-4 divide-x divide-y lg:divide-y-0 rounded-2xl overflow-hidden"

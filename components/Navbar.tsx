@@ -2,8 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useEffect, useState } from "react";
-import { useTheme } from "next-themes";
+import { useState } from "react";
 import {
   Users,
   CheckSquare,
@@ -12,8 +11,6 @@ import {
   Building2,
   Menu,
   X,
-  Moon,
-  Sun,
   Target,
   KanbanSquare,
   MessageSquare,
@@ -31,27 +28,21 @@ const navItems = [
 
 export default function Navbar() {
   const pathname = usePathname();
-  const { resolvedTheme, setTheme } = useTheme();
-  const [mounted, setMounted] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
 
-  useEffect(() => setMounted(true), []);
-
-  const isDark = resolvedTheme === "dark";
-
   return (
-    <header className="sticky top-0 z-40 border-b border-slate-200/80 bg-white/80 backdrop-blur-md dark:border-zinc-800 dark:bg-zinc-900/80">
+    <header className="sticky top-0 z-40 border-b border-slate-800/80 bg-[#0B0F17]/85 backdrop-blur-md">
         <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-8 lg:px-10">
           {/* Logo */}
           <Link href="/" className="flex shrink-0 items-center gap-2.5 group">
-            <div className="flex h-9 w-9 items-center justify-center rounded-2xl bg-slate-900 text-white transition-colors group-hover:bg-black dark:bg-white dark:text-zinc-900 dark:group-hover:bg-zinc-200">
+            <div className="flex h-9 w-9 items-center justify-center rounded-2xl bg-gradient-to-br from-sky-400 to-blue-600 text-white shadow-lg shadow-blue-900/40 transition group-hover:from-sky-300 group-hover:to-blue-500">
               <Building2 className="h-4 w-4" />
             </div>
             <div className="hidden sm:block">
-              <span className="block text-[10px] font-bold uppercase tracking-[0.2em] text-slate-400">
+              <span className="block text-[10px] font-bold uppercase tracking-[0.2em] text-sky-400">
                 Quadra
               </span>
-              <span className="block -mt-0.5 text-sm font-semibold leading-none text-slate-900 dark:text-zinc-100">
+              <span className="block -mt-0.5 text-sm font-semibold leading-none text-slate-100">
                 Pós-Atendimento
               </span>
             </div>
@@ -73,14 +64,14 @@ export default function Navbar() {
                   <span
                     className={
                       isActive
-                        ? "text-slate-900 dark:text-zinc-50"
-                        : "text-slate-500 hover:text-slate-900 dark:text-zinc-400 dark:hover:text-zinc-100"
+                        ? "text-white"
+                        : "text-slate-400 hover:text-slate-100"
                     }
                   >
                     {item.label}
                   </span>
                   {isActive && (
-                    <span className="absolute inset-x-4 -bottom-0.5 h-0.5 rounded-full bg-slate-900 dark:bg-zinc-100" />
+                    <span className="absolute inset-x-4 -bottom-0.5 h-0.5 rounded-full bg-gradient-to-r from-sky-400 to-blue-500" />
                   )}
                 </Link>
               );
@@ -89,28 +80,19 @@ export default function Navbar() {
 
           {/* Right Actions */}
           <div className="flex items-center gap-2.5">
-            {/* Theme toggle */}
-            <button
-              onClick={() => setTheme(isDark ? "light" : "dark")}
-              aria-label="Alternar tema"
-              className="flex h-10 w-10 items-center justify-center rounded-full border border-slate-200 bg-white text-slate-600 transition hover:bg-slate-100 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-200 dark:hover:bg-zinc-700"
-            >
-              {mounted ? (isDark ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />) : <Moon className="h-4 w-4" />}
-            </button>
-
             {/* Profile */}
-            <div className="flex items-center rounded-full border border-slate-200 bg-white p-1.5 pl-3 shadow-sm transition hover:shadow dark:border-zinc-700 dark:bg-zinc-800">
-              <span className="hidden pr-2 text-sm font-medium text-slate-700 lg:block dark:text-zinc-200">
+            <div className="flex items-center rounded-full border border-slate-800 bg-[#131B2E] p-1.5 pl-3 transition hover:border-slate-700">
+              <span className="hidden pr-2 text-sm font-medium text-slate-300 lg:block">
                 Equipe
               </span>
-              <span className="flex h-8 w-8 items-center justify-center rounded-full bg-slate-900 text-xs font-semibold text-white dark:bg-white dark:text-zinc-900">
+              <span className="flex h-8 w-8 items-center justify-center rounded-full bg-gradient-to-br from-sky-400 to-blue-600 text-xs font-bold text-white">
                 ES
               </span>
             </div>
 
             {/* Mobile menu button */}
             <button
-              className="rounded-full border border-slate-200 p-2 text-slate-600 md:hidden dark:border-zinc-700 dark:text-zinc-300"
+              className="rounded-full border border-slate-800 p-2 text-slate-300 md:hidden hover:border-slate-700"
               onClick={() => setMobileOpen(!mobileOpen)}
               aria-label="Abrir menu"
             >
@@ -121,7 +103,7 @@ export default function Navbar() {
 
         {/* Mobile Nav dropdown */}
         {mobileOpen && (
-          <div className="border-t border-slate-200 bg-white px-4 py-3 md:hidden dark:border-zinc-800 dark:bg-zinc-900">
+          <div className="border-t border-slate-800 bg-[#0B0F17] px-4 py-3 md:hidden">
             <nav className="space-y-1">
               {navItems.map((item) => {
                 const Icon = item.icon;
@@ -134,8 +116,8 @@ export default function Navbar() {
                     onClick={() => setMobileOpen(false)}
                     className={`flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium ${
                       isActive
-                        ? "bg-slate-900 text-white dark:bg-white dark:text-zinc-900"
-                        : "text-slate-600 hover:bg-slate-100 dark:text-zinc-300 dark:hover:bg-zinc-800"
+                        ? "border border-slate-700/60 bg-gradient-to-r from-sky-500/15 to-blue-600/10 text-white"
+                        : "text-slate-400 hover:bg-slate-900 hover:text-slate-100"
                     }`}
                   >
                     <Icon className="h-4 w-4" />

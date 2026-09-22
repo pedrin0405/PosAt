@@ -120,8 +120,8 @@ function AbaConteudo({
       onClick={onClick}
       className={`flex flex-1 items-center justify-center gap-1.5 rounded-xl px-3 py-2 text-sm font-semibold transition ${
         ativa
-          ? "bg-slate-900 text-white dark:bg-white dark:text-zinc-900"
-          : "text-slate-500 hover:text-slate-800 dark:text-zinc-400 dark:hover:text-zinc-200"
+          ? "bg-gradient-to-r from-sky-500 to-blue-600 text-white shadow-lg shadow-blue-900/40"
+          : "text-slate-400 hover:text-white"
       }`}
     >
       {icone}
@@ -417,13 +417,13 @@ export default function MensagensPage() {
       {/* Header */}
       <div className="flex flex-wrap items-center justify-between gap-4">
         <div>
-          <p className="mb-1 text-xs font-semibold uppercase tracking-widest text-slate-500 dark:text-zinc-400">
+          <p className="mb-1 text-xs font-bold uppercase tracking-widest text-sky-400">
             Integração WhatsApp → CRM
           </p>
-          <h1 className="text-2xl font-semibold tracking-tight text-slate-900 dark:text-zinc-50">
+          <h1 className="text-2xl font-extrabold tracking-tight text-white">
             Conversas espelhadas
           </h1>
-          <p className="mt-1 text-sm text-slate-500 dark:text-zinc-400">
+          <p className="mt-1 text-sm text-slate-400">
             Toda conversa do WhatsApp dos corretores vira histórico estruturado no CRM —
             {metricas
               ? ` ${metricas.espelhadas} de ${metricas.totalConversas} conversas espelhadas`
@@ -432,7 +432,7 @@ export default function MensagensPage() {
         </div>
         <button
           onClick={refresh}
-          className="flex h-11 items-center gap-1.5 rounded-xl border border-slate-200 bg-white px-3.5 text-sm font-medium text-slate-700 transition hover:bg-slate-50 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-200 dark:hover:bg-zinc-700"
+          className="flex h-11 items-center gap-1.5 rounded-xl border border-slate-700 bg-slate-800 px-3.5 text-sm font-medium text-slate-200 transition hover:border-slate-600 hover:bg-slate-700 hover:text-white"
         >
           <RefreshCw className="h-4 w-4" />
           <span className="hidden sm:inline">Atualizar</span>
@@ -440,7 +440,7 @@ export default function MensagensPage() {
       </div>
 
       {/* Abas de visualização */}
-      <div className="flex flex-wrap gap-1 rounded-2xl border border-slate-200 bg-white p-1 dark:border-zinc-700 dark:bg-zinc-800">
+      <div className="flex flex-wrap gap-1 rounded-2xl border border-slate-800 bg-[#131B2E] p-1">
         <AbaConteudo
           ativa={visao === "conversas"}
           onClick={() => setVisao("conversas")}

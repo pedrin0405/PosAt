@@ -149,8 +149,8 @@ function ClientesContent() {
       {/* Intelligence Metrics — compact row */}
       <div className="grid grid-cols-3 divide-x rounded-2xl overflow-hidden" style={{ background: "var(--white)", border: "1px solid var(--border)" }}>
         <div className="flex items-center gap-3 px-5 py-4">
-          <div className="h-8 w-8 rounded-lg flex items-center justify-center" style={{ background: "#fee2e2" }}>
-            <ShieldAlert className="h-4 w-4 text-rose-600 dark:text-rose-400" />
+          <div className="h-8 w-8 rounded-lg flex items-center justify-center" style={{ background: "rgba(248,113,113,0.12)" }}>
+            <ShieldAlert className="h-4 w-4 text-rose-400" />
           </div>
           <div>
             <p className="text-xl font-bold" style={{ color: "var(--text-primary)" }}>{totalRiscoDistrato}</p>
@@ -158,8 +158,8 @@ function ClientesContent() {
           </div>
         </div>
         <div className="flex items-center gap-3 px-5 py-4">
-          <div className="h-8 w-8 rounded-lg flex items-center justify-center" style={{ background: "#fef3c7" }}>
-            <DollarSign className="h-4 w-4 text-amber-600 dark:text-amber-400" />
+          <div className="h-8 w-8 rounded-lg flex items-center justify-center" style={{ background: "rgba(251,191,36,0.12)" }}>
+            <DollarSign className="h-4 w-4 text-amber-400" />
           </div>
           <div>
             <p className="text-xl font-bold" style={{ color: "var(--text-primary)" }}>{totalEmRepasse}</p>

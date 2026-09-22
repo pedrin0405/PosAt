@@ -6,27 +6,27 @@ import {
 export const TIPO_LABEL: Record<TipoOportunidade, { label: string; badge: string }> = {
   recompra: {
     label: "Recompra",
-    badge: "bg-sky-100 text-sky-800 dark:bg-sky-500/15 dark:text-sky-300",
+    badge: "bg-sky-500/15",
   },
   upgrade: {
     label: "Upgrade",
-    badge: "bg-indigo-100 text-indigo-800 dark:bg-indigo-500/15 dark:text-indigo-300",
+    badge: "bg-indigo-500/15",
   },
   investimento_novo: {
     label: "Investimento",
-    badge: "bg-emerald-100 text-emerald-800 dark:bg-emerald-500/15 dark:text-emerald-300",
+    badge: "bg-emerald-500/15",
   },
   indicacao: {
     label: "Indicação",
-    badge: "bg-violet-100 text-violet-800 dark:bg-violet-500/15 dark:text-violet-300",
+    badge: "bg-violet-500/15",
   },
   servicos: {
     label: "Serviços",
-    badge: "bg-amber-100 text-amber-800 dark:bg-amber-500/15 dark:text-amber-300",
+    badge: "bg-amber-500/15",
   },
   outro: {
     label: "Outro",
-    badge: "bg-slate-100 text-slate-700 dark:bg-zinc-700 dark:text-zinc-200",
+    badge: "bg-slate-700/60",
   },
 };
 

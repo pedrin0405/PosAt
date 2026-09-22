@@ -16,11 +16,10 @@ export default function RootLayout({
 }) {
   return (
     <html lang="pt-BR" className="h-full" suppressHydrationWarning>
-      <body className="flex min-h-full flex-col bg-slate-50 text-slate-900 antialiased dark:bg-[#0f1011] dark:text-slate-100">
+      <body className="flex min-h-full flex-col antialiased">
         <ThemeProvider
           attribute="class"
-          defaultTheme="system"
-          enableSystem
+          defaultTheme="dark"
           disableTransitionOnChange
           scriptProps={{ suppressHydrationWarning: true }}
         >
@@ -28,8 +27,8 @@ export default function RootLayout({
           <main className="mx-auto w-full max-w-7xl flex-1 px-4 pt-10 pb-20 sm:px-8 lg:px-10">
             {children}
           </main>
-          <footer className="border-t border-slate-200 bg-white py-6 dark:border-zinc-800 dark:bg-[#17181b]">
-            <div className="mx-auto flex max-w-7xl flex-col items-center justify-between gap-2 px-4 text-xs text-slate-400 sm:flex-row sm:px-8 lg:px-10 dark:text-zinc-500">
+          <footer className="border-t border-slate-800/70 bg-[#0B0F17] py-6">
+            <div className="mx-auto flex max-w-7xl flex-col items-center justify-between gap-2 px-4 text-xs text-slate-400 sm:flex-row sm:px-8 lg:px-10">
               <p>&copy; {new Date().getFullYear()} Quadra Brasileira — Pós-Atendimento</p>
               <p className="font-medium">Next.js + Supabase</p>
             </div>
