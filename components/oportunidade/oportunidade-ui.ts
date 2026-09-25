@@ -76,6 +76,21 @@ export const STATUS_REMOVIDAS = new Set(["removida"]);
 export const STATUS_CONVERTIDAS = new Set(["convertida"]);
 export const STATUS_ENCERRADAS = new Set(["encerrada", "ganha", "perdida", "arquivada"]);
 
+export const STAGE: Record<string, { text: string; bg: string; dot: string }> = {
+  identificada: { text: "text-sky-300", bg: "bg-sky-500/15", dot: "bg-sky-400" },
+  em_andamento: { text: "text-sky-300", bg: "bg-sky-500/15", dot: "bg-sky-400" },
+  aguardando_decisao: { text: "text-amber-300", bg: "bg-amber-500/15", dot: "bg-amber-400" },
+  em_avaliacao: { text: "text-sky-300", bg: "bg-sky-500/15", dot: "bg-sky-400" },
+  proposta_enviada: { text: "text-sky-300", bg: "bg-sky-500/15", dot: "bg-sky-400" },
+  negociacao: { text: "text-amber-300", bg: "bg-amber-500/15", dot: "bg-amber-400" },
+  convertida: { text: "text-emerald-300", bg: "bg-emerald-500/15", dot: "bg-emerald-400" },
+  ganha: { text: "text-emerald-300", bg: "bg-emerald-500/15", dot: "bg-emerald-400" },
+  removida: { text: "text-rose-300", bg: "bg-rose-500/15", dot: "bg-rose-400" },
+  perdida: { text: "text-rose-300", bg: "bg-rose-500/15", dot: "bg-rose-400" },
+  encerrada: { text: "text-slate-300", bg: "bg-slate-700/60", dot: "bg-slate-500" },
+  arquivada: { text: "text-slate-300", bg: "bg-slate-700/60", dot: "bg-slate-500" },
+};
+
 export const PROXIMO_PASSO_STATUS: Record<string, string | null> = {
   identificada: "em_andamento",
   em_andamento: "aguardando_decisao",

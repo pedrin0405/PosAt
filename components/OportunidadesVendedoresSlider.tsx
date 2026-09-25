@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
-import { ChevronLeft } from "lucide-react";
 import Dynamic from "next/dynamic";
 import { VendedorItem, ImovelItem, OportunidadeItem } from "@/lib/segmentacao/tipos";
 
@@ -94,7 +93,7 @@ export default function OportunidadesVendedoresSlider() {
           />
         </div>
         <div className="w-[50%] flex-shrink-0">
-          <VendedoresView onOpenDetail={setDetalheVendedor} />
+          <VendedoresView onOpenDetail={setDetalheVendedor} onVoltar={goBack} />
         </div>
       </div>
 
@@ -135,17 +134,6 @@ export default function OportunidadesVendedoresSlider() {
           aoFechar={() => setConverterModal(null)}
           aoConfirmar={() => setConverterModal(null)}
         />
-      )}
-
-      {/* Botão voltar flutuante */}
-      {view === "vendedores" && !isTransitioning && (
-        <button
-          onClick={goBack}
-          className="fixed left-4 top-4 z-50 flex h-10 w-10 items-center justify-center rounded-xl border border-slate-700/80 bg-slate-900/40 text-slate-200 transition hover:border-slate-600 hover:bg-slate-800 hover:text-white shadow-lg"
-          aria-label="Voltar para Oportunidades"
-        >
-          <ChevronLeft className="h-5 w-5" />
-        </button>
       )}
     </div>
   );

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useCallback, Suspense } from "react";
+import { useEffect, useState, useCallback, useMemo, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import {
   Users,
@@ -9,8 +9,9 @@ import {
   ShieldAlert,
   DollarSign,
   Sparkles,
+  SlidersHorizontal,
 } from "lucide-react";
-import { ClienteCompleto, TermometroCX, OrigemFluxo } from "@/lib/segmentacao/tipos";
+import { ClienteCompleto, TermometroCX } from "@/lib/segmentacao/tipos";
 import ClienteCard from "@/components/ClienteCard";
 import ClienteFilters from "@/components/ClienteFilters";
 import NovoClienteModal from "@/components/NovoClienteModal";
@@ -47,6 +48,8 @@ function ClientesContent() {
   const [empreendimento, setEmpreendimento] = useState<string>("");
   const [corretor, setCorretor] = useState<string>("");
   const [analistaCS, setAnalistaCS] = useState<string>("");
+
+  const [segmento, setSegmento] = useState<string>("ativos");
 
   const carregarClientes = useCallback(async () => {
     setCarregando(true);
@@ -102,43 +105,52 @@ function ClientesContent() {
     (c) => c.status === "em_negociacao" || c.status === "convertido"
   ).length;
 
+  const clientesExibidos = useMemo(() => {
+    if (segmento === "risco") {
+      return clientes.filter(
+        (c) => c.termometro_cx === "insatisfeito_distrato" || c.alerta_distrato_ativo
+      );
+    }
+    if (segmento === "repasse") {
+      return clientes.filter((c) => c.status === "em_negociacao" || c.status === "convertido");
+    }
+    if (segmento === "promotores") {
+      return clientes.filter((c) => c.termometro_cx === "promotor_mgm");
+    }
+    return clientes;
+  }, [clientes, segmento]);
+
+  const segmentos = [
+    { id: "ativos", label: "Clientes ativos", count: clientes.length, icon: Users },
+    { id: "risco", label: "Em risco", count: totalRiscoDistrato, icon: ShieldAlert, cor: "var(--danger)" },
+    { id: "repasse", label: "Em repasse", count: totalEmRepasse, icon: DollarSign, cor: "var(--warning)" },
+    { id: "promotores", label: "Promotores", count: totalPromotoresMGM, icon: Sparkles, cor: "var(--success)" },
+  ];
+
   return (
     <div className="space-y-6">
-      {/* Page header */}
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+      {/* ── Header ── */}
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
         <div>
-          <p className="text-xs font-semibold uppercase tracking-widest mb-1" style={{ color: "var(--accent)" }}>
-            Pós-Atendimento
-          </p>
-          <h1 className="text-2xl font-bold tracking-tight" style={{ color: "var(--text-primary)" }}>
+          <h1 className="text-2xl font-bold tracking-tight text-[var(--text-primary)]">
             Clientes & Leads
           </h1>
-          <p className="mt-1 text-sm" style={{ color: "var(--text-secondary)" }}>
-            {clientes.length} cadastro{clientes.length !== 1 ? "s" : ""} na base
+          <p className="mt-1 text-sm text-[var(--text-secondary)]">
+            Base de pós-atendimento e nutrição de relacionamento
           </p>
         </div>
 
-        <div className="flex items-center gap-2 shrink-0">
+        <div className="flex shrink-0 items-center gap-2">
           <button
             onClick={carregarClientes}
-            className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-sm font-medium transition-colors"
-            style={{
-              background: "var(--white)",
-              color: "var(--text-secondary)",
-              border: "1px solid var(--border)",
-            }}
-            onMouseEnter={(e) => (e.currentTarget.style.background = "var(--surface)")}
-            onMouseLeave={(e) => (e.currentTarget.style.background = "var(--white)")}
+            className="flex items-center gap-1.5 rounded-xl border border-[var(--border)] bg-[var(--white)] px-3.5 py-2 text-sm font-medium text-[var(--text-secondary)] transition-colors hover:bg-[var(--surface)]"
           >
             <RefreshCw className="h-4 w-4" />
             <span className="hidden sm:inline">Atualizar</span>
           </button>
           <button
             onClick={() => setModalNovoAberto(true)}
-            className="flex items-center gap-1.5 px-4 py-2 rounded-xl text-sm font-semibold text-white transition-colors"
-            style={{ background: "var(--accent)" }}
-            onMouseEnter={(e) => (e.currentTarget.style.background = "var(--accent-hover)")}
-            onMouseLeave={(e) => (e.currentTarget.style.background = "var(--accent)")}
+            className="flex items-center gap-1.5 rounded-xl bg-[var(--accent)] px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-[var(--accent-hover)]"
           >
             <PlusCircle className="h-4 w-4" />
             <span>Novo Cadastro</span>
@@ -146,38 +158,35 @@ function ClientesContent() {
         </div>
       </div>
 
-      {/* Intelligence Metrics — compact row */}
-      <div className="grid grid-cols-3 divide-x rounded-2xl overflow-hidden" style={{ background: "var(--white)", border: "1px solid var(--border)" }}>
-        <div className="flex items-center gap-3 px-5 py-4">
-          <div className="h-8 w-8 rounded-lg flex items-center justify-center" style={{ background: "rgba(248,113,113,0.12)" }}>
-            <ShieldAlert className="h-4 w-4 text-rose-400" />
-          </div>
-          <div>
-            <p className="text-xl font-bold" style={{ color: "var(--text-primary)" }}>{totalRiscoDistrato}</p>
-            <p className="text-xs" style={{ color: "var(--text-secondary)" }}>Risco de Distrato</p>
-          </div>
-        </div>
-        <div className="flex items-center gap-3 px-5 py-4">
-          <div className="h-8 w-8 rounded-lg flex items-center justify-center" style={{ background: "rgba(251,191,36,0.12)" }}>
-            <DollarSign className="h-4 w-4 text-amber-400" />
-          </div>
-          <div>
-            <p className="text-xl font-bold" style={{ color: "var(--text-primary)" }}>{totalEmRepasse}</p>
-            <p className="text-xs" style={{ color: "var(--text-secondary)" }}>Em Repasse</p>
-          </div>
-        </div>
-        <div className="flex items-center gap-3 px-5 py-4">
-          <div className="h-8 w-8 rounded-lg flex items-center justify-center" style={{ background: "#d1fae5" }}>
-            <Sparkles className="h-4 w-4 text-emerald-600 dark:text-emerald-400" />
-          </div>
-          <div>
-            <p className="text-xl font-bold" style={{ color: "var(--text-primary)" }}>{totalPromotoresMGM}</p>
-            <p className="text-xs" style={{ color: "var(--text-secondary)" }}>Promotores</p>
-          </div>
-        </div>
+      {/* ── Segment tabs ── */}
+      <div className="flex w-fit max-w-full overflow-x-auto rounded-xl border border-[var(--border)] bg-[var(--inset)] p-1">
+        {segmentos.map((s) => {
+          const Icon = s.icon;
+          const ativo = segmento === s.id;
+          return (
+            <button
+              key={s.id}
+              onClick={() => setSegmento(s.id)}
+              className={`flex shrink-0 items-center gap-2 rounded-lg px-3.5 py-2 text-xs font-semibold transition-colors ${
+                ativo
+                  ? "bg-[var(--white)] text-[var(--text-primary)] shadow-sm"
+                  : "text-[var(--text-secondary)] hover:text-[var(--text-primary)]"
+              }`}
+            >
+              <Icon className="h-3.5 w-3.5" style={{ color: ativo ? s.cor : undefined }} />
+              {s.label}
+              <span
+                className="rounded-full px-1.5 py-0.5 text-[10px] font-bold"
+                style={{ background: ativo ? "var(--inset)" : "var(--surface)", color: "var(--text-muted)" }}
+              >
+                {s.count}
+              </span>
+            </button>
+          );
+        })}
       </div>
 
-      {/* Filters */}
+      {/* ── Filters ── */}
       <ClienteFilters
         busca={busca}
         setBusca={setBusca}
@@ -203,37 +212,30 @@ function ClientesContent() {
         onLimpar={handleLimparFiltros}
       />
 
-      {/* Grid */}
+      {/* ── Grid ── */}
       {carregando ? (
-        <div
-          className="rounded-2xl py-16 text-center text-sm"
-          style={{ background: "var(--white)", border: "1px solid var(--border)", color: "var(--text-muted)" }}
-        >
-          <RefreshCw className="mx-auto h-5 w-5 animate-spin mb-3" style={{ color: "var(--accent)" }} />
+        <div className="rounded-2xl border border-[var(--border)] bg-[var(--white)] py-16 text-center text-sm text-[var(--text-muted)]">
+          <RefreshCw className="mx-auto mb-3 h-5 w-5 animate-spin text-[var(--accent)]" />
           Carregando base de clientes…
         </div>
-      ) : clientes.length > 0 ? (
+      ) : clientesExibidos.length > 0 ? (
         <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
-          {clientes.map((cliente) => (
+          {clientesExibidos.map((cliente) => (
             <ClienteCard key={cliente.id} cliente={cliente} onAtualizado={carregarClientes} />
           ))}
         </div>
       ) : (
-        <div
-          className="rounded-2xl p-12 text-center"
-          style={{ background: "var(--white)", border: "1px solid var(--border)" }}
-        >
-          <Users className="mx-auto h-10 w-10 mb-3" style={{ color: "var(--text-muted)" }} />
-          <h3 className="text-base font-semibold mb-1" style={{ color: "var(--text-primary)" }}>
+        <div className="rounded-2xl border border-[var(--border)] bg-[var(--white)] p-12 text-center">
+          <SlidersHorizontal className="mx-auto mb-3 h-10 w-10 text-[var(--text-muted)]" />
+          <h3 className="mb-1 text-base font-semibold text-[var(--text-primary)]">
             Nenhum cliente encontrado
           </h3>
-          <p className="text-sm mb-4" style={{ color: "var(--text-secondary)" }}>
-            Tente ajustar os filtros aplicados.
+          <p className="mb-4 text-sm text-[var(--text-secondary)]">
+            Tente ajustar os filtros aplicados ou o segmento selecionado.
           </p>
           <button
-            onClick={handleLimparFiltros}
-            className="px-4 py-2 rounded-xl text-sm font-semibold text-white"
-            style={{ background: "var(--text-primary)" }}
+            onClick={() => { setSegmento("ativos"); handleLimparFiltros(); }}
+            className="rounded-xl bg-[var(--text-primary)] px-4 py-2 text-sm font-semibold text-white"
           >
             Limpar Filtros
           </button>
@@ -251,7 +253,7 @@ function ClientesContent() {
 
 export default function ClientesPage() {
   return (
-    <Suspense fallback={<div className="py-10 text-center text-sm" style={{ color: "var(--text-muted)" }}>Carregando…</div>}>
+    <Suspense fallback={<div className="py-10 text-center text-sm text-[var(--text-muted)]">Carregando…</div>}>
       <ClientesContent />
     </Suspense>
   );

@@ -23,9 +23,12 @@ export class ReceberMensagemWhatsAppUseCase implements IReceberMensagemWhatsAppU
   async execute(
     input: IReceberMensagemWhatsAppInput
   ): Promise<IReceberMensagemWhatsAppResult> {
-    const enviadoEm = input.enviadoEm || new Date().toISOString();
-    const numero = normalizarTelefone(input.numero) || input.numero;
-    const escalonamento = detectarEscalonamento(input.conteudo);
+const enviadoEm = input.enviadoEm || new Date().toISOString();
+const numero = normalizarTelefone(input.numero) || input.numero;
+const whatsappChatId = input.numero.includes("@")
+  ? input.numero
+  : `${numero}@c.us`;
+const escalonamento = detectarEscalonamento(input.conteudo);
 
     // 1. Conecta o WhatsApp do corretor à conversa no CRM
     const conexoes = await this.whatsappRepo.listarConexoes();
@@ -41,6 +44,7 @@ export class ReceberMensagemWhatsAppUseCase implements IReceberMensagemWhatsAppU
         conexao_id: conexao.id,
         corretor: conexao.corretor,
         numero_cliente: numero,
+        whatsapp_chat_id: whatsappChatId,
         nome_cliente: input.nomeContato || null,
         cliente_id: null,
         empreendimento: null,

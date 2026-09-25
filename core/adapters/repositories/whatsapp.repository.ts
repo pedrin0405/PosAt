@@ -12,7 +12,7 @@ import { supabaseAdmin } from "@/lib/supabase-admin";
 import { storageFallback } from "@/lib/storage-fallback";
 import { normalizarTelefone } from "@/lib/whatsapp";
 
-export class WhatsAppRepository implements IWhatsAppRepository {
+export class WhatsAppRepository implements IWhatsAppRepository {  
   async listarConexoes(): Promise<ConexaoWhatsApp[]> {
     if (supabaseAdmin) {
       const { data, error } = await supabaseAdmin

@@ -21,9 +21,13 @@ import {
   Sparkles,
   Smartphone,
   LayoutDashboard,
+  ChevronDown,
+  X,
+  BadgeCheck,
 } from "lucide-react";
 import WhatsAppConexoesManager from "@/components/WhatsAppConexoesManager";
 import WhatsAppGestorDashboard from "@/components/WhatsAppGestorDashboard";
+import { supabaseBrowser } from "@/lib/supabase-browser";
 import {
   formatarHorario,
   formatarDia,
@@ -118,10 +122,10 @@ function AbaConteudo({
   return (
     <button
       onClick={onClick}
-      className={`flex flex-1 items-center justify-center gap-1.5 rounded-xl px-3 py-2 text-sm font-semibold transition ${
+      className={`flex flex-1 items-center justify-center gap-1.5 rounded-lg px-3 py-2 text-sm font-semibold transition ${
         ativa
-          ? "bg-gradient-to-r from-sky-500 to-blue-600 text-white shadow-lg shadow-blue-900/40"
-          : "text-slate-400 hover:text-white"
+          ? "bg-[var(--white)] text-[var(--text-primary)] shadow-sm"
+          : "text-[var(--text-secondary)] hover:text-[var(--text-primary)]"
       }`}
     >
       {icone}
@@ -150,6 +154,7 @@ export default function MensagensPage() {
 
   useEffect(() => {
     let ativo = true;
+
     Promise.all([
       fetch("/api/whatsapp/mensagens").then((r) => (r.ok ? r.json() : null)),
       fetch("/api/whatsapp/conexao").then((r) => (r.ok ? r.json() : null)),
@@ -157,13 +162,21 @@ export default function MensagensPage() {
     ])
       .then(([msg, con, met]) => {
         if (!ativo) return;
+
         if (msg?.conversas) setConversas(msg.conversas);
         if (msg?.clientes) setClientes(msg.clientes);
         if (msg?.nps) setNps(msg.nps);
         if (con?.conexoes) setConexoes(con.conexoes);
         if (met?.metricas) setMetricas(met.metricas);
+
         const abrir = new URLSearchParams(window.location.search).get("abrir");
-        if (abrir && msg?.conversas?.some((c: { id: string }) => c.id === abrir)) {
+
+        if (
+          abrir &&
+          msg?.conversas?.some(
+            (c: { id: string }) => c.id === abrir
+          )
+        ) {
           setSelecionada(abrir);
         }
       })
@@ -171,6 +184,7 @@ export default function MensagensPage() {
       .finally(() => {
         if (ativo) setCarregando(false);
       });
+
     return () => {
       ativo = false;
     };
@@ -184,12 +198,20 @@ export default function MensagensPage() {
 
   async function refresh() {
     setCarregando(true);
+
     try {
       const [msg, con, met] = await Promise.all([
-        fetch("/api/whatsapp/mensagens").then((r) => (r.ok ? r.json() : null)),
-        fetch("/api/whatsapp/conexao").then((r) => (r.ok ? r.json() : null)),
-        fetch("/api/whatsapp/metricas").then((r) => (r.ok ? r.json() : null)),
+        fetch("/api/whatsapp/mensagens").then((r) =>
+          r.ok ? r.json() : null
+        ),
+        fetch("/api/whatsapp/conexao").then((r) =>
+          r.ok ? r.json() : null
+        ),
+        fetch("/api/whatsapp/metricas").then((r) =>
+          r.ok ? r.json() : null
+        ),
       ]);
+
       if (msg?.conversas) setConversas(msg.conversas);
       if (msg?.clientes) setClientes(msg.clientes);
       if (msg?.nps) setNps(msg.nps);
@@ -201,6 +223,37 @@ export default function MensagensPage() {
       setCarregando(false);
     }
   }
+
+    useEffect(() => {
+  if (!supabaseBrowser) {
+    console.log("❌ Supabase Browser não configurado");
+    return;
+  }
+
+  const canal = supabaseBrowser
+    .channel("whatsapp-mensagens-realtime")
+    .on(
+      "postgres_changes",
+      {
+        event: "INSERT",
+        schema: "public",
+        table: "whatsapp_mensagens",
+      },
+      (payload) => {
+        console.log("🔥 NOVA MENSAGEM RECEBIDA PELO REALTIME:", payload);
+        void refresh();
+      }
+    )
+    .subscribe((status) => {
+      console.log("📡 STATUS REALTIME:", status);
+    });
+
+  return () => {
+    if (supabaseBrowser) {
+      void supabaseBrowser.removeChannel(canal);
+    }
+  };
+}, []);
 
   async function toggleEspelhamento(conversa: ConversaUI) {
     const proximo = !conversa.espelhando;
@@ -412,18 +465,22 @@ export default function MensagensPage() {
     );
   });
 
+  const metricasStrip = [
+    { label: "Conversas", value: metricas?.totalConversas ?? 0, cor: "var(--text-primary)" },
+    { label: "Espelhadas no CRM", value: metricas?.espelhadas ?? 0, cor: "var(--success)" },
+    { label: "Sem match", value: metricas?.semMatch ?? 0, cor: "var(--warning)" },
+    { label: "Sem resposta (8h+)", value: metricas?.semResposta.length ?? 0, cor: "var(--danger)" },
+  ];
+
   return (
-    <div className="space-y-8">
-      {/* Header */}
+    <div className="space-y-5">
+      {/* ── Header ── */}
       <div className="flex flex-wrap items-center justify-between gap-4">
         <div>
-          <p className="mb-1 text-xs font-bold uppercase tracking-widest text-sky-400">
-            Integração WhatsApp → CRM
-          </p>
-          <h1 className="text-2xl font-extrabold tracking-tight text-white">
+          <h1 className="text-2xl font-bold tracking-tight text-[var(--text-primary)]">
             Conversas espelhadas
           </h1>
-          <p className="mt-1 text-sm text-slate-400">
+          <p className="mt-1 text-sm text-[var(--text-secondary)]">
             Toda conversa do WhatsApp dos corretores vira histórico estruturado no CRM —
             {metricas
               ? ` ${metricas.espelhadas} de ${metricas.totalConversas} conversas espelhadas`
@@ -432,15 +489,15 @@ export default function MensagensPage() {
         </div>
         <button
           onClick={refresh}
-          className="flex h-11 items-center gap-1.5 rounded-xl border border-slate-700 bg-slate-800 px-3.5 text-sm font-medium text-slate-200 transition hover:border-slate-600 hover:bg-slate-700 hover:text-white"
+          className="flex h-10 items-center gap-1.5 rounded-xl border border-[var(--border)] bg-[var(--white)] px-3.5 text-sm font-medium text-[var(--text-secondary)] transition hover:bg-[var(--inset)] hover:text-[var(--text-primary)]"
         >
           <RefreshCw className="h-4 w-4" />
           <span className="hidden sm:inline">Atualizar</span>
         </button>
       </div>
 
-      {/* Abas de visualização */}
-      <div className="flex flex-wrap gap-1 rounded-2xl border border-slate-800 bg-[#131B2E] p-1">
+      {/* ── Abas de visualização ── */}
+      <div className="flex flex-wrap gap-1 rounded-xl border border-[var(--border)] bg-[var(--inset)] p-1">
         <AbaConteudo
           ativa={visao === "conversas"}
           onClick={() => setVisao("conversas")}
@@ -467,465 +524,476 @@ export default function MensagensPage() {
         <WhatsAppGestorDashboard compact />
       ) : (
         <>
-      {ultimoResultado && (
-        <div className="rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-800 dark:border-emerald-500/30 dark:bg-emerald-500/10 dark:text-emerald-300">
-          {ultimoResultado}
-        </div>
-      )}
-
-      {/* Mosaico de métricas rápidas */}
-      {metricas && (
-        <section className="grid grid-cols-2 gap-3 lg:grid-cols-4">
-          <div className="rounded-2xl border border-slate-200 bg-white p-4 dark:border-zinc-700 dark:bg-zinc-800">
-            <p className="text-[11px] font-semibold uppercase tracking-wide text-slate-400 dark:text-zinc-500">
-              Conversas
-            </p>
-            <p className="mt-1 text-2xl font-bold text-slate-900 dark:text-zinc-50">
-              {metricas.totalConversas}
-            </p>
-          </div>
-          <div className="rounded-2xl border border-emerald-200 bg-emerald-50/50 p-4 dark:border-emerald-500/30 dark:bg-emerald-500/10">
-            <p className="text-[11px] font-semibold uppercase tracking-wide text-emerald-600 dark:text-emerald-400">
-              Espelhadas no CRM
-            </p>
-            <p className="mt-1 text-2xl font-bold text-emerald-700 dark:text-emerald-300">
-              {metricas.espelhadas}
-            </p>
-          </div>
-          <div className="rounded-2xl border border-amber-200 bg-amber-50/50 p-4 dark:border-amber-500/30 dark:bg-amber-500/10">
-            <p className="text-[11px] font-semibold uppercase tracking-wide text-amber-600 dark:text-amber-400">
-              Sem match
-            </p>
-            <p className="mt-1 text-2xl font-bold text-amber-700 dark:text-amber-300">
-              {metricas.semMatch}
-            </p>
-          </div>
-          <div className="rounded-2xl border border-rose-200 bg-rose-50/50 p-4 dark:border-rose-500/30 dark:bg-rose-500/10">
-            <p className="text-[11px] font-semibold uppercase tracking-wide text-rose-600 dark:text-rose-400">
-              Sem resposta (8h+)
-            </p>
-            <p className="mt-1 text-2xl font-bold text-rose-700 dark:text-rose-300">
-              {metricas.semResposta.length}
-            </p>
-          </div>
-        </section>
-      )}
-
-      {/* Lista + Detalhe */}
-      {carregando ? (
-        <div className="rounded-2xl border border-slate-100 bg-white py-16 text-center text-sm text-slate-400 dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-500">
-          <RefreshCw className="mx-auto mb-3 h-5 w-5 animate-spin" />
-          Carregando conversas…
-        </div>
-      ) : (
-        <div className="grid grid-cols-1 gap-4 lg:grid-cols-[minmax(0,380px)_1fr]">
-          {/* Lista de conversas */}
-          <div className="flex flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white dark:border-zinc-700 dark:bg-zinc-800">
-            <div className="border-b border-slate-100 p-3 dark:border-zinc-700">
-              <div className="relative">
-                <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
-                <input
-                  value={busca}
-                  onChange={(e) => setBusca(e.target.value)}
-                  placeholder="Buscar por cliente, número ou corretor…"
-                  className="w-full rounded-xl border border-slate-200 bg-slate-50 py-2 pl-9 pr-3 text-sm outline-none focus:border-slate-400 dark:border-zinc-600 dark:bg-zinc-700 dark:text-zinc-100"
-                />
-              </div>
-            </div>
-            <div className="max-h-[560px] overflow-y-auto">
-              {filtradas.length === 0 ? (
-                <p className="px-4 py-10 text-center text-sm text-slate-400 dark:text-zinc-500">
-                  Nenhuma conversa encontrada.
-                </p>
-              ) : (
-                filtradas.map((c) => {
-                  const estado = estaSemResposta(c.mensagens);
-                  const semMatch = !c.cliente_id;
-                  const privada = !c.espelhando;
-                  const ultima = [...c.mensagens].sort(
-                    (a, b) => new Date(b.enviado_em).getTime() - new Date(a.enviado_em).getTime()
-                  )[0];
-                  return (
-                    <button
-                      key={c.id}
-                      onClick={() => setSelecionada(c.id)}
-                      className={`flex w-full items-start gap-3 border-b border-slate-50 px-4 py-3 text-left transition hover:bg-slate-50 dark:border-zinc-800 dark:hover:bg-zinc-700/40 ${
-                        selecionada === c.id ? "bg-slate-100 dark:bg-zinc-700/60" : "bg-white dark:bg-zinc-800"
-                      }`}
-                    >
-                      <span
-                        className={`mt-0.5 flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-xs font-bold ${
-                          semMatch
-                            ? "bg-slate-200 text-slate-600 dark:bg-zinc-600 dark:text-zinc-300"
-                            : "bg-slate-900 text-white dark:bg-white dark:text-zinc-900"
-                        }`}
-                      >
-                        {(c.nome_cliente || "?").charAt(0).toUpperCase()}
-                      </span>
-                      <span className="min-w-0 flex-1">
-                        <span className="flex items-center justify-between gap-2">
-                          <span className="truncate text-sm font-semibold text-slate-900 dark:text-zinc-100">
-                            {c.nome_cliente || "Número desconhecido"}
-                          </span>
-                          <span className="shrink-0 text-[11px] text-slate-400 dark:text-zinc-500">
-                            {formatarHorario(ultima?.enviado_em)}
-                          </span>
-                        </span>
-                        <span className="mt-0.5 flex items-center gap-1.5 text-xs text-slate-500 dark:text-zinc-400">
-                          <span className="truncate">{ultima?.conteudo || "Sem mensagens"}</span>
-                        </span>
-                        <span className="mt-1.5 flex flex-wrap gap-1.5">
-                          <span className="rounded-full bg-slate-100 px-2 py-0.5 text-[10px] font-medium text-slate-500 dark:bg-zinc-700 dark:text-zinc-400">
-                            {c.corretor}
-                          </span>
-                          {estado.semResposta && (
-                            <span className="rounded-full bg-rose-100 px-2 py-0.5 text-[10px] font-bold text-rose-700 dark:bg-rose-500/15 dark:text-rose-300">
-                              Sem resposta · {estado.vencidoAposHoras}h
-                            </span>
-                          )}
-                          {semMatch && (
-                            <span className="rounded-full bg-amber-100 px-2 py-0.5 text-[10px] font-bold text-amber-700 dark:bg-amber-500/15 dark:text-amber-300">
-                              Sem match
-                            </span>
-                          )}
-                          {privada && (
-                            <span className="rounded-full bg-violet-100 px-2 py-0.5 text-[10px] font-bold text-violet-700 dark:bg-violet-500/15 dark:text-violet-300">
-                              Não espelhar
-                            </span>
-                          )}
-                        </span>
-                      </span>
-                    </button>
-                  );
-                })
-              )}
-            </div>
-          </div>
-
-          {/* Detalhe da conversa */}
-          {conversaSelecionada ? (
-            <div className="flex flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white dark:border-zinc-700 dark:bg-zinc-800">
-              {/* Cabeçalho da conversa */}
-              <div className="flex flex-wrap items-center justify-between gap-3 border-b border-slate-100 px-4 py-3 dark:border-zinc-700">
-                <div className="flex items-center gap-3">
-                  <span className="flex h-10 w-10 items-center justify-center rounded-full bg-slate-900 text-xs font-bold text-white dark:bg-white dark:text-zinc-900">
-                    {(conversaSelecionada.nome_cliente || "?").charAt(0).toUpperCase()}
-                  </span>
-                  <div>
-                    <p className="text-sm font-semibold text-slate-900 dark:text-zinc-100">
-                      {conversaSelecionada.nome_cliente || "Número desconhecido"}
-                    </p>
-                    <p className="text-xs text-slate-500 dark:text-zinc-400">
-                      {conversaSelecionada.numero_cliente} · {conversaSelecionada.corretor}
-                    </p>
-                  </div>
-                </div>
-
-                <div className="flex flex-wrap items-center gap-2">
-                  {conversaSelecionada.cliente?.id && (
-                    <Link
-                      href={`/clientes/${conversaSelecionada.cliente.id}`}
-                      className="flex items-center gap-1 rounded-lg bg-slate-100 px-3 py-1.5 text-xs font-semibold text-slate-700 transition hover:bg-slate-200 dark:bg-zinc-700 dark:text-zinc-200"
-                    >
-                      <User className="h-3 w-3" />
-                      Ficha do cliente
-                    </Link>
-                  )}
-                  {conversaSelecionada.cliente && (
-                    <span className="rounded-full bg-emerald-100 px-2.5 py-1 text-[11px] font-bold text-emerald-700 dark:bg-emerald-500/15 dark:text-emerald-300">
-                      Match · {conversaSelecionada.cliente.status}
-                    </span>
-                  )}
-                  {conversaSelecionada.espelhando ? (
-                    <button
-                      onClick={() => toggleEspelhamento(conversaSelecionada)}
-                      className="flex items-center gap-1 rounded-lg bg-violet-50 px-3 py-1.5 text-xs font-semibold text-violet-700 transition hover:bg-violet-100 dark:bg-violet-500/15 dark:text-violet-300"
-                    >
-                      <ShieldCheck className="h-3 w-3" />
-                      Espelhando
-                    </button>
-                  ) : (
-                    <button
-                      onClick={() => toggleEspelhamento(conversaSelecionada)}
-                      className="flex items-center gap-1 rounded-lg bg-slate-200 px-3 py-1.5 text-xs font-semibold text-slate-600 transition hover:bg-slate-300 dark:bg-zinc-600 dark:text-zinc-300"
-                    >
-                      <ShieldOff className="h-3 w-3" />
-                      Não espelhar
-                    </button>
-                  )}
-                  <a
-                    href={`/api/whatsapp/export?conversaId=${conversaSelecionada.id}&formato=csv`}
-                    className="flex items-center gap-1 rounded-lg bg-slate-200 px-3 py-1.5 text-xs font-semibold text-slate-600 transition hover:bg-slate-300 dark:bg-zinc-600 dark:text-zinc-300"
-                  >
-                    <Download className="h-3 w-3" />
-                    CSV
-                  </a>
-                  <button
-                    onClick={() => excluirConversa(conversaSelecionada.id)}
-                    className="flex items-center gap-1 rounded-lg bg-rose-50 px-3 py-1.5 text-xs font-semibold text-rose-700 transition hover:bg-rose-100 dark:bg-rose-500/15 dark:text-rose-300"
-                  >
-                    <Trash2 className="h-3 w-3" />
-                    Excluir
-                  </button>
-                </div>
-              </div>
-
-              {/* Aviso de conversa privada */}
-              {!conversaSelecionada.espelhando && (
-                <div className="flex items-start gap-2 border-b border-violet-100 bg-violet-50 px-4 py-2 text-xs text-violet-700 dark:border-violet-500/20 dark:bg-violet-500/10 dark:text-violet-300">
-                  <ShieldOff className="mt-0.5 h-3.5 w-3.5 shrink-0" />
-                  {conversaSelecionada.privada_motivo ||
-                    "Esta conversa não é espelhada para o CRM (LGPD)."}
-                </div>
-              )}
-
-              {/* Sem match → vincular manualmente */}
-              {!conversaSelecionada.cliente_id && (
-                <div className="flex flex-col gap-2 border-b border-amber-100 bg-amber-50 px-4 py-3 dark:border-amber-500/20 dark:bg-amber-500/10">
-                  <p className="flex items-center gap-1.5 text-xs font-semibold text-amber-800 dark:text-amber-300">
-                    <AlertTriangle className="h-3.5 w-3.5" />
-                    Nenhum atendimento ativo correspondeu a {conversaSelecionada.numero_cliente}.
-                    Vincule manualmente para o histórico constar no CRM:
-                  </p>
-                  <div className="relative">
-                    <Search className="pointer-events-none absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-amber-500" />
-                    <input
-                      value={vinculoBusca}
-                      onChange={(e) => setVinculoBusca(e.target.value)}
-                      placeholder="Buscar cliente para vincular (nome ou telefone)…"
-                      className="w-full rounded-xl border border-amber-200 bg-white py-2 pl-9 pr-3 text-sm outline-none dark:border-amber-500/30 dark:bg-zinc-700 dark:text-zinc-100"
-                    />
-                  </div>
-                  <div className="flex max-h-40 flex-col gap-1 overflow-y-auto">
-                    {clientesFiltrados.slice(0, 8).map((cl) => (
-                      <div
-                        key={cl.id}
-                        className="flex items-center justify-between gap-2 rounded-lg bg-white px-3 py-1.5 dark:bg-zinc-700"
-                      >
-                        <span className="min-w-0">
-                          <span className="block truncate text-xs font-semibold text-slate-800 dark:text-zinc-100">
-                            {cl.nome}
-                          </span>
-                          <span className="block text-[11px] text-slate-500 dark:text-zinc-400">
-                            {cl.telefone || "sem telefone"} · {cl.status}
-                          </span>
-                        </span>
-                        <button
-                          onClick={() => vincularConversa(conversaSelecionada.id, cl.id)}
-                          className="flex shrink-0 items-center gap-1 rounded-lg bg-slate-900 px-2.5 py-1 text-[11px] font-semibold text-white transition hover:bg-slate-700 dark:bg-white dark:text-zinc-900"
-                        >
-                          <Link2 className="h-3 w-3" />
-                          Vincular
-                        </button>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              {/* Análise heurística (IA local) */}
-              {sentimentoConversa && (
-                <div className="space-y-2 border-b border-slate-100 px-4 py-3 dark:border-zinc-700">
-                  <p className="flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-wide text-slate-400 dark:text-zinc-500">
-                    <Sparkles className="h-3 w-3" />
-                    Análise heurística (sem IA em nuvem — LGPD)
-                  </p>
-                  <div className="flex flex-wrap items-center gap-3">
-                    <span
-                      className={`rounded-full px-2.5 py-1 text-[11px] font-bold ${
-                        sentimentoConversa === "irritado"
-                          ? "bg-rose-100 text-rose-700 dark:bg-rose-500/15 dark:text-rose-300"
-                          : sentimentoConversa === "satisfeito"
-                            ? "bg-emerald-100 text-emerald-700 dark:bg-emerald-500/15 dark:text-emerald-300"
-                            : "bg-amber-100 text-amber-700 dark:bg-amber-500/15 dark:text-amber-300"
-                      }`}
-                    >
-                      Sentimento: {sentimentoConversa}
-                    </span>
-                    <span className="text-[11px] text-slate-500 dark:text-zinc-400">
-                      {conversaSelecionada.etapa
-                        ? `etapa: ${conversaSelecionada.etapa}`
-                        : "sem etapa definida"}
-                    </span>
-                  </div>
-                  {resumoConversa && (
-                    <p className="text-xs text-slate-600 dark:text-zinc-300">
-                      <span className="font-semibold text-slate-700 dark:text-zinc-200">Resumo: </span>
-                      {resumoConversa}
-                    </p>
-                  )}
-                  {proximaAcaoConversa && (
-                    <p className="text-xs text-sky-700 dark:text-sky-300">
-                      <span className="font-semibold">Próxima ação sugerida: </span>
-                      {proximaAcaoConversa}
-                    </p>
-                  )}
-                </div>
-              )}
-
-              {/* NPS */}
-              <div className="flex flex-wrap items-center justify-between gap-3 border-b border-violet-100 bg-violet-50/60 px-4 py-3 dark:border-violet-500/20 dark:bg-violet-500/5">
-                <div className="flex items-center gap-2 text-xs font-semibold text-violet-800 dark:text-violet-300">
-                  <Star className="h-3.5 w-3.5" />
-                  Pesquisa NPS
-                  {npsDaConversa && (
-                    <span className="rounded-full bg-violet-100 px-2 py-0.5 text-[10px] font-bold text-violet-700 dark:bg-violet-500/15 dark:text-violet-300">
-                      {npsDaConversa.status === "respondida"
-                        ? `${npsDaConversa.nota}/10`
-                        : "pendente"}
-                    </span>
-                  )}
-                </div>
-                {npsDaConversa?.status === "respondida" && npsDaConversa.comentario && (
-                  <span className="text-[11px] text-violet-600 dark:text-violet-300">
-                    “{npsDaConversa.comentario}”
-                  </span>
-                )}
-                {npsDaConversa?.status === "pendente" && (
-                  <div className="flex flex-wrap items-center gap-2">
-                    <input
-                      type="number"
-                      min={0}
-                      max={10}
-                      value={respostaNps}
-                      onChange={(e) => setRespostaNps(Number(e.target.value))}
-                      className="w-16 rounded-lg border border-violet-200 bg-white px-2 py-1 text-sm outline-none dark:border-violet-500/30 dark:bg-zinc-800 dark:text-zinc-100"
-                    />
-                    <input
-                      value={comentarioNps}
-                      onChange={(e) => setComentarioNps(e.target.value)}
-                      placeholder="Comentário (opcional)"
-                      className="w-40 rounded-lg border border-violet-200 bg-white px-2 py-1 text-xs outline-none dark:border-violet-500/30 dark:bg-zinc-800 dark:text-zinc-100"
-                    />
-                    <button
-                      onClick={() => responderNpsDaConversa(npsDaConversa.id)}
-                      className="rounded-lg bg-violet-600 px-2.5 py-1 text-[11px] font-semibold text-white hover:bg-violet-500"
-                    >
-                      Registrar resposta
-                    </button>
-                  </div>
-                )}
-                {!npsDaConversa && conversaSelecionada.cliente_id && (
-                  <button
-                    onClick={() => dispararNps(conversaSelecionada.id)}
-                    className="rounded-lg bg-violet-100 px-2.5 py-1 text-[11px] font-semibold text-violet-700 transition hover:bg-violet-200 dark:bg-violet-500/15 dark:text-violet-300"
-                  >
-                    Disparar pesquisa NPS
-                  </button>
-                )}
-              </div>
-
-              {/* Thread */}
-              <div ref={threadRef} className="flex-1 space-y-3 overflow-y-auto bg-slate-50 px-4 py-4 dark:bg-zinc-900/40">
-                {conversaSelecionada.mensagens.length === 0 ? (
-                  <p className="py-8 text-center text-sm text-slate-400 dark:text-zinc-500">
-                    Nenhuma mensagem nesta conversa ainda.
-                  </p>
-                ) : (
-                  [...conversaSelecionada.mensagens]
-                    .sort((a, b) => new Date(a.enviado_em).getTime() - new Date(b.enviado_em).getTime())
-                    .map((m) => {
-                      const ehEnviada = m.origem === "enviada";
-                      return (
-                        <div key={m.id} className={`flex ${ehEnviada ? "justify-end" : "justify-start"}`}>
-                          <div
-                            className={`max-w-[75%] rounded-2xl px-3.5 py-2 text-sm shadow-sm ${
-                              ehEnviada
-                                ? "rounded-br-md bg-slate-900 text-white dark:bg-white dark:text-zinc-900"
-                                : "rounded-bl-md border border-slate-200 bg-white text-slate-800 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-100"
-                            }`}
-                          >
-                            <p className="whitespace-pre-wrap break-words leading-relaxed">
-                              {m.conteudo}
-                            </p>
-                            <p
-                              className={`mt-1 text-right text-[10px] ${
-                                ehEnviada
-                                  ? "text-slate-400 dark:text-zinc-400"
-                                  : "text-slate-400 dark:text-zinc-500"
-                              }`}
-                            >
-                              {formatarDia(m.enviado_em)} {formatarHorario(m.enviado_em)}
-                            </p>
-                          </div>
-                        </div>
-                      );
-                    })
-                )}
-              </div>
-
-              {/* Simulador espelho (webhook) */}
-              <div className="border-t border-slate-100 p-3 dark:border-zinc-700">
-                <div className="flex items-center gap-1.5 pb-2 text-[11px] font-semibold text-slate-400 dark:text-zinc-500">
-                  <Zap className="h-3 w-3" />
-                  Simulador do webhook (Evolution API) — a mensagem é processada e espelhada como se chegasse pelo WhatsApp
-                </div>
-                <div className="flex items-end gap-2">
-                  <input
-                    value={novoTexto}
-                    onChange={(e) => setNovoTexto(e.target.value)}
-                    onKeyDown={(e) => {
-                      if (e.key === "Enter") void enviarMensagem("enviada");
-                    }}
-                    placeholder="Digite a mensagem a ser espelhada…"
-                    className="flex-1 rounded-xl border border-slate-200 bg-slate-50 px-3 py-2.5 text-sm outline-none focus:border-slate-400 dark:border-zinc-600 dark:bg-zinc-700 dark:text-zinc-100"
-                  />
-                  <button
-                    onClick={() => enviarMensagem("enviada")}
-                    disabled={enviando || !novoTexto.trim()}
-                    className="flex h-10 shrink-0 items-center gap-1.5 rounded-xl bg-slate-900 px-3.5 text-sm font-semibold text-white transition hover:bg-slate-700 disabled:cursor-not-allowed disabled:opacity-40 dark:bg-white dark:text-zinc-900"
-                  >
-                    <Send className="h-4 w-4" />
-                    Enviar
-                  </button>
-                  <button
-                    onClick={() => enviarMensagem("recebida")}
-                    disabled={enviando || !novoTexto.trim()}
-                    title="Simular cliente respondendo"
-                    className="flex h-10 shrink-0 items-center gap-1.5 rounded-xl border border-slate-200 bg-white px-3.5 text-sm font-semibold text-slate-600 transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-40 dark:border-zinc-600 dark:bg-zinc-700 dark:text-zinc-300"
-                  >
-                    <Phone className="h-4 w-4" />
-                    Receber
-                  </button>
-                </div>
-              </div>
-            </div>
-          ) : (
-            <div className="flex flex-col items-center justify-center rounded-2xl border border-dashed border-slate-300 py-24 text-center dark:border-zinc-600">
-              <MessageSquare className="mb-3 h-8 w-8 text-slate-300 dark:text-zinc-600" />
-              <p className="max-w-xs text-sm text-slate-400 dark:text-zinc-500">
-                Selecione uma conversa para ver o histórico espelhado, alternar privacidade ou vincular ao cliente.
-              </p>
+          {/* ── Feedback ── */}
+          {ultimoResultado && (
+            <div className="flex items-center justify-between gap-3 rounded-xl border border-[var(--success-border)] bg-[var(--success-light)] px-4 py-3 text-sm text-[var(--success)]">
+              <span>{ultimoResultado}</span>
+              <button onClick={() => setUltimoResultado(null)} className="shrink-0">
+                <X className="h-4 w-4" />
+              </button>
             </div>
           )}
-        </div>
-      )}
 
-      {/* Legenda de fluxo */}
-      <section className="rounded-2xl border border-slate-200 bg-white p-5 dark:border-zinc-700 dark:bg-zinc-800">
-        <h2 className="mb-3 flex items-center gap-2 text-sm font-bold text-slate-900 dark:text-zinc-100">
-          <Building2 className="h-4 w-4 text-slate-500 dark:text-zinc-400" />
-          Como funciona o espelhamento
-        </h2>
-        <div className="grid grid-cols-1 gap-2 text-xs text-slate-500 dark:text-zinc-400 md:grid-cols-4">
-          <div className="rounded-xl bg-slate-50 p-3 dark:bg-zinc-700/40">
-            <b className="block text-slate-700 dark:text-zinc-200">1. Conexão</b>
-            O corretor conecta o WhatsApp via QR Code (Evolution API) — status aparece acima.
-          </div>
-          <div className="rounded-xl bg-slate-50 p-3 dark:bg-zinc-700/40">
-            <b className="block text-slate-700 dark:text-zinc-200">2. Evento</b>
-            Cada mensagem recebida/enviada dispara um webhook para <code className="font-mono">/api/whatsapp/webhook</code>.
-          </div>
-          <div className="rounded-xl bg-slate-50 p-3 dark:bg-zinc-700/40">
-            <b className="block text-slate-700 dark:text-zinc-200">3. Cruzamento</b>
-            O número é normalizado (55 + DDD) e cruzado com atendimentos ativos no CRM.
-          </div>
-          <div className="rounded-xl bg-slate-50 p-3 dark:bg-zinc-700/40">
-            <b className="block text-slate-700 dark:text-zinc-200">4. Registro</b>
-            A mensagem vira interação na ficha, separando recebidas/enviadas — sem trabalho manual.
-          </div>
-        </div>
-      </section>
+          {/* ── Faixa compacta de métricas ── */}
+          {metricas && (
+            <div className="grid grid-cols-2 gap-3 xl:grid-cols-4">
+              {metricasStrip.map((m) => (
+                <div key={m.label} className="card flex items-center gap-3 p-3.5">
+                  <span className="block min-w-0">
+                    <span className="block text-lg font-bold leading-tight tracking-tight" style={{ color: m.cor }}>
+                      {m.value}
+                    </span>
+                    <span className="block truncate text-[11px] text-[var(--text-secondary)]">{m.label}</span>
+                  </span>
+                </div>
+              ))}
+            </div>
+          )}
+
+          {carregando ? (
+            <div className="rounded-2xl border border-[var(--border)] bg-[var(--white)] py-16 text-center text-sm text-[var(--text-muted)]">
+              <RefreshCw className="mx-auto mb-3 h-5 w-5 animate-spin text-[var(--accent)]" />
+              Carregando conversas…
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 gap-4 lg:grid-cols-[minmax(0,340px)_1fr] xl:grid-cols-[minmax(0,320px)_1fr_minmax(0,300px)]">
+              {/* ── Coluna 1: Lista ── */}
+              <div className="flex flex-col overflow-hidden rounded-xl border border-[var(--border)] bg-[var(--white)]">
+                <div className="border-b border-[var(--border)] p-3">
+                  <div className="relative">
+                    <Search className="pointer-events-none absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-[var(--text-muted)]" />
+                    <input
+                      value={busca}
+                      onChange={(e) => setBusca(e.target.value)}
+                      placeholder="Buscar cliente, número ou corretor…"
+                      className="w-full rounded-lg border border-[var(--border)] bg-[var(--inset)] py-2 pl-9 pr-3 text-sm outline-none transition focus:border-[var(--border-strong)]"
+                      style={{ color: "var(--text-primary)" }}
+                    />
+                  </div>
+                </div>
+                <div className="max-h-[640px] overflow-y-auto">
+                  {filtradas.length === 0 ? (
+                    <p className="px-4 py-10 text-center text-sm text-[var(--text-secondary)]">
+                      Nenhuma conversa encontrada.
+                    </p>
+                  ) : (
+                    filtradas.map((c) => {
+                      const estado = estaSemResposta(c.mensagens);
+                      const semMatch = !c.cliente_id;
+                      const privada = !c.espelhando;
+                      const ultima = [...c.mensagens].sort(
+                        (a, b) => new Date(b.enviado_em).getTime() - new Date(a.enviado_em).getTime()
+                      )[0];
+                      return (
+                        <button
+                          key={c.id}
+                          onClick={() => setSelecionada(c.id)}
+                          className={`flex w-full items-start gap-3 border-b border-[var(--border)] px-4 py-3 text-left transition ${
+                            selecionada === c.id
+                              ? "bg-[var(--raised)]"
+                              : "bg-[var(--white)] hover:bg-[var(--raised)]"
+                          }`}
+                        >
+                          <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full border text-xs font-bold" style={{ borderColor: "var(--border)", background: "var(--inset)", color: "var(--text-primary)" }}>
+                            {(c.nome_cliente || "?").charAt(0).toUpperCase()}
+                          </span>
+                          <span className="min-w-0 flex-1">
+                            <span className="flex items-center justify-between gap-2">
+                              <span className="truncate text-sm font-semibold text-[var(--text-primary)]">
+                                {c.nome_cliente || "Número desconhecido"}
+                              </span>
+                              <span className="shrink-0 text-[11px] text-[var(--text-muted)]">
+                                {formatarHorario(ultima?.enviado_em)}
+                              </span>
+                            </span>
+                            <span className="mt-0.5 flex items-center gap-1.5 text-xs text-[var(--text-secondary)]">
+                              <span className="truncate">{ultima?.conteudo || "Sem mensagens"}</span>
+                            </span>
+                            <span className="mt-1.5 flex flex-wrap gap-1.5">
+                              {c.corretor && (
+                                <span className="rounded-full bg-[var(--inset)] px-2 py-0.5 text-[10px] font-medium text-[var(--text-secondary)]">
+                                  {c.corretor}
+                                </span>
+                              )}
+                              {estado.semResposta && (
+                                <span className="rounded-full bg-[var(--danger-light)] px-2 py-0.5 text-[10px] font-bold text-[var(--danger)]">
+                                  Sem resposta · {estado.vencidoAposHoras}h
+                                </span>
+                              )}
+                              {semMatch && (
+                                <span className="rounded-full bg-[var(--warning-light)] px-2 py-0.5 text-[10px] font-bold text-[var(--warning)]">
+                                  Sem match
+                                </span>
+                              )}
+                              {privada && (
+                                <span className="rounded-full bg-[var(--accent-light)] px-2 py-0.5 text-[10px] font-bold text-[var(--accent)]">
+                                  Não espelhar
+                                </span>
+                              )}
+                            </span>
+                          </span>
+                        </button>
+                      );
+                    })
+                  )}
+                </div>
+              </div>
+
+              {/* ── Coluna 2: Conversa ── */}
+              {conversaSelecionada ? (
+                <div className="flex flex-col overflow-hidden rounded-xl border border-[var(--border)] bg-[var(--white)]">
+                  <div className="flex items-center gap-3 border-b border-[var(--border)] px-4 py-3">
+                    <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-[var(--border)] text-xs font-bold" style={{ background: "var(--inset)", color: "var(--text-primary)" }}>
+                      {(conversaSelecionada.nome_cliente || "?").charAt(0).toUpperCase()}
+                    </span>
+                    <div className="min-w-0 flex-1">
+                      <p className="truncate text-sm font-semibold text-[var(--text-primary)]">
+                        {conversaSelecionada.nome_cliente || "Número desconhecido"}
+                      </p>
+                      <p className="truncate text-xs text-[var(--text-secondary)]">
+                        {conversaSelecionada.numero_cliente} · {conversaSelecionada.corretor}
+                      </p>
+                    </div>
+                    {conversaSelecionada.cliente?.id && (
+                      <Link
+                        href={`/clientes/${conversaSelecionada.cliente.id}`}
+                        className="flex shrink-0 items-center gap-1 rounded-lg border border-[var(--border)] bg-[var(--inset)] px-2.5 py-1.5 text-xs font-semibold text-[var(--text-primary)] transition hover:bg-[var(--raised)]"
+                      >
+                        <User className="h-3 w-3" />
+                        Ficha
+                      </Link>
+                    )}
+                  </div>
+
+                  {!conversaSelecionada.espelhando && (
+                    <div className="flex items-start gap-2 border-b border-[var(--border)] bg-[var(--accent-light)] px-4 py-2 text-xs text-[var(--accent)]">
+                      <ShieldOff className="mt-0.5 h-3.5 w-3.5 shrink-0" />
+                      {conversaSelecionada.privada_motivo ||
+                        "Esta conversa não é espelhada para o CRM (LGPD)."}
+                    </div>
+                  )}
+
+                  <div ref={threadRef} className="flex-1 space-y-3 overflow-y-auto px-4 py-4" style={{ background: "var(--inset)" }}>
+                    {conversaSelecionada.mensagens.length === 0 ? (
+                      <p className="py-8 text-center text-sm text-[var(--text-secondary)]">
+                        Nenhuma mensagem nesta conversa ainda.
+                      </p>
+                    ) : (
+                      [...conversaSelecionada.mensagens]
+                        .sort((a, b) => new Date(a.enviado_em).getTime() - new Date(b.enviado_em).getTime())
+                        .map((m) => {
+                          const ehEnviada = m.origem === "enviada";
+                          return (
+                            <div key={m.id} className={`flex ${ehEnviada ? "justify-end" : "justify-start"}`}>
+                              <div
+                                className={`max-w-[75%] rounded-2xl px-3.5 py-2 text-sm shadow-sm ${
+                                  ehEnviada
+                                    ? "rounded-br-md bg-[var(--accent)] text-white"
+                                    : "rounded-bl-md border border-[var(--border)] text-[var(--text-primary)]"
+                                }`}
+                                style={{ background: ehEnviada ? undefined : "var(--white)" }}
+                              >
+                                <p className="whitespace-pre-wrap break-words leading-relaxed">
+                                  {m.conteudo}
+                                </p>
+                                <p className={`mt-1 text-right text-[10px] ${ehEnviada ? "text-white/70" : "text-[var(--text-muted)]"}`}>
+                                  {formatarDia(m.enviado_em)} {formatarHorario(m.enviado_em)}
+                                </p>
+                              </div>
+                            </div>
+                          );
+                        })
+                    )}
+                  </div>
+
+                  <div className="border-t border-[var(--border)] p-3" style={{ background: "var(--white)" }}>
+                    <details className="group">
+                      <summary className="flex cursor-pointer items-center gap-1.5 pb-2 text-[11px] font-semibold text-[var(--text-muted)]">
+                        <Zap className="h-3 w-3" />
+                        Simulador do webhook (Evolution API)
+                        <ChevronDown className="ml-auto h-3.5 w-3.5 transition-transform group-open:rotate-180" />
+                      </summary>
+                      <div className="pb-2 text-[11px] text-[var(--text-muted)]">
+                        A mensagem é processada e espelhada como se chegasse pelo WhatsApp.
+                      </div>
+                    </details>
+                    <div className="flex items-end gap-2">
+                      <input
+                        value={novoTexto}
+                        onChange={(e) => setNovoTexto(e.target.value)}
+                        onKeyDown={(e) => {
+                          if (e.key === "Enter") void enviarMensagem("enviada");
+                        }}
+                        placeholder="Digite a mensagem a ser espelhada…"
+                        className="flex-1 rounded-lg border border-[var(--border)] bg-[var(--inset)] px-3 py-2.5 text-sm outline-none transition focus:border-[var(--border-strong)]"
+                        style={{ color: "var(--text-primary)" }}
+                      />
+                      <button
+                        onClick={() => enviarMensagem("enviada")}
+                        disabled={enviando || !novoTexto.trim()}
+                        className="flex h-10 shrink-0 items-center gap-1.5 rounded-lg bg-[var(--accent)] px-3.5 text-sm font-semibold text-white transition hover:bg-[var(--accent-hover)] disabled:cursor-not-allowed disabled:opacity-40"
+                      >
+                        <Send className="h-4 w-4" />
+                        Enviar
+                      </button>
+                      <button
+                        onClick={() => enviarMensagem("recebida")}
+                        disabled={enviando || !novoTexto.trim()}
+                        title="Simular cliente respondendo"
+                        className="flex h-10 shrink-0 items-center gap-1.5 rounded-lg border border-[var(--border)] bg-[var(--inset)] px-3.5 text-sm font-semibold text-[var(--text-secondary)] transition hover:bg-[var(--raised)] disabled:cursor-not-allowed disabled:opacity-40"
+                      >
+                        <Phone className="h-4 w-4" />
+                        Receber
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              ) : (
+                <div className="flex flex-col items-center justify-center rounded-xl border border-dashed border-[var(--border-strong)] py-24 text-center">
+                  <MessageSquare className="mb-3 h-8 w-8 text-[var(--text-muted)]" />
+                  <p className="max-w-xs text-sm text-[var(--text-secondary)]">
+                    Selecione uma conversa para ver o histórico espelhado, alternar privacidade ou vincular ao cliente.
+                  </p>
+                </div>
+              )}
+
+              {/* ── Coluna 3: Contexto do cliente ── */}
+              {conversaSelecionada && (
+                <div className="space-y-4">
+                  {/* Cliente */}
+                  <div className="card p-4">
+                    <p className="mb-3 text-[11px] font-bold uppercase tracking-wide text-[var(--text-secondary)]">
+                      Contexto do cliente
+                    </p>
+                    {conversaSelecionada.cliente ? (
+                      <div className="space-y-2 text-sm">
+                        <div className="flex items-center gap-2">
+                          <BadgeCheck className="h-4 w-4 shrink-0 text-[var(--success)]" />
+                          <span className="text-xs font-semibold text-[var(--success)]">
+                            Match com cliente · {conversaSelecionada.cliente.status}
+                          </span>
+                        </div>
+                        {conversaSelecionada.empreendimento && (
+                          <div className="flex items-center gap-2 text-xs text-[var(--text-secondary)]">
+                            <Building2 className="h-3.5 w-3.5 shrink-0 text-[var(--text-muted)]" />
+                            {conversaSelecionada.empreendimento}
+                          </div>
+                        )}
+                        {conversaSelecionada.etapa && (
+                          <div className="flex items-center gap-2 text-xs text-[var(--text-secondary)]">
+                            <Zap className="h-3.5 w-3.5 shrink-0 text-[var(--text-muted)]" />
+                            Etapa: {conversaSelecionada.etapa}
+                          </div>
+                        )}
+                      </div>
+                    ) : (
+                      <>
+                        <div className="mb-2 flex items-start gap-2 rounded-lg border border-[var(--warning-border)] bg-[var(--warning-light)] p-2.5 text-xs text-[var(--warning)]">
+                          <AlertTriangle className="mt-0.5 h-3.5 w-3.5 shrink-0" />
+                          <span>
+                            Nenhum atendimento ativo correspondeu a {conversaSelecionada.numero_cliente}.
+                          </span>
+                        </div>
+                        <div className="relative">
+                          <Search className="pointer-events-none absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-[var(--text-muted)]" />
+                          <input
+                            value={vinculoBusca}
+                            onChange={(e) => setVinculoBusca(e.target.value)}
+                            placeholder="Buscar cliente (nome ou telefone)…"
+                            className="w-full rounded-lg border border-[var(--border)] bg-[var(--inset)] py-2 pl-9 pr-3 text-xs outline-none transition focus:border-[var(--border-strong)]"
+                            style={{ color: "var(--text-primary)" }}
+                          />
+                        </div>
+                        <div className="mt-2 flex max-h-40 flex-col gap-1 overflow-y-auto">
+                          {clientesFiltrados.slice(0, 8).map((cl) => (
+                            <div
+                              key={cl.id}
+                              className="flex items-center justify-between gap-2 rounded-lg border border-[var(--border)] bg-[var(--inset)] px-3 py-1.5"
+                            >
+                              <span className="min-w-0">
+                                <span className="block truncate text-xs font-semibold text-[var(--text-primary)]">
+                                  {cl.nome}
+                                </span>
+                                <span className="block text-[11px] text-[var(--text-muted)]">
+                                  {cl.telefone || "sem telefone"} · {cl.status}
+                                </span>
+                              </span>
+                              <button
+                                onClick={() => vincularConversa(conversaSelecionada.id, cl.id)}
+                                className="flex shrink-0 items-center gap-1 rounded-lg bg-[var(--accent)] px-2.5 py-1 text-[11px] font-semibold text-white transition hover:bg-[var(--accent-hover)]"
+                              >
+                                <Link2 className="h-3 w-3" />
+                                Vincular
+                              </button>
+                            </div>
+                          ))}
+                        </div>
+                      </>
+                    )}
+                  </div>
+
+                  {/* Insights */}
+                  {sentimentoConversa && (
+                    <div className="card p-4">
+                      <p className="mb-2 flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-wide text-[var(--text-secondary)]">
+                        <Sparkles className="h-3 w-3 text-[var(--accent)]" />
+                        Insights
+                      </p>
+                      <div className="flex flex-wrap items-center gap-2">
+                        <span
+                          className={`rounded-full px-2.5 py-1 text-[11px] font-bold ${
+                            sentimentoConversa === "irritado"
+                              ? "bg-[var(--danger-light)] text-[var(--danger)]"
+                              : sentimentoConversa === "satisfeito"
+                                ? "bg-[var(--success-light)] text-[var(--success)]"
+                                : "text-[var(--warning)]"
+                          }`}
+                          style={{ background: sentimentoConversa === "neutro" ? "var(--warning-light)" : undefined }}
+                        >
+                          Sentimento: {sentimentoConversa}
+                        </span>
+                      </div>
+                      {resumoConversa && (
+                        <p className="mt-2 text-xs text-[var(--text-secondary)]">
+                          <span className="font-semibold text-[var(--text-primary)]">Resumo: </span>
+                          {resumoConversa}
+                        </p>
+                      )}
+                      {proximaAcaoConversa && (
+                        <p className="mt-2 text-xs text-[var(--accent)]">
+                          <span className="font-semibold">Próxima ação sugerida: </span>
+                          {proximaAcaoConversa}
+                        </p>
+                      )}
+                      <p className="mt-2 text-[10px] text-[var(--text-muted)]">
+                        Análise heurística local — sem IA em nuvem (LGPD).
+                      </p>
+                    </div>
+                  )}
+
+                  {/* NPS */}
+                  <div className="card p-4">
+                    <p className="mb-3 flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-wide text-[var(--text-secondary)]">
+                      <Star className="h-3.5 w-3.5 text-[var(--accent)]" />
+                      Pesquisa NPS
+                      {npsDaConversa && (
+                        <span className="rounded-full bg-[var(--accent-light)] px-2 py-0.5 text-[10px] font-bold text-[var(--accent)]">
+                          {npsDaConversa.status === "respondida" ? `${npsDaConversa.nota}/10` : "pendente"}
+                        </span>
+                      )}
+                    </p>
+                    {npsDaConversa?.status === "respondida" && npsDaConversa.comentario && (
+                      <p className="text-[11px] text-[var(--text-secondary)]">
+                        “{npsDaConversa.comentario}”
+                      </p>
+                    )}
+                    {npsDaConversa?.status === "pendente" && (
+                      <div className="flex flex-wrap items-center gap-2">
+                        <input
+                          type="number"
+                          min={0}
+                          max={10}
+                          value={respostaNps}
+                          onChange={(e) => setRespostaNps(Number(e.target.value))}
+                          className="w-14 rounded-lg border border-[var(--border)] bg-[var(--inset)] px-2 py-1.5 text-sm outline-none"
+                          style={{ color: "var(--text-primary)" }}
+                        />
+                        <input
+                          value={comentarioNps}
+                          onChange={(e) => setComentarioNps(e.target.value)}
+                          placeholder="Comentário (opcional)"
+                          className="min-w-0 flex-1 rounded-lg border border-[var(--border)] bg-[var(--inset)] px-2 py-1.5 text-xs outline-none"
+                          style={{ color: "var(--text-primary)" }}
+                        />
+                        <button
+                          onClick={() => responderNpsDaConversa(npsDaConversa.id)}
+                          className="rounded-lg bg-[var(--accent)] px-2.5 py-1.5 text-[11px] font-semibold text-white transition hover:bg-[var(--accent-hover)]"
+                        >
+                          Registrar
+                        </button>
+                      </div>
+                    )}
+                    {!npsDaConversa && conversaSelecionada.cliente_id && (
+                      <button
+                        onClick={() => dispararNps(conversaSelecionada.id)}
+                        className="rounded-lg border border-[var(--border)] bg-[var(--inset)] px-2.5 py-1.5 text-[11px] font-semibold text-[var(--text-primary)] transition hover:bg-[var(--raised)]"
+                      >
+                        Disparar pesquisa NPS
+                      </button>
+                    )}
+                  </div>
+
+                  {/* Opções da conversa */}
+                  <div className="card p-4">
+                    <p className="mb-3 text-[11px] font-bold uppercase tracking-wide text-[var(--text-secondary)]">
+                      Opções da conversa
+                    </p>
+                    <div className="space-y-2">
+                      {conversaSelecionada.espelhando ? (
+                        <button
+                          onClick={() => toggleEspelhamento(conversaSelecionada)}
+                          className="flex w-full items-center gap-2 rounded-lg border border-[var(--border)] bg-[var(--inset)] px-3 py-2 text-xs font-semibold text-[var(--text-primary)] transition hover:bg-[var(--raised)]"
+                        >
+                          <ShieldCheck className="h-3.5 w-3.5 text-[var(--success)]" />
+                          Espelhando
+                        </button>
+                      ) : (
+                        <button
+                          onClick={() => toggleEspelhamento(conversaSelecionada)}
+                          className="flex w-full items-center gap-2 rounded-lg border border-[var(--border)] bg-[var(--inset)] px-3 py-2 text-xs font-semibold text-[var(--text-secondary)] transition hover:bg-[var(--raised)]"
+                        >
+                          <ShieldOff className="h-3.5 w-3.5" />
+                          Não espelhar
+                        </button>
+                      )}
+                      <a
+                        href={`/api/whatsapp/export?conversaId=${conversaSelecionada.id}&formato=csv`}
+                        className="flex w-full items-center gap-2 rounded-lg border border-[var(--border)] bg-[var(--inset)] px-3 py-2 text-xs font-semibold text-[var(--text-primary)] transition hover:bg-[var(--raised)]"
+                      >
+                        <Download className="h-3.5 w-3.5 text-[var(--text-muted)]" />
+                        Exportar CSV
+                      </a>
+                      <button
+                        onClick={() => excluirConversa(conversaSelecionada.id)}
+                        className="flex w-full items-center gap-2 rounded-lg border border-[var(--danger-border)] bg-[var(--danger-light)] px-3 py-2 text-xs font-semibold text-[var(--danger)] transition hover:opacity-80"
+                      >
+                        <Trash2 className="h-3.5 w-3.5" />
+                        Excluir conversa (LGPD)
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* ── Como funciona (acordeão discreto) ── */}
+          <details className="group overflow-hidden rounded-xl border border-[var(--border)] bg-[var(--white)]">
+            <summary className="flex cursor-pointer items-center gap-2 px-5 py-4 text-sm font-semibold text-[var(--text-primary)]">
+              <Building2 className="h-4 w-4 text-[var(--text-muted)]" />
+              Como funciona o espelhamento
+              <ChevronDown className="ml-auto h-4 w-4 text-[var(--text-muted)] transition-transform group-open:rotate-180" />
+            </summary>
+            <div className="grid grid-cols-1 gap-2 border-t border-[var(--border)] p-4 text-xs text-[var(--text-secondary)] md:grid-cols-4">
+              <div className="rounded-xl bg-[var(--inset)] p-3">
+                <b className="block text-[var(--text-primary)]">1. Conexão</b>
+                O corretor conecta o WhatsApp via QR Code (Evolution API) — status aparece acima.
+              </div>
+              <div className="rounded-xl bg-[var(--inset)] p-3">
+                <b className="block text-[var(--text-primary)]">2. Evento</b>
+                Cada mensagem recebida/enviada dispara um webhook para{" "}
+                <code className="font-mono">/api/whatsapp/webhook</code>.
+              </div>
+              <div className="rounded-xl bg-[var(--inset)] p-3">
+                <b className="block text-[var(--text-primary)]">3. Cruzamento</b>
+                O número é normalizado (55 + DDD) e cruzado com atendimentos ativos no CRM.
+              </div>
+              <div className="rounded-xl bg-[var(--inset)] p-3">
+                <b className="block text-[var(--text-primary)]">4. Registro</b>
+                A mensagem vira interação na ficha, separando recebidas/enviadas — sem trabalho manual.
+              </div>
+            </div>
+          </details>
         </>
       )}
     </div>

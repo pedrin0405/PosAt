@@ -427,6 +427,7 @@ export interface ConversaWhatsApp {
   conexao_id: string;
   corretor: string | null;
   numero_cliente: string;
+  whatsapp_chat_id: string | null;
   nome_cliente: string | null;
   cliente_id: string | null;
   empreendimento: string | null;

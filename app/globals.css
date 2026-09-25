@@ -19,12 +19,15 @@
   --color-danger-light: rgba(248, 113, 113, 0.14);
   --color-sky: #38BDF8;
 
-  /* Surfaces */
-  --color-surface: #0B0F17;
+  /* Surfaces (Base de produtos modernos de CRM) */
+  --color-surface: #080C13;
+  --color-raised: #151F2D;
+  --color-inset: #0D1320;
+  --color-side: #0B0F17;
 
   /* Semantic aliases consumed across existing pages */
   --color-white: #FFFFFF;
-  --color-border: #1E293B;
+  --color-border: #223044;
   --color-border-strong: #334155;
   --color-text-primary: #F1F5F9;
   --color-text-secondary: #94A3B8;
@@ -33,11 +36,15 @@
 
 @layer base {
   :root {
-    /* Dark-only design: semantic aliases already resolve to the QUADRA palette. */
     color-scheme: dark;
-    --surface: #0B0F17;
-    --white: #161F33;
-    --border: #1E293B;
+    /* Fonte única de verdade dos tokens */
+    --surface: #080C13;
+    --raised: #151F2D;
+    --inset: #0D1320;
+    --side: #0B0F17;
+    /* Aliases legados usados por componentes existentes */
+    --white: #151F2D;
+    --border: #223044;
     --border-strong: #334155;
     --text-primary: #F1F5F9;
     --text-secondary: #94A3B8;
@@ -46,17 +53,25 @@
     --accent: #3B82F6;
     --accent-hover: #2563EB;
     --accent-light: rgba(59, 130, 246, 0.16);
+    --accent-border: rgba(59, 130, 246, 0.35);
     --success: #34D399;
-    --success-light: rgba(52, 211, 153, 0.14);
+    --success-light: rgba(52, 211, 153, 0.16);
+    --success-border: rgba(52, 211, 153, 0.35);
     --warning: #FBBF24;
+    --warning-light: rgba(251, 191, 36, 0.14);
+    --warning-border: rgba(251, 191, 36, 0.35);
     --danger: #F87171;
-    --danger-light: rgba(248, 113, 113, 0.14);
+    --danger-light: rgba(248, 113, 113, 0.16);
+    --danger-border: rgba(248, 113, 113, 0.35);
   }
 
   .dark {
-    --surface: #0B0F17;
-    --white: #161F33;
-    --border: #1E293B;
+    --surface: #080C13;
+    --raised: #151F2D;
+    --inset: #0D1320;
+    --side: #0B0F17;
+    --white: #151F2D;
+    --border: #223044;
     --border-strong: #334155;
     --text-primary: #F1F5F9;
     --text-secondary: #94A3B8;
@@ -65,11 +80,16 @@
     --accent: #3B82F6;
     --accent-hover: #2563EB;
     --accent-light: rgba(59, 130, 246, 0.16);
+    --accent-border: rgba(59, 130, 246, 0.35);
     --success: #34D399;
-    --success-light: rgba(52, 211, 153, 0.14);
+    --success-light: rgba(52, 211, 153, 0.16);
+    --success-border: rgba(52, 211, 153, 0.35);
     --warning: #FBBF24;
+    --warning-light: rgba(251, 191, 36, 0.14);
+    --warning-border: rgba(251, 191, 36, 0.35);
     --danger: #F87171;
-    --danger-light: rgba(248, 113, 113, 0.14);
+    --danger-light: rgba(248, 113, 113, 0.16);
+    --danger-border: rgba(248, 113, 113, 0.35);
   }
 
   html {
@@ -85,6 +105,7 @@
     color: var(--text-primary);
     line-height: 1.6;
     min-height: 100vh;
+    font-size: 14px;
   }
 
   * {
@@ -92,20 +113,57 @@
   }
 }
 
+/* ─── Componente de card (superfície padrão de conteúdo) ─── */
+.card {
+  background: var(--white);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+}
+
+.card-hover {
+  transition: border-color 150ms, background 150ms, transform 150ms, box-shadow 150ms;
+}
+.card-hover:hover {
+  border-color: var(--border-strong);
+}
+
+/* ─── Tooltip moderno via data-tooltip ─── */
+[data-tooltip] {
+  position: relative;
+}
+[data-tooltip]:hover::after {
+  content: attr(data-tooltip);
+  position: absolute;
+  left: calc(100% + 10px);
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 60;
+  padding: 4px 8px;
+  border-radius: 6px;
+  background: var(--raised);
+  border: 1px solid var(--border-strong);
+  color: var(--text-primary);
+  font-size: 11px;
+  font-weight: 500;
+  white-space: nowrap;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.35);
+  pointer-events: none;
+}
+
 /* ─── Scrollbar ─── */
 ::-webkit-scrollbar { width: 5px; height: 5px; }
 ::-webkit-scrollbar-track { background: transparent; }
-::-webkit-scrollbar-thumb { background: #334155; border-radius: 9999px; }
+::-webkit-scrollbar-thumb { background: var(--border-strong); border-radius: 9999px; }
 ::-webkit-scrollbar-thumb:hover { background: #475569; }
 
-/* ─── Focus ─── */
+/* ─── Focus acessível ─── */
 :focus-visible {
   outline: 2px solid #38BDF8;
   outline-offset: 2px;
 }
 
 /* ─── Smooth transitions for interactive elements ─── */
-button, a {
+button, a, input, select, textarea {
   transition-property: color, background-color, border-color, opacity, transform, box-shadow;
   transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
   transition-duration: 150ms;
@@ -127,3 +185,42 @@ button, a {
 .animate-slide-down {
   animation: slideDown 0.2s cubic-bezier(0.4, 0, 0.2, 1) forwards;
 }
+
+@keyframes slideRight {
+  from { opacity: 0; transform: translateX(16px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+.animate-slide-right {
+  animation: slideRight 0.28s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
+@keyframes toastIn {
+  from { opacity: 0; transform: translateY(-8px) scale(0.98); }
+  to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+.animate-toast {
+  animation: toastIn 0.22s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
+/* ─── Skeleton loader ─── */
+.skeleton {
+  position: relative;
+  overflow: hidden;
+  background: var(--inset);
+  border-radius: 8px;
+}
+.skeleton::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  transform: translateX(-100%);
+  animation: shimmer 1.5s infinite;
+  background: linear-gradient(90deg, transparent, rgba(148, 163, 184, 0.08), transparent);
+}
+@keyframes shimmer {
+  100% { transform: translateX(100%); }
+}
+
+/* ─── Scroll horizontal suave (kanban etc.) ─── */
+.scroll-thin::-webkit-scrollbar { height: 6px; }
+.scroll-thin::-webkit-scrollbar-thumb { background: var(--border-strong); }

@@ -4,6 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import {
   UserRound,
+  Building2,
   Calendar,
   MoreHorizontal,
   ArrowRight,
@@ -12,6 +13,7 @@ import {
   RotateCcw,
   Target,
   Sparkles,
+  ChevronDown,
 } from "lucide-react";
 import { OportunidadeItem } from "@/lib/segmentacao/tipos";
 import {
@@ -20,6 +22,7 @@ import {
   REGRA_LABEL,
   ORIGEM_LABEL,
   PROXIMO_PASSO_STATUS,
+  STAGE,
   grupoDeOportunidade,
   formataMoeda,
   formataData,
@@ -44,29 +47,37 @@ export default function OportunidadeCard({
   aoReabrir,
 }: OportunidadeCardProps) {
   const [menuAberto, setMenuAberto] = useState(false);
-  const tipo = TIPO_LABEL[o.tipo] || TIPO_LABEL.outro;
+  const [mostrarTodasTags, setMostrarTodasTags] = useState(false);
+
   const grupo = grupoDeOportunidade(o.status);
   const proximo = PROXIMO_PASSO_STATUS[o.status];
   const vencida = ehVencida(o.prazo_em);
-  const tags = (o.tags || []).filter((t) => t !== "Removido").slice(0, 3);
+  const stage = STAGE[o.status] || STAGE.encerrada;
+  const todasTags = (o.tags || []).filter((t) => t !== "Removido");
+  const tagsVisiveis = mostrarTodasTags ? todasTags : todasTags.slice(0, 2);
+
+  const evento = o.cliente?.id
+    ? o.imovel?.empreendimento ||
+      (o.imovel?.bairro || o.imovel?.cidade
+        ? [o.imovel.bairro, o.imovel.cidade].filter(Boolean).join(", ")
+        : null) ||
+      o.imovel?.codigo_imovel ||
+      null
+    : null;
 
   const fecharMenu = () => setMenuAberto(false);
 
   return (
     <div
       onClick={aoAbrir}
-      className="flex cursor-pointer flex-col gap-3 rounded-3xl border border-slate-800/60 bg-[#161F33] p-5 transition-all hover:border-slate-700/80 hover:shadow-lg hover:shadow-black/20"
+      className="flex cursor-pointer flex-col gap-2.5 rounded-2xl border border-slate-800/60 bg-[#161F33] p-4 transition-all hover:border-slate-700/80 hover:shadow-lg hover:shadow-black/20"
     >
-      {/* Header */}
-      <div className="flex items-start justify-between gap-3">
-        <div className="flex min-w-0 flex-wrap items-center gap-2">
-          <span className={`inline-flex shrink-0 rounded-full px-3 py-1 text-xs font-black uppercase tracking-widest text-white ${tipo.badge}`}>
-            {tipo.label}
-          </span>
-          <span className="inline-flex shrink-0 items-center gap-1 rounded-full bg-slate-900/80 px-3 py-1 text-[10px] font-bold uppercase tracking-widest text-slate-300">
-            <Sparkles className="h-3 w-3 text-sky-400" />
-            {ORIGEM_LABEL[o.origem] || "Outro"}
-          </span>
+      {/* Linha 1: tipo + origem (secundário) · kebab */}
+      <div className="flex items-center justify-between gap-3">
+        <div className="flex min-w-0 items-center gap-1.5 text-[10px] font-black uppercase tracking-widest text-slate-400">
+          <span>{TIPO_LABEL[o.tipo]?.label || "Outro"}</span>
+          <span className="text-slate-600">•</span>
+          <span className="normal-case tracking-normal">{ORIGEM_LABEL[o.origem] || "Outro"}</span>
         </div>
         <div className="relative shrink-0">
           <button
@@ -148,85 +159,125 @@ export default function OportunidadeCard({
         </div>
       </div>
 
-      {/* Título */}
-      <h3 className="text-base font-black tracking-wide leading-snug text-white">
-        {o.descricao}
-      </h3>
-
-      {/* Valor */}
-      {o.valor_estimado ? (
-        <span className="text-xl font-extrabold text-emerald-400">
-          {formataMoeda(o.valor_estimado)}
-        </span>
-      ) : null}
-
-      {/* Tags */}
-      {tags.length > 0 && (
-        <div className="flex flex-wrap gap-1.5">
-          {tags.map((t) => (
-            <span
-              key={t}
-              className="rounded-full border border-slate-700/40 bg-slate-900/80 px-2.5 py-0.5 text-[11px] font-bold text-slate-300"
-            >
-              {t}
-            </span>
-          ))}
-          {(o.tags || []).filter((t) => t !== "Removido").length > 3 && (
-            <span className="text-[11px] font-semibold text-slate-500">
-              +{(o.tags || []).filter((t) => t !== "Removido").length - 3}
-            </span>
-          )}
+      {/* Cliente */}
+      <div className="flex items-center gap-2.5">
+        <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-slate-800 text-[11px] font-black text-sky-300">
+          {(o.cliente?.nome || "Cliente")
+            .split(" ")
+            .slice(0, 2)
+            .map((n) => n[0]?.toUpperCase() || "")
+            .join("")}
         </div>
-      )}
-
-      {/* Sub-container de Metadados */}
-      <div className="my-3 rounded-2xl border border-slate-700/40 bg-slate-900/60 p-3.5 pointer-events-none">
-        <div className="space-y-2 text-sm text-slate-300">
-          {o.cliente?.id && (
+        <div className="min-w-0 flex-1">
+          {o.cliente?.id ? (
             <Link
               href={`/clientes/${o.cliente.id}`}
-              className="flex items-center gap-2 font-semibold text-slate-200 hover:text-white hover:underline pointer-events-auto"
+              onClick={(e) => e.stopPropagation()}
+              className="block truncate text-sm font-black text-white transition hover:text-sky-300 hover:underline"
             >
-              <Target className="h-3.5 w-3.5 text-sky-400" />
               {o.cliente.nome || "Cliente"}
             </Link>
+          ) : (
+            <span className="block truncate text-sm font-black text-white">{o.descricao}</span>
           )}
-          {o.vendedor && (
-            <div className="flex items-center gap-2 pointer-events-auto">
-              <UserRound className="h-3.5 w-3.5 text-slate-500" />
-              <span className="font-medium text-slate-200">{o.vendedor.nome}</span>
-            </div>
+          {o.cliente?.id && (
+            <span className="block truncate text-[11px] text-slate-500">{o.descricao}</span>
           )}
         </div>
       </div>
 
-      {/* Footer */}
-      <div className="mt-auto flex flex-wrap items-center justify-between gap-2 border-t border-slate-800/80 pt-3 text-xs text-slate-400">
-        <span
-          className={`rounded-full px-2.5 py-0.5 text-[11px] font-bold ${
-            o.status === "removida"
-              ? "bg-rose-500/15 text-rose-300"
-              : o.status === "convertida"
-                ? "bg-emerald-500/15 text-emerald-300"
-                : "bg-blue-500/15 text-blue-300"
-          }`}
-        >
-          {STATUS_LABEL[o.status] || o.status}
-        </span>
-        <div className="flex items-center gap-3">
-          {o.regra_geradora !== "origem_manual" && (
-            <span className="hidden items-center gap-1.5 sm:flex">
-              <Sparkles className="h-3 w-3 text-slate-500" />
-              {REGRA_LABEL[o.regra_geradora] || o.regra_geradora}
-            </span>
-          )}
-          {o.prazo_em && (
-            <span className={`flex items-center gap-1.5 ${vencida ? "font-bold text-rose-400" : ""}`}>
-              <Calendar className="h-3 w-3 text-slate-500" />
-              {formataData(o.prazo_em)}
-            </span>
-          )}
+      {/* Empreendimento */}
+      {evento && (
+        <div className="flex items-center gap-1.5 text-xs font-semibold text-slate-300">
+          <Building2 className="h-3.5 w-3.5 flex-shrink-0 text-slate-500" />
+          <span className="truncate">{evento}</span>
         </div>
+      )}
+
+      <div className="my-1 border-t border-slate-800/70" />
+
+      {/* Etapa (cor principal) + próximo passo */}
+      <div className="flex flex-wrap items-center justify-between gap-2">
+        <span className="inline-flex items-center gap-1.5 rounded-full border border-slate-700/50 px-2.5 py-1 text-[11px] font-bold">
+          <span className={`h-1.5 w-1.5 rounded-full ${stage.dot}`} />
+          <span className={stage.text}>{STATUS_LABEL[o.status] || o.status}</span>
+        </span>
+        {grupo === "ativas" && proximo && aoAvancar && (
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              aoAvancar();
+            }}
+            className="flex items-center gap-1 rounded-full border border-slate-700/50 px-2.5 py-1 text-[10px] font-bold text-slate-300 transition hover:border-sky-500/50 hover:text-sky-300"
+          >
+            Próx. {STATUS_LABEL[proximo]}
+            <ArrowRight className="h-3 w-3" />
+          </button>
+        )}
+      </div>
+
+      {/* Próxima ação · Valor */}
+      <div className="flex items-center justify-between gap-3">
+        {o.proximo_passo ? (
+          <span className="flex items-center gap-1.5 truncate text-xs text-slate-400">
+            <Calendar className="h-3.5 w-3.5 flex-shrink-0 text-slate-500" />
+            <span className="truncate">{o.proximo_passo}</span>
+          </span>
+        ) : o.prazo_em ? (
+          <span
+            className={`flex items-center gap-1.5 text-xs ${
+              vencida ? "font-bold text-rose-400" : "text-slate-400"
+            }`}
+          >
+            <Calendar className="h-3.5 w-3.5 flex-shrink-0 text-slate-500" />
+            {formataData(o.prazo_em)}
+          </span>
+        ) : (
+          <span />
+        )}
+        {o.valor_estimado ? (
+          <span className="shrink-0 text-base font-extrabold text-emerald-400">
+            {formataMoeda(o.valor_estimado)}
+          </span>
+        ) : null}
+      </div>
+
+      {/* Responsável */}
+      {o.vendedor?.nome && (
+        <div className="flex items-center gap-1.5 text-[11px] text-slate-400">
+          <UserRound className="h-3 w-3 text-slate-500" />
+          {o.vendedor.nome}
+        </div>
+      )}
+
+      {/* Tags colapsadas + regra geradora */}
+      <div className="flex flex-wrap items-center gap-1.5">
+        {tagsVisiveis.map((t) => (
+          <span
+            key={t}
+            className="rounded-full border border-slate-700/40 bg-slate-900/80 px-2 py-0.5 text-[10px] font-semibold text-slate-400"
+          >
+            {t}
+          </span>
+        ))}
+        {todasTags.length > 2 && (
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              setMostrarTodasTags((v) => !v);
+            }}
+            className="flex items-center gap-0.5 rounded-full border border-slate-700/50 px-2 py-0.5 text-[10px] font-bold text-slate-400 transition hover:text-slate-200"
+          >
+            {mostrarTodasTags ? "menos" : `+${todasTags.length - 2}`}
+            <ChevronDown className={`h-3 w-3 transition ${mostrarTodasTags ? "rotate-180" : ""}`} />
+          </button>
+        )}
+        {o.regra_geradora !== "origem_manual" && (
+          <span className="ml-auto hidden items-center gap-1 text-[10px] font-semibold text-slate-500 sm:flex">
+            <Sparkles className="h-3 w-3 text-slate-600" />
+            {REGRA_LABEL[o.regra_geradora] || o.regra_geradora}
+          </span>
+        )}
       </div>
 
       {/* Nota de remoção */}

@@ -239,25 +239,24 @@ export function OportunidadesView({ onNavigateToVendedores, onOpenDetail, onClos
       {/* Header */}
       <div className="flex flex-wrap items-center justify-between gap-4">
         <div>
-          <p className="mb-1 text-xs font-bold uppercase tracking-widest text-sky-400">Crescimento</p>
-          <h1 className="text-2xl font-extrabold tracking-tight text-white">Oportunidades</h1>
-          <p className="mt-1 text-sm text-slate-400">
+          <h1 className="text-2xl font-bold tracking-tight text-[var(--text-primary)]">Oportunidades</h1>
+          <p className="mt-1 text-sm text-[var(--text-secondary)]">
             {contagem.ativas} em andamento · {formataMoeda(totalValorAtivas)} em jogo
           </p>
         </div>
         <div className="flex items-center gap-2">
           <button
             onClick={onNavigateToVendedores}
-            className="flex h-11 items-center gap-1.5 rounded-xl border border-slate-700/80 bg-slate-900/40 px-3.5 text-sm font-semibold text-slate-200 transition hover:border-slate-600 hover:bg-slate-800 hover:text-white"
+            className="flex h-10 items-center gap-1.5 rounded-xl border border-[var(--border)] bg-[var(--white)] px-3.5 text-sm font-medium text-[var(--text-secondary)] transition hover:bg-[var(--inset)] hover:text-[var(--text-primary)]"
           >
-            <Store className="h-4 w-4 text-sky-400" />
+            <Store className="h-4 w-4 text-[var(--accent)]" />
             <span className="hidden sm:inline">Vendedores</span>
           </button>
-          <button onClick={recarregar} className="flex h-11 items-center gap-1.5 rounded-xl border border-slate-700/80 bg-slate-900/40 px-3.5 text-sm font-semibold text-slate-200 transition hover:border-slate-600 hover:bg-slate-800 hover:text-white">
-            <RefreshCw className="h-4 w-4 text-sky-400" />
+          <button onClick={recarregar} className="flex h-10 items-center gap-1.5 rounded-xl border border-[var(--border)] bg-[var(--white)] px-3.5 text-sm font-medium text-[var(--text-secondary)] transition hover:bg-[var(--inset)] hover:text-[var(--text-primary)]">
+            <RefreshCw className="h-4 w-4" />
             <span className="hidden sm:inline">Atualizar</span>
           </button>
-          <button onClick={() => setModalNova(true)} className="flex h-11 items-center gap-1.5 rounded-xl bg-blue-600 px-4 text-sm font-bold text-white shadow-lg shadow-blue-900/40 transition hover:bg-blue-500">
+          <button onClick={() => setModalNova(true)} className="flex h-10 items-center gap-1.5 rounded-xl bg-[var(--accent)] px-4 text-sm font-bold text-white transition hover:bg-[var(--accent-hover)]">
             <Plus className="h-4 w-4" />
             Nova Oportunidade
           </button>
@@ -265,37 +264,39 @@ export function OportunidadesView({ onNavigateToVendedores, onOpenDetail, onClos
       </div>
 
       {/* Destaque: Oportunidades Ativas */}
-      <div className="rounded-3xl border border-sky-500/30 bg-sky-500/10 p-5 shadow-lg shadow-sky-500/5">
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-          <div className="flex items-center gap-3">
-            <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-sky-500/20">
-              <Target className="h-6 w-6 text-sky-400" />
-            </div>
-            <div>
-              <p className="text-xs font-bold uppercase tracking-widest text-sky-400">Em Negociação Ativa</p>
-              <p className="text-3xl font-extrabold tracking-tight text-white">{contagem.ativas}</p>
-            </div>
+      <div className="card flex flex-col gap-4 p-5 sm:flex-row sm:items-center sm:justify-between">
+        <div className="flex items-center gap-3">
+          <span className="flex h-11 w-11 items-center justify-center rounded-xl bg-[var(--accent-light)]">
+            <Target className="h-5 w-5 text-[var(--accent)]" />
+          </span>
+          <div>
+            <p className="text-xs font-bold uppercase tracking-widest text-[var(--text-secondary)]">
+              Em Negociação Ativa
+            </p>
+            <p className="text-3xl font-extrabold tracking-tight text-[var(--text-primary)]">
+              {contagem.ativas}
+            </p>
           </div>
-          <div className="flex items-center gap-3 border-l border-slate-800/60 pl-4 sm:border-l sm:pl-4">
-            <div className="text-right">
-              <p className="text-xs font-bold uppercase tracking-widest text-slate-400">Valor Total em Jogo</p>
-              <p className="text-2xl font-extrabold text-emerald-400">{formataMoeda(totalValorAtivas)}</p>
-            </div>
-          </div>
+        </div>
+        <div className="text-left sm:text-right">
+          <p className="text-xs font-bold uppercase tracking-widest text-[var(--text-secondary)]">
+            Valor Total em Jogo
+          </p>
+          <p className="text-2xl font-extrabold text-[var(--success)]">{formataMoeda(totalValorAtivas)}</p>
         </div>
       </div>
 
       {/* Tabs + filtro */}
       <div className="flex flex-wrap items-center gap-4">
-        <div className="flex flex-1 gap-1 rounded-2xl border border-slate-800/60 bg-[#0D1320] p-1">
+        <div className="flex flex-1 gap-1 rounded-xl border border-[var(--border)] bg-[var(--inset)] p-1">
           {GRUPO.map((g) => (
             <button
               key={g.id}
               onClick={() => setGrupo(g.id)}
-              className={`flex-1 rounded-xl px-3 py-2 text-xs font-bold transition sm:text-sm ${
+              className={`flex-1 rounded-lg px-3 py-2 text-xs font-bold transition sm:text-sm ${
                 grupo === g.id
-                  ? "bg-blue-600 text-white shadow-lg shadow-blue-900/40"
-                  : "text-slate-400 hover:bg-slate-800/60 hover:text-white"
+                  ? "bg-[var(--white)] text-[var(--text-primary)] shadow-sm"
+                  : "text-[var(--text-secondary)] hover:bg-[var(--raised)] hover:text-[var(--text-primary)]"
               }`}
             >
               {g.label}
@@ -307,8 +308,8 @@ export function OportunidadesView({ onNavigateToVendedores, onOpenDetail, onClos
           onClick={() => setFiltrosAberto(true)}
           className={`flex h-10 items-center gap-1.5 rounded-xl border px-3.5 text-sm font-semibold transition ${
             filtresAtivos
-              ? "border-sky-500/60 bg-blue-600 text-white hover:bg-blue-500"
-              : "border-slate-700/80 bg-slate-900/40 text-slate-200 hover:border-slate-600 hover:bg-slate-800"
+              ? "border-[var(--accent)] bg-[var(--accent)] text-white hover:bg-[var(--accent-hover)]"
+              : "border-[var(--border)] bg-[var(--white)] text-[var(--text-secondary)] hover:bg-[var(--inset)]"
           }`}
         >
           <SlidersHorizontal className="h-4 w-4" />
@@ -323,12 +324,12 @@ export function OportunidadesView({ onNavigateToVendedores, onOpenDetail, onClos
 
       {/* Cards */}
       {carregando ? (
-        <div className="rounded-3xl border border-slate-800/60 bg-[#161F33] py-16 text-center text-sm text-slate-400">
-          <RefreshCw className="mx-auto mb-3 h-5 w-5 animate-spin text-sky-400" />
+        <div className="rounded-xl border border-[var(--border)] bg-[var(--white)] py-16 text-center text-sm text-[var(--text-muted)]">
+          <RefreshCw className="mx-auto mb-3 h-5 w-5 animate-spin text-[var(--accent)]" />
           Carregando oportunidades…
         </div>
       ) : filtradas.length === 0 ? (
-        <div className="rounded-3xl border border-dashed border-slate-700/80 py-10 text-center text-sm text-slate-500">
+        <div className="rounded-xl border border-dashed border-[var(--border-strong)] py-10 text-center text-sm text-[var(--text-muted)]">
           {filtresAtivos ? "Nenhuma oportunidade encontrada com esses filtros." : "Nenhuma oportunidade nesta aba."}
         </div>
       ) : (

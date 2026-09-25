@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { ThemeProvider } from "next-themes";
 import "./globals.css";
-import Navbar from "@/components/Navbar";
+import { AppShell } from "@/components/AppShell";
 
 export const metadata: Metadata = {
   title: "Pós-Atendimento | Quadra Brasileira",
@@ -23,16 +23,7 @@ export default function RootLayout({
           disableTransitionOnChange
           scriptProps={{ suppressHydrationWarning: true }}
         >
-          <Navbar />
-          <main className="mx-auto w-full max-w-7xl flex-1 px-4 pt-10 pb-20 sm:px-8 lg:px-10">
-            {children}
-          </main>
-          <footer className="border-t border-slate-800/70 bg-[#0B0F17] py-6">
-            <div className="mx-auto flex max-w-7xl flex-col items-center justify-between gap-2 px-4 text-xs text-slate-400 sm:flex-row sm:px-8 lg:px-10">
-              <p>&copy; {new Date().getFullYear()} Quadra Brasileira — Pós-Atendimento</p>
-              <p className="font-medium">Next.js + Supabase</p>
-            </div>
-          </footer>
+          <AppShell>{children}</AppShell>
         </ThemeProvider>
       </body>
     </html>

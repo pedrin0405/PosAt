@@ -3,7 +3,14 @@
 import { PhoneCall, Mail, Building2, Target, X, ChevronRight } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { VendedorItem, ImovelItem, OportunidadeItem } from "@/lib/segmentacao/tipos";
-import { STATUS_LABEL, formataMoeda } from "@/components/oportunidade/oportunidade-ui";
+import { STATUS_LABEL, STAGE, formataMoeda } from "@/components/oportunidade/oportunidade-ui";
+
+const IMOVEL_STATUS: Record<string, { label: string; text: string; bg: string }> = {
+  disponivel: { label: "Disponível", text: "text-emerald-300", bg: "bg-emerald-500/15" },
+  reservado: { label: "Reservado", text: "text-amber-300", bg: "bg-amber-500/15" },
+  vendido: { label: "Vendido", text: "text-slate-300", bg: "bg-slate-700/60" },
+  locado: { label: "Locado", text: "text-sky-300", bg: "bg-sky-500/15" },
+};
 
 function iniciais(nome: string) {
   return nome
@@ -31,120 +38,146 @@ export function VendedorDetailPanel({
 
   return (
     <div className="fixed inset-0 z-50">
-      <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={aoFechar} />
+      <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={aoFechar} />
       <aside className="absolute right-0 top-0 flex h-screen w-full max-w-lg flex-col border-l border-slate-800/60 bg-[#0D1320] shadow-2xl">
-        <div className="border-b border-slate-800/80 px-5 py-4 flex-shrink-0">
+        {/* Header */}
+        <div className="flex-shrink-0 border-b border-slate-800/80 px-6 py-5">
           <div className="flex items-start justify-between gap-3">
             <div className="flex min-w-0 items-center gap-3">
-              <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-sky-400 to-blue-600 text-base font-bold text-white shadow-lg shadow-blue-900/40">
+              <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-slate-800 text-base font-black text-sky-300">
                 {iniciais(v.nome)}
               </span>
               <div className="min-w-0">
                 <h2 className="truncate text-lg font-black tracking-wide text-white">{v.nome}</h2>
-                <div className="flex flex-wrap items-center gap-2 text-xs text-slate-400">
+                <div className="mt-1 flex flex-wrap items-center gap-2 text-xs text-slate-400">
                   <span
-                    className={`rounded-full px-3 py-1 text-[10px] font-black uppercase tracking-wider ${
+                    className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-[11px] font-bold ${
                       v.status === "ativo"
                         ? "bg-emerald-500/15 text-emerald-300"
                         : "bg-slate-700/40 text-slate-400"
                     }`}
                   >
+                    <span className={`h-1.5 w-1.5 rounded-full ${v.status === "ativo" ? "bg-emerald-400" : "bg-slate-500"}`} />
                     {v.status === "ativo" ? "Ativo" : "Inativo"}
                   </span>
                   {v.creci && <span>CREci {v.creci}</span>}
                 </div>
               </div>
             </div>
-            <button onClick={aoFechar} aria-label="Fechar" className="rounded-xl border border-slate-800 p-2 text-slate-400 transition hover:border-slate-700 hover:bg-slate-900/40 hover:text-white">
+            <button onClick={aoFechar} aria-label="Fechar" className="shrink-0 rounded-xl border border-slate-800 p-2 text-slate-400 transition hover:border-slate-700 hover:bg-slate-900/40 hover:text-white">
               <X className="h-5 w-5" />
             </button>
           </div>
         </div>
 
-        <div className="flex-1 min-h-0 space-y-6 overflow-y-auto px-5 py-5">
-          <div className="space-y-1.5 text-sm text-slate-300">
-            {v.telefone && (
-              <div className="flex items-center gap-2">
-                <PhoneCall className="h-4 w-4 text-slate-500" />
-                {v.telefone}
-              </div>
-            )}
-            {v.email && (
-              <div className="flex items-center gap-2">
-                <Mail className="h-4 w-4 text-slate-500" />
-                {v.email}
-              </div>
-            )}
-          </div>
+        <div className="min-h-0 flex-1 space-y-6 overflow-y-auto px-6 py-6">
+          {/* Contato */}
+          <section>
+            <h3 className="flex items-center gap-2 text-sm font-black uppercase tracking-widest text-white">
+              <PhoneCall className="h-4 w-4 text-sky-400" />
+              Contato
+            </h3>
+            <dl className="mt-4 space-y-2.5 text-sm text-slate-300">
+              {v.telefone && (
+                <div className="flex items-center gap-2">
+                  <PhoneCall className="h-4 w-4 shrink-0 text-slate-500" />
+                  {v.telefone}
+                </div>
+              )}
+              {v.email ? (
+                <div className="flex items-center gap-2">
+                  <Mail className="h-4 w-4 shrink-0 text-slate-500" />
+                  <span className="truncate">{v.email}</span>
+                </div>
+              ) : (
+                <p className="text-sm text-slate-500">Contato não informado.</p>
+              )}
+            </dl>
+          </section>
 
-          <div>
-            <h3 className="mb-3 flex items-center gap-2 text-sm font-black tracking-wide text-white">
+          <div className="border-t border-slate-800/70" />
+
+          {/* Imóveis */}
+          <section>
+            <h3 className="flex items-center gap-2 text-sm font-black uppercase tracking-widest text-white">
               <Building2 className="h-4 w-4 text-sky-400" />
               Imóveis anunciados ({imoveis.length})
             </h3>
             {imoveis.length === 0 ? (
-              <p className="text-sm text-slate-500">Nenhum imóvel vinculado.</p>
+              <p className="mt-4 text-sm text-slate-500">Nenhum imóvel vinculado.</p>
             ) : (
-              <ul className="space-y-2">
-                {imoveis.map((i) => (
-                  <li key={i.id} className="rounded-2xl border border-slate-800/60 bg-[#131C2E] p-3">
-                    <div className="flex items-center justify-between gap-2">
-                      <p className="text-sm font-black tracking-wide text-white">
-                        {i.codigo_imovel}
-                        <span className="ml-2 font-normal text-slate-400">{i.empreendimento}</span>
+              <ul className="mt-4 space-y-2.5">
+                {imoveis.map((i) => {
+                  const statusImovel = IMOVEL_STATUS[i.status] || { label: i.status, text: "text-slate-300", bg: "bg-slate-700/60" };
+                  const valor =
+                    i.tipo_negocio === "venda" && i.valor_venda
+                      ? formataMoeda(i.valor_venda)
+                      : i.tipo_negocio === "locacao" && i.valor_locacao
+                        ? `${formataMoeda(i.valor_locacao)}/mês`
+                        : null;
+                  return (
+                    <li key={i.id} className="rounded-xl border border-slate-800/60 bg-[#131C2E] p-3">
+                      <div className="flex items-center justify-between gap-2">
+                        <p className="min-w-0 truncate text-sm font-black tracking-wide text-white">
+                          {i.codigo_imovel}
+                          <span className="ml-2 font-normal text-slate-400">{i.empreendimento}</span>
+                        </p>
+                        <span className={`shrink-0 rounded-full px-2 py-0.5 text-[10px] font-bold uppercase ${statusImovel.bg} ${statusImovel.text}`}>
+                          {statusImovel.label}
+                        </span>
+                      </div>
+                      <p className="mt-1 text-xs text-slate-500">
+                        {[i.tipologia, [i.bairro, i.cidade].filter(Boolean).join(", "), i.regiao].filter(Boolean).join(" · ")}
                       </p>
-                      <span className="shrink-0 rounded-full border border-slate-700/60 bg-slate-900/80 px-2 py-0.5 text-[10px] font-bold uppercase text-slate-300">
-                        {i.status}
-                      </span>
-                    </div>
-                    <p className="mt-1 text-xs text-slate-400">
-                      {i.tipologia} · {i.bairro}, {i.cidade} · {i.regiao}
-                    </p>
-                    {i.tipo_negocio === "venda" && i.valor_venda ? (
-                      <p className="mt-1 text-xs font-extrabold text-emerald-400">
-                        {formataMoeda(i.valor_venda)}
-                      </p>
-                    ) : i.tipo_negocio === "locacao" && i.valor_locacao ? (
-                      <p className="mt-1 text-xs font-extrabold text-emerald-400">
-                        {formataMoeda(i.valor_locacao)}/mês
-                      </p>
-                    ) : null}
-                  </li>
-                ))}
+                      {valor && (
+                        <p className="mt-1 text-xs font-extrabold text-emerald-400">{valor}</p>
+                      )}
+                    </li>
+                  );
+                })}
               </ul>
             )}
-          </div>
+          </section>
 
-          <div>
-            <h3 className="mb-3 flex items-center gap-2 text-sm font-black tracking-wide text-white">
+          <div className="border-t border-slate-800/70" />
+
+          {/* Oportunidades */}
+          <section>
+            <h3 className="flex items-center gap-2 text-sm font-black uppercase tracking-widest text-white">
               <Target className="h-4 w-4 text-sky-400" />
               Oportunidades ({oportunidades.length})
             </h3>
             {oportunidades.length === 0 ? (
-              <p className="text-sm text-slate-500">Nenhuma oportunidade vinculada.</p>
+              <p className="mt-4 text-sm text-slate-500">Nenhuma oportunidade vinculada.</p>
             ) : (
-              <ul className="space-y-2">
-                {oportunidades.slice(0, 8).map((o) => (
-                  <li key={o.id}>
-                    <button
-                      onClick={() => {
-                        aoFechar();
-                        router.push(`/oportunidades?oportunidade=${o.id}`);
-                      }}
-                      className="flex w-full items-center justify-between gap-2 rounded-2xl border border-slate-800/60 bg-[#131C2E] p-3 transition hover:border-slate-700/80 text-left"
-                    >
-                      <span className="min-w-0 truncate text-sm font-semibold text-slate-200">
-                        {o.descricao}
-                      </span>
-                      <span className="flex shrink-0 items-center gap-2">
-                        <span className="text-xs font-semibold text-slate-500">
-                          {STATUS_LABEL[o.status] || o.status}
+              <ul className="mt-4 space-y-2">
+                {oportunidades.slice(0, 8).map((o) => {
+                  const stage = STAGE[o.status] || STAGE.encerrada;
+                  return (
+                    <li key={o.id}>
+                      <button
+                        onClick={() => {
+                          aoFechar();
+                          router.push(`/oportunidades?oportunidade=${o.id}`);
+                        }}
+                        className="flex w-full items-center justify-between gap-2 rounded-xl border border-slate-800/60 bg-[#131C2E] p-3 text-left transition hover:border-slate-700/80"
+                      >
+                        <span className="flex min-w-0 items-center gap-2">
+                          <span className={`h-1.5 w-1.5 shrink-0 rounded-full ${stage.dot}`} />
+                          <span className="min-w-0 truncate text-sm font-semibold text-slate-200">
+                            {o.descricao}
+                          </span>
                         </span>
-                        <ChevronRight className="h-3.5 w-3.5 text-slate-500" />
-                      </span>
-                    </button>
-                  </li>
-                ))}
+                        <span className="flex shrink-0 items-center gap-2">
+                          <span className="text-xs font-semibold text-slate-500">
+                            {STATUS_LABEL[o.status] || o.status}
+                          </span>
+                          <ChevronRight className="h-3.5 w-3.5 text-slate-500" />
+                        </span>
+                      </button>
+                    </li>
+                  );
+                })}
                 {oportunidades.length > 8 && (
                   <li className="text-xs text-slate-500">
                     +{oportunidades.length - 8} outra(s)…
@@ -152,7 +185,7 @@ export function VendedorDetailPanel({
                 )}
               </ul>
             )}
-          </div>
+          </section>
         </div>
       </aside>
     </div>

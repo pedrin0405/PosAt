@@ -3,12 +3,15 @@
 import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import {
-  CheckSquare,
   Clock,
   CheckCircle2,
   RefreshCw,
   Plus,
   ArrowRight,
+  AlertTriangle,
+  X,
+  UserRound,
+  FileText,
 } from "lucide-react";
 import { TarefaItem } from "@/lib/segmentacao/tipos";
 import { finalidadeConfig } from "./ClienteCard";
@@ -20,6 +23,8 @@ const PRIORIDADE_LABEL: Record<number, { label: string; color: string }> = {
   2: { label: "Alta",    color: "#d97706" },
   3: { label: "Média",   color: "#6366f1" },
 };
+
+const MS_DIA = 24 * 60 * 60 * 1000;
 
 interface Coluna {
   id: string;
@@ -53,11 +58,210 @@ const COLUNAS: Coluna[] = [
   },
 ];
 
+type AtualizarStatusFn = (tarefaId: string, novoStatus: string) => void;
+
+function TarefaDrawer({
+  tarefa,
+  aoFechar,
+  aoAtualizarStatus,
+}: {
+  tarefa: TarefaItem;
+  aoFechar: () => void;
+  aoAtualizarStatus: AtualizarStatusFn;
+}) {
+  const prio = PRIORIDADE_LABEL[tarefa.prioridade] ?? { label: `P${tarefa.prioridade}`, color: "var(--text-muted)" };
+  const vencida = tarefa.prazo_em && new Date(tarefa.prazo_em) < new Date() && tarefa.status !== "concluida";
+  const diasAtraso = tarefa.prazo_em
+    ? Math.floor((new Date().getTime() - new Date(tarefa.prazo_em).getTime()) / MS_DIA)
+    : 0;
+
+  const statusMeta =
+    tarefa.status === "concluida"
+      ? { label: "Concluída", cor: "var(--success)", bg: "rgba(52,211,153,0.14)", border: "rgba(52,211,153,0.35)" }
+      : tarefa.status === "em_andamento" || tarefa.status === "reagendada"
+        ? { label: "Em Andamento", cor: "var(--accent)", bg: "rgba(59,130,246,0.14)", border: "rgba(59,130,246,0.35)" }
+        : { label: "Pendente", cor: "var(--warning)", bg: "rgba(251,191,36,0.14)", border: "rgba(251,191,36,0.35)" };
+
+  const finalidadeItem = tarefa.cliente?.finalidade_principal
+    ? finalidadeConfig[tarefa.cliente.finalidade_principal]
+    : null;
+
+  const formatarData = (iso?: string | null) =>
+    iso ? new Date(iso).toLocaleDateString("pt-BR") : "—";
+
+  return (
+    <div className="fixed inset-0 z-50">
+      <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={aoFechar} />
+      <aside className="absolute right-0 top-0 flex h-screen w-full max-w-lg flex-col border-l border-[var(--border)] bg-[var(--white)] shadow-2xl">
+        {/* Header */}
+        <div className="flex-shrink-0 border-b border-[var(--border)] px-6 py-5">
+          <div className="flex items-start justify-between gap-3">
+            <div className="min-w-0">
+              <span
+                className="inline-flex rounded-full px-2.5 py-1 text-[11px] font-bold"
+                style={{ color: statusMeta.cor, background: statusMeta.bg, border: `1px solid ${statusMeta.border}` }}
+              >
+                {statusMeta.label}
+              </span>
+              <h2 className="mt-3 text-lg font-black tracking-wide leading-snug text-[var(--text-primary)]">
+                {tarefa.titulo}
+              </h2>
+            </div>
+            <button
+              onClick={aoFechar}
+              aria-label="Fechar detalhes da tarefa"
+              className="shrink-0 rounded-xl border border-[var(--border)] p-2 text-[var(--text-muted)] transition hover:bg-[var(--inset)] hover:text-[var(--text-primary)]"
+            >
+              <X className="h-5 w-5" />
+            </button>
+          </div>
+        </div>
+
+        {/* Body */}
+        <div className="min-h-0 flex-1 space-y-6 overflow-y-auto px-6 py-6">
+          {/* Alertas reais */}
+          {vencida && (
+            <div className="flex items-start gap-2.5 rounded-xl border border-[var(--danger-border)] bg-[var(--danger-light)] p-3.5 text-sm text-[var(--danger)]">
+              <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0" />
+              <div>
+                <p className="font-bold">Prazo vencido</p>
+                <p className="mt-0.5 text-xs leading-relaxed text-[var(--text-secondary)]">
+                  {diasAtraso > 0
+                    ? `Tarefa atrasada há ${diasAtraso} dia${diasAtraso > 1 ? "s" : ""} desde ${formatarData(tarefa.prazo_em)}.`
+                    : `Prazo vencido em ${formatarData(tarefa.prazo_em)}.`}
+                </p>
+              </div>
+            </div>
+          )}
+
+          {/* Situação */}
+          <section>
+            <h3 className="flex items-center gap-2 text-sm font-black uppercase tracking-widest text-[var(--text-primary)]">
+              <FileText className="h-4 w-4 text-[var(--accent)]" />
+              Situação
+            </h3>
+            <dl className="mt-4 grid grid-cols-2 gap-x-5 gap-y-5 text-sm">
+              <div>
+                <dt className="text-xs font-semibold uppercase tracking-wider text-[var(--text-muted)]">Status</dt>
+                <dd className="mt-1 font-bold capitalize text-[var(--text-primary)]">{statusMeta.label}</dd>
+              </div>
+              <div>
+                <dt className="text-xs font-semibold uppercase tracking-wider text-[var(--text-muted)]">Prioridade</dt>
+                <dd className="mt-1 font-bold" style={{ color: prio.color }}>{prio.label}</dd>
+              </div>
+              {tarefa.prazo_em && (
+                <div>
+                  <dt className="text-xs font-semibold uppercase tracking-wider text-[var(--text-muted)]">Prazo</dt>
+                  <dd className={`mt-1 font-bold ${vencida ? "text-[var(--danger)]" : "text-[var(--text-primary)]"}`}>
+                    {formatarData(tarefa.prazo_em)}
+                  </dd>
+                </div>
+              )}
+              {tarefa.concluida_em && (
+                <div>
+                  <dt className="text-xs font-semibold uppercase tracking-wider text-[var(--text-muted)]">Concluída em</dt>
+                  <dd className="mt-1 font-bold text-[var(--text-primary)]">{formatarData(tarefa.concluida_em)}</dd>
+                </div>
+              )}
+              <div>
+                <dt className="text-xs font-semibold uppercase tracking-wider text-[var(--text-muted)]">Criada em</dt>
+                <dd className="mt-1 text-[var(--text-primary)]">{formatarData(tarefa.criado_em)}</dd>
+              </div>
+              {tarefa.atualizado_em && (
+                <div>
+                  <dt className="text-xs font-semibold uppercase tracking-wider text-[var(--text-muted)]">Atualizada em</dt>
+                  <dd className="mt-1 text-[var(--text-primary)]">{formatarData(tarefa.atualizado_em)}</dd>
+                </div>
+              )}
+            </dl>
+          </section>
+
+          <div className="border-t border-[var(--border)]" />
+
+          {/* Cliente */}
+          <section>
+            <h3 className="flex items-center gap-2 text-sm font-black uppercase tracking-widest text-[var(--text-primary)]">
+              <UserRound className="h-4 w-4 text-[var(--accent)]" />
+              Cliente
+            </h3>
+            <div className="mt-4 flex flex-wrap items-center justify-between gap-2">
+              {tarefa.cliente?.id ? (
+                <Link
+                  href={`/clientes/${tarefa.cliente.id}`}
+                  className="flex items-center gap-1 text-sm font-bold text-[var(--accent)] hover:underline"
+                >
+                  {tarefa.cliente.pessoa?.nome || "Cliente"} <ArrowRight className="h-3 w-3" />
+                </Link>
+              ) : (
+                <span className="text-sm font-semibold text-[var(--text-primary)]">
+                  {tarefa.cliente?.pessoa?.nome || "Cliente não informado"}
+                </span>
+              )}
+              {finalidadeItem && (
+                <span className={`rounded-full border px-2.5 py-1 text-[11px] font-bold ${finalidadeItem.bg} ${finalidadeItem.text} ${finalidadeItem.border}`}>
+                  {finalidadeItem.label}
+                </span>
+              )}
+            </div>
+          </section>
+
+          <div className="border-t border-[var(--border)]" />
+
+          {/* Descrição */}
+          <section>
+            <h3 className="flex items-center gap-2 text-sm font-black uppercase tracking-widest text-[var(--text-primary)]">
+              <FileText className="h-4 w-4 text-[var(--accent)]" />
+              Descrição
+            </h3>
+            {tarefa.descricao ? (
+              <p className="mt-3 whitespace-pre-wrap text-sm leading-relaxed text-[var(--text-secondary)]">
+                {tarefa.descricao}
+              </p>
+            ) : (
+              <p className="mt-3 text-sm text-[var(--text-muted)]">Sem descrição.</p>
+            )}
+          </section>
+        </div>
+
+        {/* Ações */}
+        <div className="flex flex-wrap items-center gap-2.5 border-t border-[var(--border)] px-6 py-4">
+          {tarefa.status !== "pendente" && (
+            <button
+              onClick={() => aoAtualizarStatus(tarefa.id, "pendente")}
+              className="flex flex-1 items-center justify-center gap-1.5 rounded-xl border border-[var(--warning-border)] bg-[var(--warning-light)] px-4 py-2.5 text-sm font-bold text-[var(--warning)] transition hover:opacity-80"
+            >
+              Voltar para Fila
+            </button>
+          )}
+          {tarefa.status !== "em_andamento" && tarefa.status !== "concluida" && (
+            <button
+              onClick={() => aoAtualizarStatus(tarefa.id, "em_andamento")}
+              className="flex flex-1 items-center justify-center gap-1.5 rounded-xl bg-[var(--accent)] px-4 py-2.5 text-sm font-bold text-white transition hover:bg-[var(--accent-hover)]"
+            >
+              Iniciar Tarefa
+            </button>
+          )}
+          {tarefa.status !== "concluida" && (
+            <button
+              onClick={() => aoAtualizarStatus(tarefa.id, "concluida")}
+              className="flex flex-1 items-center justify-center gap-1.5 rounded-xl bg-[var(--success)] px-4 py-2.5 text-sm font-bold text-white transition hover:opacity-90"
+            >
+              <CheckCircle2 className="h-4 w-4" />
+              Concluir
+            </button>
+          )}
+        </div>
+      </aside>
+    </div>
+  );
+}
+
 export default function PosAtendimentoBoard() {
   const [tarefas, setTarefas] = useState<TarefaItem[]>([]);
   const [carregando, setCarregando] = useState(true);
   const [filtroPrioridade, setFiltroPrioridade] = useState<string>("");
   const [modalAberto, setModalAberto] = useState(false);
+  const [tarefaSelecionada, setTarefaSelecionada] = useState<TarefaItem | null>(null);
 
   // Drag & drop state
   const [arrastandoId, setArrastandoId] = useState<string | null>(null);
@@ -153,18 +357,29 @@ export default function PosAtendimentoBoard() {
     ? tarefas.filter((t) => t.prioridade === Number(filtroPrioridade))
     : tarefas;
 
+  const hoje = new Date();
+  hoje.setHours(0, 0, 0, 0);
+  const amanha = new Date(hoje);
+  amanha.setDate(amanha.getDate() + 1);
+
+  const resumo = {
+    atrasadas: tarefas.filter((t) => t.status !== "concluida" && t.prazo_em && new Date(t.prazo_em) < hoje).length,
+    hoje: tarefas.filter(
+      (t) => t.status !== "concluida" && t.prazo_em && new Date(t.prazo_em) >= hoje && new Date(t.prazo_em) < amanha
+    ).length,
+    proximas: tarefas.filter((t) => t.status !== "concluida" && t.prazo_em && new Date(t.prazo_em) >= amanha).length,
+    concluidas: tarefas.filter((t) => t.status === "concluida").length,
+  };
+
   return (
-    <div className="space-y-6">
+    <div className="space-y-5">
       {/* Header */}
       <div className="flex flex-wrap items-center justify-between gap-4">
         <div>
-          <p className="mb-1 text-xs font-bold uppercase tracking-widest text-sky-400">
-            Operacional
-          </p>
-          <h1 className="text-2xl font-extrabold tracking-tight text-white">
+          <h1 className="text-2xl font-bold tracking-tight text-[var(--text-primary)]">
             Fila de Pós-Atendimento
           </h1>
-          <p className="mt-1 text-sm text-slate-400">
+          <p className="mt-1 text-sm text-[var(--text-secondary)]">
             {tarefas.length} tarefa{tarefas.length !== 1 ? "s" : ""} no total
           </p>
         </div>
@@ -173,7 +388,7 @@ export default function PosAtendimentoBoard() {
           <select
             value={filtroPrioridade}
             onChange={(e) => setFiltroPrioridade(e.target.value)}
-            className="h-11 rounded-xl border border-slate-700/80 bg-slate-900/40 px-3 text-sm font-semibold text-slate-200 focus:border-sky-400 focus:outline-none focus:ring-2 focus:ring-sky-400/30"
+            className="h-10 rounded-xl border border-[var(--border)] bg-[var(--white)] px-3 text-sm font-semibold text-[var(--text-primary)] outline-none transition focus:border-[var(--accent)]"
           >
             <option value="">Todas as prioridades</option>
             <option value="1">Crítica</option>
@@ -182,14 +397,14 @@ export default function PosAtendimentoBoard() {
           </select>
           <button
             onClick={carregarTarefas}
-            className="flex h-11 items-center gap-1.5 rounded-xl border border-slate-700/80 bg-slate-900/40 px-3.5 text-sm font-semibold text-slate-200 transition hover:border-slate-600 hover:bg-slate-800 hover:text-white"
+            className="flex h-10 items-center gap-1.5 rounded-xl border border-[var(--border)] bg-[var(--white)] px-3.5 text-sm font-medium text-[var(--text-secondary)] transition hover:bg-[var(--inset)] hover:text-[var(--text-primary)]"
           >
-            <RefreshCw className="h-4 w-4 text-sky-400" />
+            <RefreshCw className="h-4 w-4" />
             <span className="hidden sm:inline">Atualizar</span>
           </button>
           <button
             onClick={() => setModalAberto(true)}
-            className="flex h-11 items-center gap-1.5 rounded-xl bg-blue-600 px-4 text-sm font-bold text-white shadow-lg shadow-blue-900/40 transition hover:bg-blue-500"
+            className="flex h-10 items-center gap-1.5 rounded-xl bg-[var(--accent)] px-4 text-sm font-bold text-white transition hover:bg-[var(--accent-hover)]"
           >
             <Plus className="h-4 w-4" />
             Nova Tarefa
@@ -197,9 +412,37 @@ export default function PosAtendimentoBoard() {
         </div>
       </div>
 
+      {/* Resumo compacto */}
+      <div className="grid grid-cols-2 gap-3 xl:grid-cols-4">
+        {[
+          { label: "Atrasadas", value: resumo.atrasadas, cor: "var(--danger)", icon: AlertTriangle },
+          { label: "Vencem hoje", value: resumo.hoje, cor: "var(--accent)", icon: Clock },
+          { label: "Próximas", value: resumo.proximas, cor: "var(--warning)", icon: ArrowRight },
+          { label: "Concluídas", value: resumo.concluidas, cor: "var(--success)", icon: CheckCircle2 },
+        ].map((s) => {
+          const Icon = s.icon;
+          return (
+            <div key={s.label} className="card flex items-center gap-3 p-3.5">
+              <span
+                className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg"
+                style={{ background: "var(--inset)", color: s.cor }}
+              >
+                <Icon className="h-[15px] w-[15px]" />
+              </span>
+              <div className="min-w-0">
+                <span className="block text-lg font-bold leading-tight tracking-tight text-[var(--text-primary)]">
+                  {s.value}
+                </span>
+                <span className="block truncate text-[11px] text-[var(--text-secondary)]">{s.label}</span>
+              </div>
+            </div>
+          );
+        })}
+      </div>
+
       {carregando ? (
-        <div className="rounded-3xl border border-slate-800/60 bg-[#161F33] py-16 text-center text-sm text-slate-400">
-          <RefreshCw className="mx-auto mb-3 h-5 w-5 animate-spin text-sky-400" />
+        <div className="rounded-xl border border-[var(--border)] bg-[var(--white)] py-16 text-center text-sm text-[var(--text-muted)]">
+          <RefreshCw className="mx-auto mb-3 h-5 w-5 animate-spin text-[var(--accent)]" />
           Carregando tarefas…
         </div>
       ) : (
@@ -220,18 +463,21 @@ export default function PosAtendimentoBoard() {
                   }
                 }}
                 onDrop={(e) => handleDropColuna(col, e)}
-                className={`flex flex-col gap-3 rounded-3xl border p-3 transition-colors ${
+                className={`flex flex-col gap-3 rounded-xl border p-3 transition-colors ${
                   isOver
-                    ? "border-sky-500/50 bg-slate-900/60 ring-2 ring-sky-500/20"
-                    : "border-slate-800/60 bg-[#0D1320]"
+                    ? "border-[var(--accent)] bg-[var(--raised)] ring-2 ring-[var(--accent-light)]"
+                    : "border-[var(--border)] bg-[var(--inset)]"
                 }`}
               >
                 {/* Column header */}
-                <div className="flex items-center justify-between border-b border-slate-800/80 px-2 pb-2.5 pt-1">
-                  <h2 className="text-sm font-black uppercase tracking-wide text-white">
+                <div className="flex items-center justify-between border-b border-[var(--border)] px-2 pb-2.5 pt-1">
+                  <h2 className="text-sm font-black uppercase tracking-wide text-[var(--text-primary)]">
                     {col.titulo}
                   </h2>
-                  <span className={`rounded-full px-2.5 py-0.5 text-xs font-bold ${col.badge}`}>
+                  <span
+                    className="rounded-full px-2.5 py-0.5 text-xs font-bold"
+                    style={{ background: "var(--white)", color: col.accent }}
+                  >
                     {items.length}
                   </span>
                 </div>
@@ -240,11 +486,12 @@ export default function PosAtendimentoBoard() {
                 <div className="flex min-h-[60px] flex-col gap-3">
                   {items.map((tarefa) => {
                     const prio = PRIORIDADE_LABEL[tarefa.prioridade] ?? { label: `P${tarefa.prioridade}`, color: "var(--text-muted)" };
-                    const finalidadeItem = tarefa.cliente?.finalidade_principal
-                      ? finalidadeConfig[tarefa.cliente.finalidade_principal]
-                      : null;
                     const isVencida = tarefa.prazo_em && new Date(tarefa.prazo_em) < new Date() && tarefa.status !== "concluida";
                     const estaArrastando = arrastandoId === tarefa.id;
+                    const concluida = tarefa.status === "concluida";
+                    const diasAtraso = tarefa.prazo_em
+                      ? Math.floor((new Date().getTime() - new Date(tarefa.prazo_em).getTime()) / MS_DIA)
+                      : 0;
 
                     return (
                       <div
@@ -252,98 +499,79 @@ export default function PosAtendimentoBoard() {
                         draggable
                         onDragStart={() => handleDragStart(tarefa.id)}
                         onDragEnd={handleDragEnd}
-                        className={`relative flex cursor-grab flex-col gap-3 overflow-hidden rounded-3xl border bg-[#161F33] p-4 pl-5 shadow-sm transition active:cursor-grabbing ${
+                        onClick={() => setTarefaSelecionada(tarefa)}
+                        className={`relative flex cursor-pointer flex-col gap-2 overflow-hidden rounded-xl border bg-[var(--white)] p-3 pl-4 shadow-sm transition active:cursor-grabbing ${
                           estaArrastando
-                            ? "rotate-1 scale-[1.01] opacity-40 shadow-lg"
-                            : "hover:shadow-lg hover:shadow-black/20 hover:border-slate-700/80"
-                        } ${isVencida ? "border-rose-500/60" : "border-slate-800/60"}`}
+                            ? "scale-[1.01] opacity-40 shadow-lg"
+                            : "hover:border-[var(--border-strong)] hover:shadow-lg hover:shadow-black/20"
+                        } ${isVencida ? "border-[var(--danger-border)] ring-1 ring-[var(--danger-border)]" : "border-[var(--border)]"}`}
                       >
-                        {/* Status indicator stripe (column color) */}
                         <span
                           className="absolute bottom-0 left-0 top-0 w-1"
                           style={{ background: col.accent }}
                         />
-                        {/* Priority dot + title */}
+
+                        {/* Título com checkbox */}
                         <div className="flex items-start gap-2">
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              atualizarStatus(tarefa.id, concluida ? "pendente" : "concluida");
+                            }}
+                            aria-label={concluida ? "Reabrir tarefa" : "Concluir tarefa"}
+                            className={`mt-0.5 flex h-4.5 w-4.5 shrink-0 items-center justify-center rounded-md border transition ${
+                              concluida
+                                ? "border-[var(--success)] bg-[var(--success)] text-white"
+                                : "border-[var(--border-strong)] bg-[var(--white)] hover:border-[var(--accent)]"
+                            }`}
+                          >
+                            {concluida && <CheckCircle2 className="h-3 w-3" />}
+                          </button>
+                          <h4 className={`min-w-0 flex-1 text-sm font-black leading-snug tracking-wide ${concluida ? "text-[var(--text-muted)] line-through" : "text-[var(--text-primary)]"}`}>
+                            {tarefa.titulo}
+                          </h4>
                           <span
-                            className="mt-1.5 h-2 w-2 shrink-0 rounded-full"
-                            style={{ background: prio.color }}
-                          />
-                          <div className="min-w-0 flex-1">
-                            <h3 className="text-sm font-black tracking-wide leading-snug text-white">
-                              {tarefa.titulo}
-                            </h3>
-                            {tarefa.descricao && (
-                              <p className="mt-1 text-xs line-clamp-2 text-slate-400">
-                                {tarefa.descricao}
-                              </p>
-                            )}
-                          </div>
+                            className="shrink-0 rounded-full px-2 py-0.5 text-[10px] font-bold"
+                            style={{ color: prio.color, borderColor: `${prio.color}4d`, backgroundColor: `${prio.color}1a`, borderWidth: 1 }}
+                          >
+                            {prio.label}
+                          </span>
                         </div>
 
-                        {/* Meta row */}
-                        <div className="flex items-center justify-between text-xs text-slate-400">
-                          <div className="flex items-center gap-3">
-                            {tarefa.prazo_em && (
-                              <span
-                                className="flex items-center gap-1"
-                                style={{ color: isVencida ? "#f87171" : "" }}
+                        {/* Meta: cliente + prazo */}
+                        <div className="flex items-center justify-between gap-2 text-xs text-[var(--text-secondary)]">
+                          <div className="flex min-w-0 items-center gap-2">
+                            {tarefa.cliente?.id ? (
+                              <Link
+                                href={`/clientes/${tarefa.cliente.id}`}
+                                onClick={(e) => e.stopPropagation()}
+                                className="flex min-w-0 items-center gap-1 font-bold text-[var(--accent)] hover:underline"
                               >
-                                <Clock className="h-3 w-3 text-slate-500" />
-                                {new Date(tarefa.prazo_em).toLocaleDateString("pt-BR")}
+                                <UserRound className="h-3 w-3 shrink-0" />
+                                <span className="truncate">{tarefa.cliente.pessoa?.nome || "Cliente"}</span>
+                              </Link>
+                            ) : tarefa.cliente ? (
+                              <span className="flex min-w-0 items-center gap-1 font-bold text-[var(--text-primary)]">
+                                <UserRound className="h-3 w-3 shrink-0 text-[var(--text-muted)]" />
+                                <span className="truncate">{tarefa.cliente.pessoa?.nome || "Cliente"}</span>
                               </span>
-                            )}
-                            {tarefa.cliente && (
-                              <span className="max-w-[100px] truncate font-semibold text-slate-200">
-                                {tarefa.cliente.pessoa?.nome || "Cliente"}
-                              </span>
-                            )}
+                            ) : <span />}
                           </div>
-                          {finalidadeItem && (
-                            <span className={`rounded-full border px-2 py-0.5 text-[10px] font-bold ${finalidadeItem.bg} ${finalidadeItem.text} ${finalidadeItem.border}`}>
-                              {finalidadeItem.label}
+                          {tarefa.prazo_em && (
+                            <span
+                              className={`flex shrink-0 items-center gap-1 font-semibold ${
+                                isVencida ? "text-[var(--danger)]" : "text-[var(--text-secondary)]"
+                              }`}
+                            >
+                              <Clock className="h-3 w-3 text-[var(--text-muted)]" />
+                              {new Date(tarefa.prazo_em).toLocaleDateString("pt-BR")}
+                              {isVencida && (
+                                <span className="rounded-full border border-[var(--danger-border)] bg-[var(--danger-light)] px-1.5 py-px text-[9px] font-bold">
+                                  {diasAtraso > 0 ? `${diasAtraso}d atraso` : "atrasada"}
+                                </span>
+                              )}
                             </span>
                           )}
-                        </div>
-
-                        {/* Actions */}
-                        <div className="flex items-center justify-between border-t border-slate-800/80 pt-2.5">
-                          {tarefa.cliente?.id ? (
-                            <Link
-                              href={`/clientes/${tarefa.cliente.id}`}
-                              className="flex items-center gap-1 text-xs font-bold text-white hover:text-sky-300"
-                            >
-                              Ver perfil <ArrowRight className="h-3 w-3" />
-                            </Link>
-                          ) : <span />}
-
-                          <div className="flex items-center gap-1">
-                            {tarefa.status !== "pendente" && (
-                              <button
-                                onClick={() => atualizarStatus(tarefa.id, "pendente")}
-                                className="rounded-lg border border-amber-500/30 bg-amber-500/15 px-2.5 py-1 text-[11px] font-bold text-amber-300 transition hover:bg-amber-500/25"
-                              >
-                                Fila
-                              </button>
-                            )}
-                            {tarefa.status !== "em_andamento" && tarefa.status !== "concluida" && (
-                              <button
-                                onClick={() => atualizarStatus(tarefa.id, "em_andamento")}
-                                className="rounded-lg bg-blue-600 px-2.5 py-1 text-[11px] font-bold text-white transition hover:bg-blue-500"
-                              >
-                                Iniciar
-                              </button>
-                            )}
-                            {tarefa.status !== "concluida" && (
-                              <button
-                                onClick={() => atualizarStatus(tarefa.id, "concluida")}
-                                className="flex items-center gap-1 rounded-lg border border-emerald-500/30 bg-emerald-500/15 px-2.5 py-1 text-[11px] font-bold text-emerald-300 transition hover:bg-emerald-500/25"
-                              >
-                                <CheckCircle2 className="h-3 w-3" />
-                                OK
-                              </button>
-                            )}
-                          </div>
                         </div>
                       </div>
                     );
@@ -351,10 +579,10 @@ export default function PosAtendimentoBoard() {
 
                   {items.length === 0 && (
                     <div
-                      className={`rounded-2xl border border-dashed px-4 py-8 text-center text-sm transition-colors ${
+                      className={`rounded-xl border border-dashed px-4 py-8 text-center text-sm transition-colors ${
                         isOver
-                          ? "border-sky-500/50 bg-slate-900/60 text-slate-300"
-                          : "border-slate-700 text-slate-500"
+                          ? "border-[var(--accent)] bg-[var(--raised)] text-[var(--text-primary)]"
+                          : "border-[var(--border)] text-[var(--text-muted)]"
                       }`}
                     >
                       {isOver ? "Solte aqui" : "Nenhuma tarefa aqui."}
@@ -365,6 +593,14 @@ export default function PosAtendimentoBoard() {
             );
           })}
         </div>
+      )}
+
+      {tarefaSelecionada && (
+        <TarefaDrawer
+          tarefa={tarefaSelecionada}
+          aoFechar={() => setTarefaSelecionada(null)}
+          aoAtualizarStatus={atualizarStatus}
+        />
       )}
 
       <NovaTarefaModal

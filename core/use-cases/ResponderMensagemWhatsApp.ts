@@ -4,7 +4,7 @@ import {
   IResponderMensagemWhatsAppResult,
   IResponderMensagemWhatsAppUseCase,
 } from "../ports/in/use-cases";
-import { simularEnviarMensagemTexto } from "@/lib/evolution";
+import { enviarMensagemTextoWaha } from "@/lib/waha";
 
 // BETA: responder pelo painel → POST /message/sendText da Evolution API.
 // Registra a mensagem enviada, mantém o espelhamento no CRM e loga o acesso.
@@ -28,11 +28,17 @@ export class ResponderMensagemWhatsAppUseCase implements IResponderMensagemWhats
     );
 
     // 1. Envia pelo WhatsApp do corretor (Evolution API — simulado no beta).
-    const envio = await simularEnviarMensagemTexto({
-      sessaoId: conexao?.sessao_id || conversa.conexao_id,
-      numero: conversa.numero_cliente,
-      conteudo,
-    });
+    const sessao = conexao?.sessao_id;
+
+if (!sessao) {
+  throw new Error("A conversa não possui uma sessão WhatsApp vinculada.");
+}
+
+await enviarMensagemTextoWaha({
+  sessao,
+  numero: conversa.whatsapp_chat_id || conversa.numero_cliente,
+  texto: conteudo,
+});
 
     // 2. Registra a mensagem na conversa (lado do corretor).
     const enviadoEm = new Date().toISOString();
@@ -90,7 +96,7 @@ export class ResponderMensagemWhatsAppUseCase implements IResponderMensagemWhats
         ),
       },
       mensagem,
-      enviadoViaEvolution: envio.simulado,
+      enviadoViaEvolution: true,
       registradoNoCrm,
     };
   }

@@ -119,35 +119,32 @@ export default function KanbanPosVenda() {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-5">
       <div className="flex flex-wrap items-center justify-between gap-4">
         <div>
-          <p className="mb-1 text-xs font-bold uppercase tracking-widest text-sky-400">
-            Funil de Pós-Venda
-          </p>
-          <h1 className="text-2xl font-extrabold tracking-tight text-white">
+          <h1 className="text-2xl font-bold tracking-tight text-[var(--text-primary)]">
             Kanban de Clientes
           </h1>
-          <p className="mt-1 text-sm text-slate-400">
+          <p className="mt-1 text-sm text-[var(--text-secondary)]">
             {clientes.length} cliente(s) na operação · arraste para avançar na jornada
           </p>
         </div>
         <button
           onClick={refresh}
-          className="flex h-11 items-center gap-1.5 rounded-xl border border-slate-700/80 bg-slate-900/40 px-3.5 text-sm font-semibold text-slate-200 transition hover:border-slate-600 hover:bg-slate-800 hover:text-white"
+          className="flex h-10 items-center gap-1.5 rounded-xl border border-[var(--border)] bg-[var(--white)] px-3.5 text-sm font-medium text-[var(--text-secondary)] transition hover:bg-[var(--inset)] hover:text-[var(--text-primary)]"
         >
-          <RefreshCw className="h-4 w-4 text-sky-400" />
+          <RefreshCw className="h-4 w-4" />
           <span className="hidden sm:inline">Atualizar</span>
         </button>
       </div>
 
       {carregando ? (
-        <div className="rounded-3xl border border-slate-800/60 bg-[#161F33] py-16 text-center text-sm text-slate-400">
-          <RefreshCw className="mx-auto mb-3 h-5 w-5 animate-spin text-sky-400" />
+        <div className="rounded-xl border border-[var(--border)] bg-[var(--white)] py-16 text-center text-sm text-[var(--text-muted)]">
+          <RefreshCw className="mx-auto mb-3 h-5 w-5 animate-spin text-[var(--accent)]" />
           Carregando clientes…
         </div>
       ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4">
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
           {COLUNAS.map((col) => {
             const items = clientes.filter((c) => col.statusList.includes(c.status));
             const isOver = overColuna === col.id;
@@ -167,17 +164,20 @@ export default function KanbanPosVenda() {
                   }
                 }}
                 onDrop={(e) => handleDrop(col, e)}
-                className={`flex flex-col gap-3 rounded-3xl border p-3 transition-colors ${
+                className={`flex flex-col gap-3 rounded-xl border p-3 transition-colors ${
                   isOver
-                    ? "border-sky-500/50 bg-slate-900/60 ring-2 ring-sky-500/20"
-                    : "border-slate-800/60 bg-[#0D1320]"
+                    ? "border-[var(--accent)] bg-[var(--raised)] ring-2 ring-[var(--accent-light)]"
+                    : "border-[var(--border)] bg-[var(--inset)]"
                 }`}
               >
-                <div className="flex items-center justify-between border-b border-slate-800/80 px-2 pb-2.5 pt-1">
-                  <h2 className="text-sm font-black uppercase tracking-wide text-white">
+                <div className="flex items-center justify-between border-b border-[var(--border)] px-2 pb-2.5 pt-1">
+                  <h2 className="text-sm font-black uppercase tracking-wide text-[var(--text-primary)]">
                     {col.titulo}
                   </h2>
-                  <span className={`rounded-full px-2.5 py-0.5 text-xs font-bold ${col.badge}`}>
+                  <span
+                    className="rounded-full px-2.5 py-0.5 text-xs font-bold"
+                    style={{ background: "var(--white)", color: col.accent }}
+                  >
                     {items.length}
                   </span>
                 </div>
@@ -195,33 +195,33 @@ export default function KanbanPosVenda() {
                         draggable
                         onDragStart={() => setArrastandoId(c.id)}
                         onDragEnd={() => { dragCounter.current = 0; setArrastandoId(null); setOverColuna(null); }}
-                        className={`relative flex cursor-grab flex-col gap-2 overflow-hidden rounded-3xl border bg-[#161F33] p-3 pl-4 shadow-sm transition active:cursor-grabbing ${
+                        className={`relative flex cursor-grab flex-col gap-2 overflow-hidden rounded-xl border bg-[var(--white)] p-3 pl-4 shadow-sm transition active:cursor-grabbing ${
                           estaArrastando
-                            ? "rotate-1 scale-[1.01] opacity-40 shadow-lg"
-                            : "hover:border-slate-700/80 hover:shadow-lg hover:shadow-black/20"
-                        } ${emRisco ? "border-rose-500/50" : "border-slate-800/60"}`}
+                            ? "scale-[1.01] opacity-40 shadow-lg"
+                            : "hover:border-[var(--border-strong)] hover:shadow-lg hover:shadow-black/20"
+                        } ${emRisco ? "border-[var(--danger-border)] ring-1 ring-[var(--danger-border)]" : "border-[var(--border)]"}`}
                       >
                         <span className="absolute bottom-0 left-0 top-0 w-1" style={{ background: col.accent }} />
                         <div className="flex items-start gap-2">
-                          <GripVertical className="h-3.5 w-3.5 shrink-0 text-slate-500" />
+                          <GripVertical className="h-3.5 w-3.5 shrink-0 text-[var(--text-muted)]" />
                           <div className="min-w-0 flex-1">
-                            <p className="text-sm font-black tracking-wide leading-snug text-white">
+                            <p className="text-sm font-black leading-snug tracking-wide text-[var(--text-primary)]">
                               {c.nome || "Sem nome"}
                             </p>
-                            <p className="text-[11px] text-slate-400">
+                            <p className="text-[11px] text-[var(--text-secondary)]">
                               {String(c.finalidade_principal || "").replace(/_/g, " ")} · {c.indice_completude ?? 0}% completo
                             </p>
                           </div>
-                          {emRisco && <AlertTriangle className="h-4 w-4 shrink-0 text-rose-400" />}
+                          {emRisco && <AlertTriangle className="h-4 w-4 shrink-0 text-[var(--danger)]" />}
                         </div>
                         {diasSemContato !== null && (
-                          <p className="text-[11px] text-slate-400">
+                          <p className="text-[11px] text-[var(--text-secondary)]">
                             {diasSemContato === 0 ? "Contato hoje" : `${diasSemContato} dia(s) sem contato`}
                           </p>
                         )}
                         <Link
                           href={`/clientes/${c.id}`}
-                          className="flex items-center gap-1 border-t border-slate-800/80 pt-2 text-[11px] font-bold text-white hover:text-sky-300"
+                          className="flex items-center gap-1 border-t border-[var(--border)] pt-2 text-[11px] font-bold text-[var(--accent)] hover:underline"
                         >
                           Ver perfil <ArrowRight className="h-3 w-3" />
                         </Link>
@@ -231,10 +231,10 @@ export default function KanbanPosVenda() {
 
                   {items.length === 0 && (
                     <div
-                      className={`rounded-2xl border border-dashed px-4 py-8 text-center text-sm transition-colors ${
+                      className={`rounded-xl border border-dashed px-4 py-8 text-center text-sm transition-colors ${
                         isOver
-                          ? "border-sky-500/50 bg-slate-900/60 text-slate-300"
-                          : "border-slate-700 text-slate-500"
+                          ? "border-[var(--accent)] bg-[var(--raised)] text-[var(--text-primary)]"
+                          : "border-[var(--border)] text-[var(--text-muted)]"
                       }`}
                     >
                       {isOver ? "Solte aqui" : "Vazio"}

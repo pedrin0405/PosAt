@@ -8,6 +8,7 @@ import {
   MessageSquarePlus,
   CheckSquare,
   TrendingUp,
+  AlertTriangle,
 } from "lucide-react";
 import {
   ClienteCompleto,
@@ -100,6 +101,37 @@ function avatarColor(name: string): string {
   return colors[Math.abs(hash) % colors.length];
 }
 
+// Cores semânticas para o status (verde saudável / amarelo atenção / vermelho risco / azul info / cinza secundário)
+const STATUS_COR: Record<string, string> = {
+  novo_lead: "var(--accent)",
+  em_qualificacao: "var(--warning)",
+  em_negociacao: "var(--warning)",
+  convertido: "var(--success)",
+  handoff_pendente: "var(--danger)",
+  onboarding: "var(--accent)",
+  pos_venda: "var(--success)",
+  cliente_ativo: "var(--success)",
+  cliente_inativo: "var(--text-muted)",
+  reativacao: "var(--accent)",
+  sem_resposta: "var(--danger)",
+  encerrado: "var(--text-muted)",
+};
+
+function tempoRelativo(iso?: string | null): string | null {
+  if (!iso) return null;
+  const data = new Date(iso);
+  if (isNaN(data.getTime())) return null;
+  const hoje = new Date();
+  hoje.setHours(0, 0, 0, 0);
+  const alvo = new Date(data);
+  alvo.setHours(0, 0, 0, 0);
+  const dias = Math.round((hoje.getTime() - alvo.getTime()) / 86400000);
+  if (dias <= 0) return "Hoje";
+  if (dias === 1) return "Ontem";
+  if (dias <= 7) return `Há ${dias} dias`;
+  return new Date(data).toLocaleDateString("pt-BR");
+}
+
 // ─── Component ───
 export default function ClienteCard({ cliente, onAtualizado }: ClienteCardProps) {
   const [modalInteracaoAberto, setModalInteracaoAberto] = useState(false);
@@ -107,10 +139,8 @@ export default function ClienteCard({ cliente, onAtualizado }: ClienteCardProps)
   const [modalHandoffAberto, setModalHandoffAberto] = useState(false);
 
   const nome = cliente.pessoa?.nome || "Lead Sem Nome";
-  const telefone = cliente.pessoa?.telefone;
   const status = statusConfig[cliente.status] ?? { label: cliente.status, bg: "bg-slate-700/40", text: "text-slate-300" };
   const cx = cliente.termometro_cx ? termometroCXConfig[cliente.termometro_cx] : null;
-  const finalidade = finalidadeConfig[cliente.finalidade_principal] ?? finalidadeConfig.nao_identificado;
 
   const empreendimento =
     cliente.empreendimento ||
@@ -119,147 +149,144 @@ export default function ClienteCard({ cliente, onAtualizado }: ClienteCardProps)
 
   const isDistrato = cliente.termometro_cx === "insatisfeito_distrato" || cliente.alerta_distrato_ativo;
 
+  const ultimoContato = tempoRelativo(cliente.ultima_interacao_em);
+
+  const tarefasPendentes = (cliente.tarefas || []).filter((t) => t.status !== "concluida" && t.status !== "nao_realizada").length;
+
   return (
     <>
       <article
-        className="group flex flex-col overflow-hidden rounded-3xl border bg-[#161F33] transition-all duration-200"
+        className="card card-hover group relative flex flex-col overflow-hidden p-5"
         style={{
-          borderColor: isDistrato ? "rgba(244,63,94,0.5)" : "rgba(30,41,59,0.6)",
-        }}
-        onMouseEnter={(e) => {
-          (e.currentTarget as HTMLElement).style.borderColor = isDistrato ? "rgba(244,63,94,0.7)" : "rgba(51,65,85,0.8)";
-          (e.currentTarget as HTMLElement).style.boxShadow = "0 10px 30px rgba(0,0,0,0.35)";
-          (e.currentTarget as HTMLElement).style.transform = "translateY(-2px)";
-        }}
-        onMouseLeave={(e) => {
-          (e.currentTarget as HTMLElement).style.borderColor = isDistrato ? "rgba(244,63,94,0.5)" : "rgba(30,41,59,0.6)";
-          (e.currentTarget as HTMLElement).style.boxShadow = "none";
-          (e.currentTarget as HTMLElement).style.transform = "translateY(0)";
+          borderColor: isDistrato ? "var(--danger-border)" : undefined,
         }}
       >
-        {/* Distrato alert stripe */}
+        {/* Stripe de risco discreta */}
         {isDistrato && (
-          <div className="h-1 w-full" style={{ background: "var(--danger)" }} />
+          <span
+            className="absolute bottom-0 left-0 top-0 w-1"
+            style={{ background: "var(--danger)" }}
+          />
         )}
 
-        <div className="flex flex-col flex-1 p-5">
-          {/* Top row: avatar + name + badges */}
-          <div className="flex items-start gap-3">
-            {/* Avatar */}
-            <div
-              className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full text-sm font-bold text-white shadow-lg shadow-black/20"
-              style={{ background: avatarColor(nome) }}
-            >
-              {initials(nome)}
-            </div>
-
-            {/* Name + Empreendimento */}
-            <div className="flex-1 min-w-0">
-              <h2 className="text-[15px] font-black tracking-wide leading-tight truncate text-white">
-                <Link
-                  href={`/clientes/${cliente.id}`}
-                  className="hover:text-sky-300"
-                >
-                  {nome}
-                </Link>
-              </h2>
-              {empreendimento && (
-                <p className="flex items-center gap-1.5 text-sm mt-0.5 truncate text-slate-400">
-                  <Building2 className="h-3.5 w-3.5 shrink-0 text-sky-400" />
-                  <span className="truncate">{empreendimento}{cliente.unidade ? ` · ${cliente.unidade}` : ""}</span>
-                </p>
-              )}
-            </div>
-
-            {/* Status badge */}
-            <span
-              className={`shrink-0 rounded-full px-3 py-1 text-[11px] font-black uppercase tracking-wider ${status.bg} ${status.text}`}
-            >
-              {status.label}
-            </span>
+        {/* Linha 1: avatar + nome + estado */}
+        <div className="flex items-start gap-3">
+          <div
+            className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-xs font-bold text-white shadow-lg shadow-black/20"
+            style={{ background: avatarColor(nome) }}
+          >
+            {initials(nome)}
           </div>
 
-          {/* CX pill + Finalidade */}
-          <div className="mt-3 flex flex-wrap items-center gap-1.5">
-            {cx && (
-              <span
-                className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-[11px] font-bold border ${cx.bg} ${cx.text} ${cx.border}`}
+          <div className="min-w-0 flex-1">
+            <h2 className="flex items-center gap-2 text-[15px] font-black tracking-wide leading-tight truncate text-[var(--text-primary)]">
+              <Link
+                href={`/clientes/${cliente.id}`}
+                className="truncate hover:text-sky-300"
               >
-                <span className={`h-1.5 w-1.5 rounded-full ${cx.dot}`} />
-                {cx.label}
-              </span>
-            )}
-            <span
-              className={`rounded-full border px-3 py-1 text-[11px] font-bold ${finalidade.bg} ${finalidade.text} ${finalidade.border}`}
-            >
-              {finalidade.label}
-            </span>
-            {cliente.oportunidade_upsell && (
-              <span className="rounded-full border border-purple-500/30 bg-purple-500/15 px-3 py-1 text-[11px] font-bold text-purple-300">
-                Up-Sell ✦
-              </span>
+                {nome}
+              </Link>
+            </h2>
+            {empreendimento && (
+              <p className="mt-0.5 flex items-center gap-1.5 truncate text-xs text-[var(--text-secondary)]">
+                <Building2 className="h-3.5 w-3.5 shrink-0 text-[var(--text-muted)]" />
+                <span className="truncate">{empreendimento}{cliente.unidade ? ` · ${cliente.unidade}` : ""}</span>
+              </p>
             )}
           </div>
 
-          {/* Meta: Corretor + Telefone */}
-          {(cliente.corretor_original_nome || telefone) && (
-            <div
-              className="mt-3 flex items-center gap-4 text-sm text-slate-400"
-            >
-              {cliente.corretor_original_nome && (
-                <span>Corretor: <strong className="text-slate-200">{cliente.corretor_original_nome}</strong></span>
-              )}
-              {telefone && (
-                <span className="truncate">{telefone}</span>
-              )}
-            </div>
-          )}
+          {/* Estado único com cor semântica */}
+          <span
+            className="flex shrink-0 items-center gap-1.5 rounded-full px-2.5 py-1 text-[11px] font-bold"
+            style={{
+              background: "var(--inset)",
+              color: STATUS_COR[cliente.status] || "var(--text-secondary)",
+              border: "1px solid var(--border)",
+            }}
+          >
+            <span className="h-1.5 w-1.5 rounded-full" style={{ background: STATUS_COR[cliente.status] || "var(--text-muted)" }} />
+            {status.label}
+          </span>
+        </div>
 
-          {/* Próxima ação (se houver) — very compact */}
-          {cliente.proxima_acao && (
-            <p
-              className="mt-3 text-xs leading-relaxed line-clamp-2 pl-2 text-slate-400"
-              style={{ borderLeft: "2px solid var(--border-strong)" }}
-            >
-              {cliente.proxima_acao}
-            </p>
+        {/* Linha 2: termômetro discreto + último contato */}
+        <div className="mt-3.5 flex items-center gap-3 text-xs text-[var(--text-secondary)]">
+          {cx && (
+            <span className="inline-flex items-center gap-1.5">
+              <span className={`h-2 w-2 rounded-full ${cx.dot}`} />
+              {cx.label}
+            </span>
+          )}
+          {ultimoContato && (
+            <span className="flex items-center gap-1 text-[var(--text-muted)]">
+              <span className="hidden sm:inline">Último contato:</span>
+              {ultimoContato}
+            </span>
           )}
         </div>
 
-        {/* Footer: actions */}
-        <div
-          className="flex items-center justify-between gap-2 px-5 py-3 border-t border-slate-800/80 bg-[#0B0F17]"
-        >
+        {/* Linha 3: responsável */}
+        {cliente.corretor_original_nome && (
+          <p className="mt-2.5 text-xs text-[var(--text-secondary)]">
+            <span className="text-[var(--text-muted)]">Corretor:</span>{" "}
+            <strong className="font-bold text-[var(--text-primary)]">{cliente.corretor_original_nome}</strong>
+          </p>
+        )}
+
+        {/* Linha 4: pendências que exigem atenção */}
+        {(isDistrato || tarefasPendentes > 0 || cliente.oportunidade_upsell) && (
+          <div className="mt-3 flex flex-wrap items-center gap-2">
+            {isDistrato && (
+              <span className="flex items-center gap-1 rounded-full bg-[var(--danger-light)] px-2.5 py-0.5 text-[11px] font-bold text-[var(--danger)]">
+                <AlertTriangle className="h-3 w-3" />
+                Atenção
+              </span>
+            )}
+            {tarefasPendentes > 0 && (
+              <span className="rounded-full bg-[var(--inset)] px-2.5 py-0.5 text-[11px] font-bold text-[var(--text-secondary)]">
+                {tarefasPendentes} tarefa{tarefasPendentes > 1 ? "s" : ""}
+              </span>
+            )}
+            {cliente.oportunidade_upsell && (
+              <span className="rounded-full bg-[var(--accent-light)] px-2.5 py-0.5 text-[11px] font-bold text-[var(--accent)]">
+                Up-Sell
+              </span>
+            )}
+          </div>
+        )}
+
+        {/* Footer: ações */}
+        <div className="mt-4 flex items-center justify-between gap-2 border-t border-[var(--border)] pt-3">
           <div className="flex items-center gap-1">
             <button
               onClick={() => setModalInteracaoAberto(true)}
               title="Registrar Interação"
-              className="flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-xs font-semibold text-slate-400 transition-colors hover:bg-slate-800 hover:text-white"
+              className="flex h-8 items-center gap-1.5 rounded-lg px-2.5 text-xs font-semibold text-[var(--text-muted)] transition hover:bg-[var(--inset)] hover:text-[var(--text-primary)]"
             >
               <MessageSquarePlus className="h-3.5 w-3.5" />
-              <span className="hidden sm:inline">Interação</span>
+              <span className="hidden md:inline">Interação</span>
             </button>
             <button
               onClick={() => setModalTarefaAberto(true)}
               title="Criar Tarefa"
-              className="flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-xs font-semibold text-slate-400 transition-colors hover:bg-slate-800 hover:text-white"
+              className="flex h-8 items-center gap-1.5 rounded-lg px-2.5 text-xs font-semibold text-[var(--text-muted)] transition hover:bg-[var(--inset)] hover:text-[var(--text-primary)]"
             >
               <CheckSquare className="h-3.5 w-3.5" />
-              <span className="hidden sm:inline">Tarefa</span>
+              <span className="hidden md:inline">Tarefa</span>
             </button>
             <button
               onClick={() => setModalHandoffAberto(true)}
               title="Passagem de Bastão"
-              className="flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-xs font-semibold text-slate-400 transition-colors hover:bg-slate-800 hover:text-white"
+              className="flex h-8 items-center gap-1.5 rounded-lg px-2.5 text-xs font-semibold text-[var(--text-muted)] transition hover:bg-[var(--inset)] hover:text-[var(--text-primary)]"
             >
               <TrendingUp className="h-3.5 w-3.5" />
-              <span className="hidden sm:inline">Handoff</span>
+              <span className="hidden md:inline">Handoff</span>
             </button>
           </div>
 
           <Link
             href={`/clientes/${cliente.id}`}
-            className="flex items-center gap-1.5 rounded-lg bg-blue-600 px-3.5 py-1.5 text-xs font-bold text-white transition-colors hover:bg-blue-500"
+            className="flex shrink-0 items-center gap-1.5 rounded-lg bg-[var(--accent)] px-3 py-1.5 text-xs font-bold text-white transition hover:bg-[var(--accent-hover)]"
           >
             Ver perfil
             <ArrowRight className="h-3.5 w-3.5" />
